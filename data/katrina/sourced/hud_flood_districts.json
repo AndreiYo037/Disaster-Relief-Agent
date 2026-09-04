@@ -1,0 +1,191 @@
+{
+  "dataset_id": "hud-noaa-katrina-flood-2005-08-31",
+  "source_key": "hud-noaa-flood-2005-08-31",
+  "retrieved": "2026-09-04",
+  "vintage": "2005-08-31",
+  "depth_date": "2005-08-31",
+  "unit": "housing units",
+  "depth_bins_ft": ["2-4", "4-7", ">7"],
+  "bin_midpoints_ft": [3.0, 5.5, 8.0],
+  "bin_midpoint_note": "Open >7 ft bin uses 8.0 ft as a modest midpoint, not a measured mean. Depths are NOAA 31 Aug 2005 grid as tabulated by HUD; they are not MOTF GIS polygons and not a 29 Aug surge hydrograph.",
+  "urls": [
+    "https://nola.gov/nola/media/Safety-and-Permits/floodplain-management/Extent-Depth-of-Flooding-Katrina.pdf",
+    "https://www.huduser.gov/periodicals/cityscpe/vol9num1/ch9.pdf"
+  ],
+  "note": "HUD overlay of NOAA 31 Aug 2005 flood depths on Orleans planning districts. Columns: units at 2-4 ft, 4-7 ft, >7 ft, flooded total, housing-unit total. Algiers, French Quarter, New Aurora/English Turn = 0. Rings follow flooded land bowls as they sit on the Esri basemap (Pontchartrain seawall, 17th St / IHNC, Mississippi river levee, parish line). They are not FEMA MOTF shapefiles and they do not cover the lake or the river.",
+  "districts": [
+    {
+      "id": "mid-city",
+      "name": "Mid-City",
+      "planning_district": 4,
+      "units_2_4": 12519, "units_4_7": 10745, "units_gt7": 386,
+      "flooded_units": 23651, "total_units": 35582,
+      "early_29aug": false,
+      "ring": [
+        [-90.1120, 29.9600], [-90.0920, 29.9520], [-90.0750, 29.9565],
+        [-90.0620, 29.9640], [-90.0520, 29.9720], [-90.0480, 29.9880],
+        [-90.0550, 30.0020], [-90.0750, 30.0080], [-90.0950, 30.0040],
+        [-90.1120, 29.9900], [-90.1120, 29.9600]
+      ]
+    },
+    {
+      "id": "new-orleans-east",
+      "name": "New Orleans East",
+      "planning_district": 9,
+      "units_2_4": 5387, "units_4_7": 14013, "units_gt7": 2625,
+      "flooded_units": 22025, "total_units": 27986,
+      "early_29aug": false,
+      "ring": [
+        [-90.0200, 30.0020], [-89.9700, 29.9980], [-89.9300, 30.0060],
+        [-89.9000, 30.0180], [-89.8880, 30.0320], [-89.8920, 30.0480],
+        [-89.9200, 30.0505], [-89.9550, 30.0440], [-89.9850, 30.0340],
+        [-90.0120, 30.0265], [-90.0200, 30.0020]
+      ]
+    },
+    {
+      "id": "gentilly",
+      "name": "Gentilly",
+      "planning_district": 6,
+      "units_2_4": 2691, "units_4_7": 4679, "units_gt7": 6792,
+      "flooded_units": 14162, "total_units": 17343,
+      "early_29aug": false,
+      "ring": [
+        [-90.0880, 29.9880], [-90.0550, 29.9900], [-90.0280, 29.9920],
+        [-90.0200, 30.0080], [-90.0185, 30.0260], [-90.0450, 30.0265],
+        [-90.0700, 30.0265], [-90.0880, 30.0260], [-90.0880, 29.9880]
+      ]
+    },
+    {
+      "id": "uptown",
+      "name": "Uptown",
+      "planning_district": 3,
+      "units_2_4": 4823, "units_4_7": 7018, "units_gt7": 577,
+      "flooded_units": 12418, "total_units": 29853,
+      "early_29aug": false,
+      "ring": [
+        [-90.1370, 29.9480], [-90.1220, 29.9380], [-90.1080, 29.9360],
+        [-90.0950, 29.9400], [-90.0920, 29.9550], [-90.1000, 29.9680],
+        [-90.1220, 29.9680], [-90.1370, 29.9600], [-90.1370, 29.9480]
+      ]
+    },
+    {
+      "id": "lakeview",
+      "name": "Lakeview",
+      "planning_district": 5,
+      "units_2_4": 1116, "units_4_7": 2949, "units_gt7": 5648,
+      "flooded_units": 9713, "total_units": 11722,
+      "early_29aug": true,
+      "ring": [
+        [-90.1225, 29.9960], [-90.1050, 29.9965], [-90.0880, 29.9970],
+        [-90.0880, 30.0260], [-90.1000, 30.0265], [-90.1120, 30.0265],
+        [-90.1220, 30.0260], [-90.1225, 29.9960]
+      ]
+    },
+    {
+      "id": "bywater",
+      "name": "Bywater",
+      "planning_district": 7,
+      "units_2_4": 3583, "units_4_7": 4467, "units_gt7": 685,
+      "flooded_units": 8735, "total_units": 18027,
+      "early_29aug": false,
+      "ring": [
+        [-90.0550, 29.9620], [-90.0400, 29.9605], [-90.0275, 29.9615],
+        [-90.0275, 29.9780], [-90.0280, 29.9920], [-90.0420, 29.9900],
+        [-90.0550, 29.9780], [-90.0550, 29.9620]
+      ]
+    },
+    {
+      "id": "lower-9th",
+      "name": "Lower 9th Ward",
+      "planning_district": 8,
+      "units_2_4": 1131, "units_4_7": 2332, "units_gt7": 2721,
+      "flooded_units": 6184, "total_units": 7138,
+      "early_29aug": true,
+      "ring": [
+        [-90.0275, 29.9580], [-90.0150, 29.9565], [-90.0050, 29.9548],
+        [-89.9920, 29.9528], [-89.9780, 29.9540], [-89.9750, 29.9680],
+        [-89.9780, 29.9845], [-90.0000, 29.9865], [-90.0275, 29.9855],
+        [-90.0275, 29.9580]
+      ]
+    },
+    {
+      "id": "garden",
+      "name": "Garden",
+      "planning_district": 2,
+      "units_2_4": 2964, "units_4_7": 1558, "units_gt7": 2,
+      "flooded_units": 4524, "total_units": 24000,
+      "early_29aug": false,
+      "ring": [
+        [-90.0980, 29.9380], [-90.0820, 29.9340], [-90.0720, 29.9380],
+        [-90.0700, 29.9480], [-90.0780, 29.9580], [-90.0920, 29.9560],
+        [-90.0980, 29.9480], [-90.0980, 29.9380]
+      ]
+    },
+    {
+      "id": "village-de-lest",
+      "name": "Village de l'Est",
+      "planning_district": 10,
+      "units_2_4": 1017, "units_4_7": 288, "units_gt7": 296,
+      "flooded_units": 1601, "total_units": 3445,
+      "early_29aug": false,
+      "ring": [
+        [-89.9450, 30.0320], [-89.9100, 30.0300], [-89.8880, 30.0380],
+        [-89.8820, 30.0520], [-89.9000, 30.0580], [-89.9300, 30.0560],
+        [-89.9450, 30.0480], [-89.9450, 30.0320]
+      ]
+    },
+    {
+      "id": "venetian-isles",
+      "name": "Venetian Isles",
+      "planning_district": 11,
+      "units_2_4": 23, "units_4_7": 38, "units_gt7": 34,
+      "flooded_units": 95, "total_units": 1397,
+      "early_29aug": false,
+      "ring": [
+        [-89.8800, 30.0180], [-89.8400, 30.0280], [-89.8000, 30.0550],
+        [-89.7600, 30.0950], [-89.7350, 30.1180], [-89.7420, 30.1280],
+        [-89.7800, 30.1000], [-89.8300, 30.0580], [-89.8700, 30.0320],
+        [-89.8800, 30.0180]
+      ]
+    },
+    {
+      "id": "warehouse-cbd",
+      "name": "Warehouse / CBD",
+      "planning_district": 1,
+      "units_2_4": 56, "units_4_7": 1, "units_gt7": 0,
+      "flooded_units": 57, "total_units": 1183,
+      "early_29aug": false,
+      "ring": [
+        [-90.0780, 29.9480], [-90.0680, 29.9465], [-90.0650, 29.9520],
+        [-90.0720, 29.9545], [-90.0780, 29.9520], [-90.0780, 29.9480]
+      ]
+    },
+    {
+      "id": "algiers",
+      "name": "Algiers",
+      "planning_district": 12,
+      "units_2_4": 0, "units_4_7": 0, "units_gt7": 0,
+      "flooded_units": 0, "total_units": 20053,
+      "early_29aug": false,
+      "ring": [[-90.060, 29.905], [-89.995, 29.905], [-89.995, 29.958], [-90.060, 29.958], [-90.060, 29.905]]
+    },
+    {
+      "id": "french-quarter",
+      "name": "French Quarter",
+      "planning_district": 1,
+      "units_2_4": 0, "units_4_7": 0, "units_gt7": 0,
+      "flooded_units": 0, "total_units": 3505,
+      "early_29aug": false,
+      "ring": [[-90.073, 29.954], [-90.058, 29.954], [-90.058, 29.963], [-90.073, 29.963], [-90.073, 29.954]]
+    },
+    {
+      "id": "new-aurora-english-turn",
+      "name": "New Aurora / English Turn",
+      "planning_district": 13,
+      "units_2_4": 0, "units_4_7": 0, "units_gt7": 0,
+      "flooded_units": 0, "total_units": 1227,
+      "early_29aug": false,
+      "ring": [[-90.005, 29.880], [-89.930, 29.880], [-89.930, 29.918], [-90.005, 29.918], [-90.005, 29.880]]
+    }
+  ]
+}

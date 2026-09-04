@@ -1,0 +1,71 @@
+:root {
+  --bg: #070b15;
+  --bg2: #0b1120;
+  --panel: #0e1526;
+  --panel2: #121b30;
+  --line: #1e2a45;
+  --ink: #e8eefc;
+  --dim: #8195b8;
+  --dim2: #5f7191;
+  --ok: #37d67a;
+  --warn: #ffb020;
+  --bad: #ff5964;
+  --accent: #7c9cff;
+  --forecast: #b06bff;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
+  font: 13px/1.5 Inter, system-ui, Segoe UI, Roboto, sans-serif; }
+#app {
+  display: grid; height: 100%;
+  grid-template-columns: 238px 1fr 320px;
+  grid-template-rows: 46px 1fr 92px;
+  grid-template-areas: "nav nav nav" "pulse map inspector" "timeline timeline timeline";
+}
+.area-nav { grid-area: nav; display: flex; align-items: center; gap: 14px; padding: 0 16px;
+  background: var(--bg2); border-bottom: 1px solid var(--line); z-index: 6; }
+.brand { font-weight: 700; letter-spacing: .3px; }
+.brand .os { color: var(--accent); }
+.crisis-name { font-weight: 600; }
+.crisis-sub { color: var(--dim); font-size: 11px; }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+  color: var(--forecast); border: 1px solid rgba(176,107,255,.35); border-radius: 20px; padding: 3px 10px; }
+.live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--forecast); }
+.clock { font: 12px ui-monospace, Consolas, monospace; color: var(--dim); margin-left: auto; }
+.exag { font-size: 11px; color: var(--warn); border: 1px solid rgba(255,176,32,.35); border-radius: 6px; padding: 2px 8px; }
+.pane { background: var(--panel); overflow: auto; padding: 12px; }
+.area-pulse { grid-area: pulse; border-right: 1px solid var(--line); }
+.area-inspector { grid-area: inspector; border-left: 1px solid var(--line); }
+.area-map { grid-area: map; position: relative; }
+#map { position: absolute; inset: 0; }
+.area-timeline { grid-area: timeline; background: var(--bg2); border-top: 1px solid var(--line); padding: 10px 16px; }
+h3.sec { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim2); margin: 14px 0 8px; font-weight: 700; }
+h3.sec:first-child { margin-top: 0; }
+.metric { border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; margin-bottom: 7px; background: var(--panel2); }
+.metric .lab { color: var(--dim); font-size: 10.5px; text-transform: uppercase; }
+.metric .val { font-size: 20px; font-weight: 700; line-height: 1.1; margin-top: 2px; }
+.metric.crit .val { color: var(--bad); }
+.metric.warnv .val { color: var(--warn); }
+.map-legend { position: absolute; left: 12px; bottom: 12px; z-index: 3; background: rgba(9,14,26,.85);
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 10.5px; color: var(--dim); max-width: 420px; }
+#popctl { position: absolute; right: 12px; top: 12px; z-index: 4; width: 248px; background: rgba(9,14,26,.92);
+  border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; font-size: 11px; color: var(--dim); }
+#popctl label { display: flex; align-items: center; gap: 6px; margin: 4px 0; cursor: pointer; color: #aebbd6; }
+#popctl .hint { font-size: 9px; color: #5f7191; margin: -2px 0 6px 22px; line-height: 1.35; }
+.stops { display: flex; gap: 8px; margin-top: 8px; }
+.stops button, .tbtn {
+  background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+  padding: 6px 10px; cursor: pointer; font-size: 11px;
+}
+.stops button.active { border-color: var(--accent); color: var(--accent); }
+.range { width: 100%; }
+.insp { font-size: 12px; }
+.insp .k { color: var(--dim); }
+.insp .row { display: flex; justify-content: space-between; margin: 4px 0; gap: 8px; }
+.tag { font-size: 10px; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--line); }
+.tag.syn { color: var(--warn); }
+.hidden { display: none !important; }
+#webgl-fail { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 8;
+  background: #4a1c22; color: #ffd0d4; padding: 4px 10px; border-radius: 6px; font-size: 11px; }
+.prov { font-size: 11px; color: var(--dim); margin-top: 8px; }
+.dash { color: var(--dim2); }

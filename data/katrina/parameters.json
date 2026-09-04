@@ -1,0 +1,513 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "katrina-nola-2005",
+  "description": "Every numeric input to the Crisis OS demo lives here. No layer module may hardcode a value that belongs in this file. Each leaf carries value/source_key/status, and every source_key MUST resolve to an entry in ../SOURCES.md.",
+  "status_legend": {
+    "verified": "Value was read from the cited primary source and checked against it. Safe to present as fact.",
+    "unverified": "Value has NOT been checked against its cited source. MUST NOT be presented as fact on stage or in the deck."
+  },
+  "kind_legend": {
+    "empirical": "A claim about the real world. Requires a primary source before it can be marked verified.",
+    "standard": "A published humanitarian or engineering standard.",
+    "tuned": "A calibration choice made so the demo behaves as designed. Not a fact about the world; source_key is design:tuned-for-demo.",
+    "model_coefficient": "A coefficient inside a mechanistic model. Expert-set, not measured.",
+    "chronology": "A timestamp binding the demo clock to the real event timeline."
+  },
+
+  "humanitarian_standards": {
+    "water_l_per_person_day": {
+      "value": 15,
+      "unit": "L/person/day",
+      "kind": "standard",
+      "source_key": "sphere-handbook",
+      "status": "verified",
+      "note": "Sphere Handbook (2018) Water supply standard 2.1: minimum 15 L/person/day for drinking, cooking and personal hygiene. Retrieved 2026-09-04 from https://interactive.spherestandards.org/ and the 2018 handbook text. The same edition notes 7.5 L as a short-term survival floor in some contexts; this demo uses the 15 L household minimum."
+    }
+  },
+
+  "zones": {
+    "zone_B_population": {
+      "value": 14008,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "census-2000-sf1",
+      "status": "verified",
+      "note": "Lower Ninth Ward, Census 2000 SF1 as compiled by The Data Center. Retrieved 2026-09-04 from https://www.datacenterresearch.org/data-resources/neighborhood-data/district-8/lower-ninth-ward/. Neighborhood ≠ census tract; Data Center aggregation is the recorded method."
+    },
+    "zone_B_vulnerability": {
+      "value": 1.0,
+      "unit": "multiplier",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Baseline. zone:B is the reference zone, so this is 1.0 by definition rather than by measurement."
+    },
+    "zone_C_population": {
+      "value": 19000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "house-select-katrina",
+      "status": "verified",
+      "note": "National Guard estimate of people at the Ernest N. Morial Convention Center. House Select Committee, A Failure of Initiative, H. Rpt. 109-377, evacuation chapter, footnote 114. Retrieved 2026-09-04 from https://biotech.law.lsu.edu/katrina/govdocs/109-377/evac.pdf. This is a shelter headcount, not a residential census."
+    },
+    "zone_C_vulnerability": {
+      "value": 1.4,
+      "unit": "multiplier",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Encodes that zone:C was reached slowest in reality and carries the higher equity floor. This is a policy weight, not a measured vulnerability index. Say so on stage."
+    }
+  },
+
+  "shelters": {
+    "superdome_occupancy_landfall": {
+      "value": 11000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "whitehouse-katrina-lessons-ch3",
+      "status": "verified",
+      "note": "White House Katrina Lessons Learned ch. 3: 'It was estimated that there were 10,000 - 12,000 people at the Superdome by midnight' (Sunday 28 Aug), fn. 139. Retrieved 2026-09-04 from https://georgewbush-whitehouse.archives.gov/reports/katrina-lessons-learned/chapter3.html. Midpoint of the cited range, not a census. Occupancy at the b7 keyframe (29 Aug 06:00 CDT) uses this landfall-morning figure."
+    },
+    "superdome_occupancy_31aug": {
+      "value": 20000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "nyt-superdome-2005-09-01",
+      "status": "verified",
+      "note": "NYT 1 Sep 2005 ('Superdome: Haven Quickly Becomes an Ordeal'), dateline 31 Aug: '20,000 or more storm refugees'. Retrieved 2026-09-04. Contemporaneous, not a census."
+    },
+    "superdome_capacity": {
+      "value": 70000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Listed stadium capacity. Not a 2005 shelter design load."
+    },
+    "convention_center_capacity": {
+      "value": 19000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "house-select-katrina",
+      "status": "verified",
+      "note": "Set equal to the NG headcount: the building was never designed as a shelter (House Rpt 109-377)."
+    }
+  },
+
+  "supply": {
+    "warehouse_W1_staging_l_per_day": {
+      "value": 648000,
+      "unit": "L/day",
+      "kind": "empirical",
+      "source_key": "house-select-katrina",
+      "status": "verified",
+      "note": "Louisiana pre-staged water at Camp Beauregard on 28 Aug: 36 trucks × 18,000 L = 648,000 L (House Rpt 109-377, preparation chapter, fn. 4). Retrieved 2026-09-04 from https://govinfo.library.unt.edu/katrina/preparation.pdf. Regional total in that footnote is 11,322,000 L; this parameter binds the Louisiana stock, not the regional total. warehouse:W1 stays at the Slidell I-10 node so the Twin Span beat still happens on stage — Beauregard is the sourced origin of the litres, not the map pin."
+    },
+    "tanker_capacity_l": {
+      "value": 8000,
+      "unit": "L",
+      "kind": "empirical",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Capacity of a single relief water tanker. Plausible for the period but currently unsourced."
+    },
+    "convoy_17_tanker_count": {
+      "value": 32,
+      "unit": "tankers",
+      "kind": "derived",
+      "source_key": "design:derived",
+      "status": "unverified",
+      "note": "32 x 8,000 L = 256,000 L, which covers zone:B's expected t0 allocation of ~250,733 L. Recompute whenever the floors, the staging volume, or the t0 shortage probability change. This is why truck:17 is a convoy and not a single truck: one 8,000 L tanker is ~3 percent of zone:B's floor alone."
+    }
+  },
+
+  "forecast_depletion": {
+    "water_hours_remaining": {
+      "value": 8.0,
+      "unit": "hours",
+      "kind": "empirical",
+      "source_key": "fema-dr1603",
+      "status": "unverified",
+      "note": "Hours of water on hand in zone:B at demo t0. The real record suggests the Convention Center was at or near zero by 31 Aug, so this is a tuned stand-in until a sourced figure exists. Flag as unverified in the deck."
+    },
+    "displacement_rate_mu": {
+      "value": 1.0,
+      "unit": "demand multiplier",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Dimensionless. 1.0 means demand arrives as planned."
+    },
+    "displacement_rate_sigma": {
+      "value": 0.22,
+      "unit": "demand multiplier",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Chosen so displacement out-varies resupply ETA at t0, which is what makes 'population movement' the named main uncertainty. If this drops below the ETA's contribution the forecast narration silently changes its headline driver."
+    },
+    "resupply_eta_mu_hours": {
+      "value": 12.0,
+      "unit": "hours",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Load-bearing. Real Katrina water convoys ran roughly 72 hours late; a mu of 72 saturates P(shortage) to about 1.0, which lands in CRITICAL at t0 and leaves no headroom for the V2 forecast to be worse than V1, destroying the supersession beat. 12.0 is only honest because the forecast claim is scoped to horizon_hours."
+    },
+    "resupply_eta_sigma_hours": {
+      "value": 4.0,
+      "unit": "hours",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified"
+    },
+    "horizon_hours": {
+      "value": 12,
+      "unit": "hours",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "The scope of the forecast claim, and the reason a 0.78 probability is defensible rather than 1.0. Every forecast must state this horizon alongside the number."
+    },
+    "monte_carlo_samples": {
+      "value": 1000,
+      "unit": "samples",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified"
+    },
+    "rng_seed": {
+      "value": 42,
+      "unit": "seed",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Fixed so the demo is rehearsable frame-for-frame. A live run that reseeds per invocation is not rehearsable."
+    }
+  },
+
+  "forecast_route_risk": {
+    "base_probability": {
+      "value": 0.10,
+      "unit": "probability",
+      "kind": "model_coefficient",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Baseline P(route impassable) with the bridge intact and no hazard."
+    },
+    "bridge_inaccessible_contribution": {
+      "value": 0.75,
+      "unit": "probability",
+      "kind": "model_coefficient",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Added when bridge:B7 is believed inaccessible. This coefficient is the numeric form of the cascade: bridge fails, route risk rises, resupply ETA stretches, shortage probability rises."
+    },
+    "hazard_severity_weight": {
+      "value": 0.15,
+      "unit": "probability per unit severity",
+      "kind": "model_coefficient",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified"
+    },
+    "hazard_severity": {
+      "value": 0.73,
+      "unit": "normalized 0-1",
+      "kind": "empirical",
+      "source_key": "noaa-tcr-al122005",
+      "status": "verified",
+      "note": "110 kt Buras landfall / 150 kt peak (TCR Table 1, 28 Aug 1800 UTC). Retrieved 2026-09-04 https://www.nhc.noaa.gov/data/tcr/AL122005_Katrina.pdf"
+    }
+  },
+
+  "forecast_bands": {
+    "advisory_probability": {
+      "value": 0.30,
+      "unit": "probability",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified"
+    },
+    "warning_probability": {
+      "value": 0.60,
+      "unit": "probability",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Crossing this emits forecast.warning and wakes Planning. Must sit below the t0 depletion probability of about 0.78 or the WARNING beat never fires."
+    },
+    "critical_probability": {
+      "value": 0.85,
+      "unit": "probability",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Must sit above the t0 probability (~0.78) and below the post-collapse V2 probability (~0.91), which gives the demo a genuine WARNING to CRITICAL escalation caused by a verified event."
+    }
+  },
+
+  "verification": {
+    "corroboration_min_independent_sources": {
+      "value": 2,
+      "unit": "sources",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "The numeric form of the core invariant: one uncorroborated report never moves the world model. Independence, not source count, is what this threshold is really measuring, so the independence test matters more than the number."
+    }
+  },
+
+  "chronology": {
+    "demo_t0": {
+      "value": "2005-08-31T08:00:00-05:00",
+      "unit": "ISO-8601 CDT",
+      "kind": "chronology",
+      "source_key": "fema-dr1603",
+      "status": "unverified",
+      "note": "Placed inside the relief-logistics window rather than at landfall: by 31 Aug the Superdome evacuation had been ordered, the Convention Center population was growing, and convoys were forming. A t0 at landfall would have no relief plan to approve."
+    },
+    "bridge_B7_collapse_valid_from": {
+      "value": "2005-08-29T06:00:00-05:00",
+      "unit": "ISO-8601 CDT",
+      "kind": "chronology",
+      "source_key": "usace-ipet",
+      "status": "unverified",
+      "note": "When the I-10 Twin Span was physically destroyed by surge. NOAA TCR: Buras landfall 1110 UTC 29 Aug (0610 CDT). USGS Circ. 1306 ch. 3D: Twin Span rendered completely unusable. Exact span-drop minute is not in those reports; 06:00 CDT is the landfall-morning bound, not a stopwatch reading. Retrieved 2026-09-04."
+    },
+    "bridge_B7_corroborated_recorded_at": {
+      "value": "2005-08-31T09:20:00-05:00",
+      "unit": "ISO-8601 CDT",
+      "kind": "chronology",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "When the demo's second independent source corroborates the loss. That valid_from precedes recorded_at by two days is the entire point: the world model records what we are justified in believing, not ground truth, and the mid-run beat is belief catching up with a reality that was already true."
+    },
+    "bridge_B7_initial_state": {
+      "value": "uncertain",
+      "unit": "entity state",
+      "kind": "chronology",
+      "source_key": "design:derived",
+      "status": "unverified",
+      "note": "Follows from the bitemporal split. B7 cannot be 'operational' at t0 because it was already destroyed, and it cannot be 'inaccessible' because nothing has corroborated that yet. 'uncertain' is the only honest value, and it is what lets the plan legitimately route over R14."
+    }
+  },
+
+  "governance": {
+    "human_modify_zone_B_qty_l": {
+      "value": 230000,
+      "unit": "L",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "The scripted coordinator MODIFY. Must stay above zone:B's 210,120 L floor, or Governance's independent equity re-check will correctly reject the coordinator's own modification, which reads as a bug on stage rather than as defense in depth."
+    },
+    "required_approval_tier": {
+      "value": 3,
+      "unit": "tier",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Tier 3 requires a named authority and a reason. Reached by auto-escalation from the data-confidence versus recommendation-confidence gap, not asserted directly."
+    }
+  },
+
+  "safety": {
+    "max_replan_loops": {
+      "value": 3,
+      "unit": "loops",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Hard cap on the replan cycle, enforced from state and deliberately ignoring model judgement."
+    }
+  },
+
+  "visualization": {
+    "note": "Rendering parameters for the 3D diorama (docs/3d-diorama.md). Declared here rather than embedded in the renderer so that no visual distortion is undocumented. Geometry sources are NOT listed here; they live in ../SOURCES.md under Reference geometry, each with a vintage.",
+    "vertical_exaggeration": {
+      "value": 25,
+      "unit": "multiplier",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A1. New Orleans has only a few metres of relief and much of it sits below sea level, so at 1:1 the bowl is invisible. MUST be displayed on screen: an undeclared exaggeration is the model lying about elevation."
+    },
+    "camera_tilt_degrees": {
+      "value": 42,
+      "unit": "degrees from vertical",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Item 12. Must stay in the 35-50 range: shallower loses terrain depth, steeper collapses into a top-down GIS view and the diorama stops reading as a physical model."
+    },
+    "hero_region_bounds": {
+      "value": [-90.30, 29.85, -89.60, 30.35],
+      "unit": "[west, south, east, north] WGS84",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Item 13. Orleans and St. Bernard Parish plus the Lake Pontchartrain crossings, so bridge:B7 (I-10 Twin Span at 30.18264 N, 89.82486 W) and airport:msy both fall inside. Everything outside renders simpler. power:waterford at -90.47 is deliberately outside and contextual."
+    },
+    "terrain_source_key": {
+      "value": "noaa-digitalcoast-lidar",
+      "unit": "source_key",
+      "kind": "tuned",
+      "source_key": "design:derived",
+      "status": "unverified",
+      "note": "Preferred terrain source, chosen for vintage rather than resolution. Falls back to usgs-3dep-dem, which is post-Katrina and will therefore produce a derived flood extent that differs from what actually happened. See the DEM conflict note in ../SOURCES.md."
+    },
+    "flood_grid_resolution_m": {
+      "value": 30,
+      "unit": "metres",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Cell size the DEM is resampled to before the breach-seeded fill. Coarser is faster and reads fine at diorama scale; finer starts to matter for whether individual road segments go under."
+    },
+    "flood_fill_connectivity": {
+      "value": 8,
+      "unit": "neighbours",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A2. Connectivity for the flood fill seeded from the breach entities. 8-connectivity lets water round corners through the street grid; 4 leaves artificial dry diagonals. The seeded fill is what prevents disconnected inland depressions from flooding when they never actually filled."
+    },
+    "population_density_bin_method": {
+      "value": "quantile",
+      "unit": "quantile | jenks | fixed",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment P1 of docs/population-density.md. Bin edges MUST be derived from the loaded dataset's distribution within the hero region, not hard-coded. Fixed universal thresholds either flatten New Orleans into one uniform blob or push the whole city into the top bin, and either way the operator loses the relative-concentration signal the layer exists to convey."
+    },
+    "population_density_bin_edges_fallback_per_km2": {
+      "value": [1000, 3000, 6000],
+      "unit": "persons/km^2",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "FALLBACK ONLY, used when no population dataset is loaded. Three edges give four bins (low / medium / high / very high). Whenever a dataset IS loaded these are discarded in favour of computed breaks, and the legend must display the computed edges in real units. §28 of docs/population-density.md forbids presenting these as if they were dataset-specific."
+    },
+    "population_grid_resolution_m": {
+      "value": 30,
+      "unit": "metres",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment P3. MUST equal flood_grid_resolution_m. When the population raster and the derived flood mask share one grid, hazard exposure becomes sum(population_grid * hazard_mask) — an elementwise multiply with no geometry library, no polygon intersection and no resampling at query time. Every population-times-hazard overlay then becomes the same operation with a different mask."
+    },
+    "population_min_aggregation_cell_count": {
+      "value": 25,
+      "unit": "persons per cell",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment P7. Cells estimated below this count are suppressed or merged upward BEFORE the grid leaves the server. A 30 m cell containing three people is individual-level location data wearing a raster's clothing, and suppressing it in the renderer is defeated by a network inspector. Raise this if the grid resolution is ever made finer."
+    },
+    "translucency_unverified": {
+      "value": 0.35,
+      "unit": "alpha 0-1",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A4, belief axis. Applied to provisional entities. Distinct from the unverified candidate ping, which must leave the entity's own colour UNCHANGED."
+    },
+    "translucency_verified": {
+      "value": 1.0,
+      "unit": "alpha 0-1",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A4, belief axis. Full solidity is reserved for verified state."
+    },
+    "saturation_historical": {
+      "value": 0.4,
+      "unit": "saturation 0-1",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A4, time axis. Applied where valid_until is non-null. Independent of the belief axis, so an entity can legitimately be both faded and translucent."
+    },
+    "lod_switch_altitude_m": {
+      "value": 4000,
+      "unit": "metres camera altitude",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A6. Above this altitude every entity renders as its far-field billboard symbol; below it, the near-field mesh. Each of the ~22 mesh types therefore needs an LOD pair. See docs/entity-rendering.md section 5."
+    },
+    "max_particle_count": {
+      "value": 20000,
+      "unit": "particles",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A7. Hard ceiling across all hazard effects combined. A budget rather than a per-effect limit, so that adding a hazard costs something and cannot quietly degrade the frame rate."
+    },
+    "shader_binding_required": {
+      "value": true,
+      "unit": "boolean policy",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A7, stated as an enforceable flag. Every shader and particle parameter must read a world-model value; none may be a constant chosen for mood. When the numbers stop moving, the effect stops moving."
+    },
+    "emissive_materials_allowed": {
+      "value": ["hazard:fire.core"],
+      "unit": "allow-list",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Amendment A7 corollary. Exactly one emissive material in the entire scene, and only while the fire is active. Everything else is lit, not glowing — item 16 bans glowing icons and neon, and item 9 requires the scene to stay calm so that failures and active missions are the only things that draw the eye."
+    },
+    "fog_recency_kernel_radius_m": {
+      "value": 750,
+      "unit": "metres",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Item 15. Radius of the kernel density over EntityState.recorded_at that produces the data fog. The fog answers 'where have we not looked lately', so this radius is really a claim about how far one observation's freshness generalises."
+    }
+  },
+
+  "derivations": {
+    "note": "These are NOT stored values. Code must compute them from the parameters above so there is one source of truth. The expected figures exist so a guard test can assert the arithmetic still holds after any parameter edit.",
+    "zone_equity_floor_l": {
+      "formula": "zones.zone_<Z>_population * humanitarian_standards.water_l_per_person_day",
+      "expected": { "zone:B": 210120, "zone:C": 285000 }
+    },
+    "need_above_floor_l": {
+      "formula": "same as the floor, representing a further day's requirement beyond the floor",
+      "expected": { "zone:B": 210120, "zone:C": 285000 }
+    },
+    "summed_floors_l": {
+      "formula": "sum of zone_equity_floor_l over all zones",
+      "expected": 495120
+    },
+    "discretionary_remainder_l": {
+      "formula": "supply.warehouse_W1_staging_l_per_day - summed_floors_l",
+      "expected": 152880
+    },
+    "expected_allocation_at_t0_l": {
+      "formula": "floor + remainder * (need * probability * vulnerability) / sum(need * probability * vulnerability)",
+      "expected": { "zone:B": 269315, "zone:C": 378685 },
+      "note": "Assumes the t0 depletion probability of 0.78 for zone:B and 0.65 for zone:C. These shift as the forecast updates, which is correct behaviour, so the guard test should assert the invariants below rather than these exact figures. truck:17 remains a 32 × 8,000 L = 256,000 L convoy covering the scripted 230,000 L MODIFY; the fair-share B allocation is now slightly above convoy capacity after the 648,000 L staging bind."
+    },
+    "invariants": [
+      "supply.warehouse_W1_staging_l_per_day >= summed_floors_l, or the equity beat degrades to blanket infeasibility",
+      "governance.human_modify_zone_B_qty_l >= zone_equity_floor_l['zone:B'], or Governance rejects the scripted human decision",
+      "forecast_bands.warning_probability <= t0 depletion probability < forecast_bands.critical_probability <= post-collapse probability",
+      "supply.convoy_17_tanker_count * supply.tanker_capacity_l >= expected_allocation_at_t0_l['zone:B']",
+      "chronology.bridge_B7_collapse_valid_from < chronology.demo_t0 < chronology.bridge_B7_corroborated_recorded_at",
+      "35 <= visualization.camera_tilt_degrees <= 50, or the scene collapses into a top-down GIS view and stops reading as a physical model",
+      "visualization.vertical_exaggeration > 1 and is rendered on screen as a label, never applied silently",
+      "bridge:B7 and airport:msy both fall inside visualization.hero_region_bounds, or the mid-run beat happens off-stage",
+      "every source_key in this file resolves to a row in ../SOURCES.md, and every geometry source in that file carries a vintage",
+      "visualization.population_grid_resolution_m == visualization.flood_grid_resolution_m, or hazard exposure stops being an elementwise join and needs runtime resampling",
+      "visualization.population_density_bin_method != 'fixed' whenever a population dataset is loaded, per amendment P1",
+      "len(visualization.emissive_materials_allowed) == 1, per amendment A7 — a second emissive material means the scene has started glowing everywhere",
+      "every Entity.type present in the seed has a row in the symbol registry, or it silently fails to render"
+    ]
+  }
+}

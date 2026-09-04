@@ -1,0 +1,18 @@
+{
+  "dataset_id": "ihnc-lock-staff-hydrograph",
+  "source_key": "usace-ipet",
+  "retrieved": "2026-09-04",
+  "datum": "NAVD88",
+  "unit": "ft",
+  "timezone": "CDT",
+  "site": "IHNC Lock staff gauge",
+  "note": "Uncontested IHNC Lock hydrograph used in Katrina canal-breach litigation and consistent with IPET Vol. V (peak ~14.2 ft NAVD88 ~09:00 29 Aug). USGS NWIS 073802332 (IHNC at Seabrook) has no 2005 series — period of record starts 2017. This is canal surge on 29 Aug, not standing bowl water on 31 Aug.",
+  "series": [
+    {"cdt": "2005-08-29T05:00:00-05:00", "stage_ft": 10.3},
+    {"cdt": "2005-08-29T06:00:00-05:00", "stage_ft": 11.3},
+    {"cdt": "2005-08-29T07:00:00-05:00", "stage_ft": 12.3},
+    {"cdt": "2005-08-29T08:00:00-05:00", "stage_ft": 13.8},
+    {"cdt": "2005-08-29T09:00:00-05:00", "stage_ft": 14.3},
+    {"cdt": "2005-08-29T10:00:00-05:00", "stage_ft": 12.3}
+  ]
+}

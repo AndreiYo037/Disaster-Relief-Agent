@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crisis OS — World Model</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="area-nav">
+        <div class="brand">Crisis <span class="os">OS</span></div>
+        <div>
+          <div class="crisis-name">Hurricane Katrina — New Orleans</div>
+          <div class="crisis-sub">Orleans + St. Bernard Parish · 29 Aug 2005</div>
+        </div>
+        <span id="live-badge" class="live"><span class="dot"></span> REPLAY</span>
+        <span id="clock" class="clock"></span>
+        <span class="exag" id="exag-badge">terrain exaggeration</span>
+      </header>
+      <aside class="area-pulse pane" id="pulse"></aside>
+      <main class="area-map">
+        <div id="map"></div>
+        <div id="webgl-fail" class="hidden">WebGL unavailable — 2D fallback active</div>
+        <div class="map-legend" id="legend"></div>
+        <div id="popctl"></div>
+      </main>
+      <aside class="area-inspector pane" id="inspector"></aside>
+      <footer class="area-timeline" id="timeline"></footer>
+    </div>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@9.0.36/dist.min.js"></script>
+    <script src="/diorama.js"></script>
+  </body>
+</html>

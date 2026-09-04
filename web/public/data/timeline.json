@@ -1,0 +1,19 @@
+{
+  "keyframes": [
+    {
+      "id": "t0",
+      "label": "t0 \u2014 belief, B7 uncertain",
+      "file": "t0.json"
+    },
+    {
+      "id": "b7",
+      "label": "B7 corroborated \u2014 truck SUSPENDED",
+      "file": "b7.json"
+    },
+    {
+      "id": "reroute",
+      "label": "R22 approved \u2014 convoy moving",
+      "file": "reroute.json"
+    }
+  ]
+}

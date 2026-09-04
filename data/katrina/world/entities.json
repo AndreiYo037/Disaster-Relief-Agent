@@ -1,0 +1,533 @@
+{
+  "entities": [
+    {
+      "entity_id": "bridge:B7",
+      "type": "bridge",
+      "name": "I-10 Twin Span Bridge",
+      "lon": -89.82486,
+      "lat": 30.18264,
+      "aliases": [
+        "Twin Span",
+        "the north bridge",
+        "I-10 bridge"
+      ]
+    },
+    {
+      "entity_id": "route:R14",
+      "type": "route",
+      "name": "I-10 East (to Slidell)",
+      "lon": -89.855,
+      "lat": 30.155,
+      "aliases": [
+        "I-10 east"
+      ]
+    },
+    {
+      "entity_id": "route:R22",
+      "type": "route",
+      "name": "US-11 Lake Pontchartrain bridge (alt)",
+      "lon": -89.84306,
+      "lat": 30.18722,
+      "aliases": [
+        "US-11",
+        "the alternate route",
+        "Maestri Bridge"
+      ]
+    },
+    {
+      "entity_id": "zone:B",
+      "type": "zone",
+      "name": "Lower Ninth Ward",
+      "lon": -90.013,
+      "lat": 29.974,
+      "aliases": [
+        "Lower 9",
+        "Ninth Ward",
+        "L9W"
+      ]
+    },
+    {
+      "entity_id": "zone:C",
+      "type": "zone",
+      "name": "Ernest N. Morial Convention Center",
+      "lon": -90.0629,
+      "lat": 29.9428,
+      "aliases": [
+        "Morial Convention Center"
+      ]
+    },
+    {
+      "entity_id": "warehouse:W1",
+      "type": "warehouse",
+      "name": "Slidell I-10 staging",
+      "lon": -89.7704,
+      "lat": 30.2753
+    },
+    {
+      "entity_id": "truck:17",
+      "type": "vehicle",
+      "name": "Relief water convoy 17",
+      "lon": -89.7704,
+      "lat": 30.2753
+    },
+    {
+      "entity_id": "hospital:NDH",
+      "type": "hospital",
+      "name": "Memorial Medical Center (Baptist)",
+      "lon": -90.0986,
+      "lat": 29.9267,
+      "aliases": [
+        "Memorial",
+        "Baptist",
+        "NDH",
+        "Ochsner Baptist"
+      ]
+    },
+    {
+      "entity_id": "bridge:us11",
+      "type": "bridge",
+      "name": "Maestri Bridge (US-11)",
+      "lon": -89.84306,
+      "lat": 30.18722,
+      "aliases": [
+        "US-11"
+      ]
+    },
+    {
+      "entity_id": "bridge:ccc",
+      "type": "bridge",
+      "name": "Crescent City Connection (US-90)",
+      "lon": -90.0575,
+      "lat": 29.93861,
+      "aliases": [
+        "CCC",
+        "GNO bridge"
+      ]
+    },
+    {
+      "entity_id": "bridge:danziger",
+      "type": "bridge",
+      "name": "Danziger Bridge",
+      "lon": -90.0267,
+      "lat": 30.0094,
+      "aliases": [
+        "Danziger"
+      ]
+    },
+    {
+      "entity_id": "bridge:causeway",
+      "type": "bridge",
+      "name": "Lake Pontchartrain Causeway (south landing)",
+      "lon": -90.1539,
+      "lat": 30.0266,
+      "aliases": [
+        "Causeway"
+      ]
+    },
+    {
+      "entity_id": "road:i10",
+      "type": "road",
+      "name": "I-10 at Claiborne Avenue overpass",
+      "lon": -90.0755,
+      "lat": 29.9642,
+      "aliases": [
+        "I-10"
+      ]
+    },
+    {
+      "entity_id": "camp:cloverleaf",
+      "type": "camp",
+      "name": "I-10 / Causeway cloverleaf",
+      "lon": -90.1544,
+      "lat": 30.0028,
+      "aliases": [
+        "cloverleaf"
+      ]
+    },
+    {
+      "entity_id": "shelter:dome",
+      "type": "shelter",
+      "name": "Louisiana Superdome",
+      "lon": -90.08124,
+      "lat": 29.95106,
+      "aliases": [
+        "Superdome",
+        "the Dome",
+        "Caesars Superdome"
+      ]
+    },
+    {
+      "entity_id": "shelter:morial",
+      "type": "shelter",
+      "name": "Ernest N. Morial Convention Center",
+      "lon": -90.0629,
+      "lat": 29.9428,
+      "aliases": [
+        "Convention Center"
+      ]
+    },
+    {
+      "entity_id": "school:mcd",
+      "type": "school",
+      "name": "McDonogh 35 Senior High (Kerlerec St)",
+      "lon": -90.0685,
+      "lat": 29.9717,
+      "aliases": [
+        "McDonogh 35"
+      ]
+    },
+    {
+      "entity_id": "hospital:charity",
+      "type": "hospital",
+      "name": "Charity Hospital",
+      "lon": -90.0781,
+      "lat": 29.9586,
+      "aliases": [
+        "Big Charity"
+      ]
+    },
+    {
+      "entity_id": "hospital:university",
+      "type": "hospital",
+      "name": "University Hospital (MCLNO)",
+      "lon": -90.0817,
+      "lat": 29.9578,
+      "aliases": [
+        "University Hospital"
+      ]
+    },
+    {
+      "entity_id": "hospital:touro",
+      "type": "hospital",
+      "name": "Touro Infirmary",
+      "lon": -90.093,
+      "lat": 29.9256,
+      "aliases": [
+        "Touro"
+      ]
+    },
+    {
+      "entity_id": "hospital:methodist",
+      "type": "hospital",
+      "name": "Pendleton Memorial Methodist Hospital",
+      "lon": -89.9748,
+      "lat": 30.0165,
+      "aliases": [
+        "Methodist"
+      ]
+    },
+    {
+      "entity_id": "hospital:chalmette",
+      "type": "hospital",
+      "name": "Chalmette Medical Center",
+      "lon": -89.9625,
+      "lat": 29.9408,
+      "aliases": [
+        "Chalmette"
+      ]
+    },
+    {
+      "entity_id": "clinic:9th",
+      "type": "clinic",
+      "name": "St. Claude Ave clinic (9th Ward)",
+      "lon": -90.0375,
+      "lat": 29.9688,
+      "aliases": [
+        "clinic"
+      ]
+    },
+    {
+      "entity_id": "infra:power",
+      "type": "power",
+      "name": "A.B. Paterson / Market St plant",
+      "lon": -90.0669,
+      "lat": 29.941,
+      "aliases": [
+        "power",
+        "grid"
+      ]
+    },
+    {
+      "entity_id": "power:michoud",
+      "type": "power",
+      "name": "Entergy Michoud Generating Station",
+      "lon": -89.9244,
+      "lat": 30.0078,
+      "aliases": [
+        "Michoud"
+      ]
+    },
+    {
+      "entity_id": "power:waterford",
+      "type": "power",
+      "name": "Waterford 3 Nuclear Station",
+      "lon": -90.4711,
+      "lat": 29.9953,
+      "aliases": [
+        "Waterford"
+      ]
+    },
+    {
+      "entity_id": "power:ninemile",
+      "type": "power",
+      "name": "Entergy Nine Mile Point",
+      "lon": -90.2056,
+      "lat": 29.9475,
+      "aliases": [
+        "Nine Mile"
+      ]
+    },
+    {
+      "entity_id": "infra:water",
+      "type": "water",
+      "name": "Carrollton Water Purification Plant",
+      "lon": -90.1342,
+      "lat": 29.9606,
+      "aliases": [
+        "S&WB"
+      ]
+    },
+    {
+      "entity_id": "infra:pump6",
+      "type": "pump",
+      "name": "S&WB Drainage Pump Station No. 6",
+      "lon": -90.1215,
+      "lat": 30.0208
+    },
+    {
+      "entity_id": "infra:pumpInd",
+      "type": "pump",
+      "name": "S&WB Drainage Pump Station No. 5",
+      "lon": -90.0325,
+      "lat": 29.9822
+    },
+    {
+      "entity_id": "breach:17th",
+      "type": "breach",
+      "name": "17th Street Canal breach (Bellaire Dr)",
+      "lon": -90.1217,
+      "lat": 30.017
+    },
+    {
+      "entity_id": "breach:london",
+      "type": "breach",
+      "name": "London Avenue Canal south breach (Mirabeau)",
+      "lon": -90.071,
+      "lat": 30.0092
+    },
+    {
+      "entity_id": "breach:london-n",
+      "type": "breach",
+      "name": "London Avenue Canal north breach (Warrington)",
+      "lon": -90.0695,
+      "lat": 30.0206
+    },
+    {
+      "entity_id": "breach:ihnc",
+      "type": "breach",
+      "name": "IHNC east-bank breach (Lower Ninth)",
+      "lon": -90.0205,
+      "lat": 29.9758
+    },
+    {
+      "entity_id": "breach:ihnc-west",
+      "type": "breach",
+      "name": "IHNC west-bank breach (France Rd)",
+      "lon": -90.028,
+      "lat": 29.9875
+    },
+    {
+      "entity_id": "infra:port",
+      "type": "port",
+      "name": "Port of New Orleans (Julia St terminal)",
+      "lon": -90.0635,
+      "lat": 29.944
+    },
+    {
+      "entity_id": "airport:msy",
+      "type": "airport",
+      "name": "Louis Armstrong New Orleans Intl",
+      "lon": -90.2581,
+      "lat": 29.9934,
+      "aliases": [
+        "MSY"
+      ]
+    },
+    {
+      "entity_id": "airport:lakefront",
+      "type": "airport",
+      "name": "New Orleans Lakefront Airport",
+      "lon": -90.0283,
+      "lat": 30.0424
+    },
+    {
+      "entity_id": "comms:eoc",
+      "type": "comm",
+      "name": "City command post \u2014 Hyatt Regency",
+      "lon": -90.0783,
+      "lat": 29.9486,
+      "aliases": [
+        "EOC"
+      ]
+    },
+    {
+      "entity_id": "personnel:ng",
+      "type": "personnel",
+      "name": "Jackson Barracks \u2014 Louisiana NG HQ",
+      "lon": -90.0089,
+      "lat": 29.9511
+    },
+    {
+      "entity_id": "food:pod",
+      "type": "food",
+      "name": "Alario Center POD",
+      "lon": -90.1556,
+      "lat": 29.9075
+    },
+    {
+      "entity_id": "medicine:cache",
+      "type": "medicine",
+      "name": "MSY airport DMAT field hospital",
+      "lon": -90.256,
+      "lat": 29.9885
+    },
+    {
+      "entity_id": "fuel:depot",
+      "type": "fuel",
+      "name": "Murphy Oil refinery (Meraux)",
+      "lon": -89.937,
+      "lat": 29.9335
+    },
+    {
+      "entity_id": "gauge:ihnc",
+      "type": "gauge",
+      "name": "IHNC Lock staff gauge",
+      "lon": -90.0274,
+      "lat": 29.9647
+    }
+  ],
+  "zone_rings": {
+    "zone:B": [
+      [
+        -90.0275,
+        29.9565
+      ],
+      [
+        -89.988,
+        29.954
+      ],
+      [
+        -89.985,
+        29.986
+      ],
+      [
+        -90.0275,
+        29.9845
+      ],
+      [
+        -90.0275,
+        29.9565
+      ]
+    ],
+    "zone:C": [
+      [
+        -90.0735,
+        29.9375
+      ],
+      [
+        -90.056,
+        29.9378
+      ],
+      [
+        -90.056,
+        29.9475
+      ],
+      [
+        -90.0735,
+        29.947
+      ],
+      [
+        -90.0735,
+        29.9375
+      ]
+    ]
+  },
+  "route_paths": {
+    "route:R14": [
+      [
+        -89.7704,
+        30.2753
+      ],
+      [
+        -89.805,
+        30.22
+      ],
+      [
+        -89.805,
+        30.205
+      ],
+      [
+        -89.82486,
+        30.18264
+      ],
+      [
+        -89.855,
+        30.155
+      ],
+      [
+        -89.92,
+        30.08
+      ],
+      [
+        -89.98,
+        30.045
+      ],
+      [
+        -90.0,
+        30.02
+      ],
+      [
+        -90.012,
+        29.99
+      ],
+      [
+        -90.013,
+        29.974
+      ]
+    ],
+    "route:R22": [
+      [
+        -89.7704,
+        30.2753
+      ],
+      [
+        -89.8,
+        30.25
+      ],
+      [
+        -89.84306,
+        30.18722
+      ],
+      [
+        -89.86,
+        30.155
+      ],
+      [
+        -89.94,
+        30.07
+      ],
+      [
+        -89.99,
+        30.03
+      ],
+      [
+        -90.0,
+        30.005
+      ],
+      [
+        -90.013,
+        29.974
+      ]
+    ]
+  }
+}

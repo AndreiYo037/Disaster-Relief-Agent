@@ -1,0 +1,243 @@
+{
+  "schema_version": "1.0",
+  "note": "One row per Entity.type. A type with no row must not render. See docs/entity-rendering.md.",
+  "lod_switch_altitude_m_ref": "visualization.lod_switch_altitude_m",
+  "types": {
+    "bridge": {
+      "category": "transport",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/bridge.gltf",
+      "asset_failed": "/assets/gltf/bridge.failed.gltf",
+      "symbol_far": "\u2293",
+      "fallback_2d": "icon-bridge",
+      "state_mesh_variants": [
+        "failed"
+      ],
+      "symbol_failed": "\u2715"
+    },
+    "route": {
+      "category": "transport",
+      "primitive": "ribbon",
+      "asset_near": null,
+      "symbol_far": "\u2550",
+      "fallback_2d": "line"
+    },
+    "route_segment": {
+      "category": "transport",
+      "primitive": "ribbon",
+      "asset_near": null,
+      "symbol_far": null,
+      "fallback_2d": "line"
+    },
+    "road": {
+      "category": "transport",
+      "primitive": "ribbon",
+      "asset_near": null,
+      "symbol_far": "\u2500",
+      "fallback_2d": "line"
+    },
+    "hospital": {
+      "category": "health",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/hospital.gltf",
+      "symbol_far": "\u271a",
+      "fallback_2d": "icon-hospital"
+    },
+    "clinic": {
+      "category": "health",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/clinic.gltf",
+      "symbol_far": "\u2020",
+      "fallback_2d": "icon-clinic"
+    },
+    "shelter": {
+      "category": "humanitarian",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/shelter.gltf",
+      "symbol_far": "\u2302",
+      "fallback_2d": "icon-shelter"
+    },
+    "school": {
+      "category": "humanitarian",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/school.gltf",
+      "symbol_far": "\u25a3",
+      "fallback_2d": "icon-school"
+    },
+    "power": {
+      "category": "utilities",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/power.gltf",
+      "symbol_far": "\u26a1",
+      "fallback_2d": "icon-power"
+    },
+    "water": {
+      "category": "utilities",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/water.gltf",
+      "symbol_far": "\u25c9",
+      "fallback_2d": "icon-water"
+    },
+    "pump": {
+      "category": "utilities",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/pump.gltf",
+      "symbol_far": "\u25ce",
+      "fallback_2d": "icon-pump"
+    },
+    "breach": {
+      "category": "hazard",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/breach.gltf",
+      "asset_failed": "/assets/gltf/breach.open.gltf",
+      "symbol_far": "\u25bd",
+      "fallback_2d": "icon-breach",
+      "state_mesh_variants": [
+        "open"
+      ],
+      "symbol_open": "\u25bc"
+    },
+    "port": {
+      "category": "transport",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/port.gltf",
+      "symbol_far": "\u2693",
+      "fallback_2d": "icon-port"
+    },
+    "airport": {
+      "category": "transport",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/airport.gltf",
+      "symbol_far": "\u2708",
+      "fallback_2d": "icon-airport"
+    },
+    "comm": {
+      "category": "utilities",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/comm.gltf",
+      "symbol_far": "\u2316",
+      "fallback_2d": "icon-comm"
+    },
+    "gauge": {
+      "category": "utilities",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/gauge.gltf",
+      "symbol_far": "\u25ae",
+      "fallback_2d": "icon-gauge"
+    },
+    "warehouse": {
+      "category": "supply",
+      "primitive": "mesh",
+      "grammar": "static_stock",
+      "asset_near": "/assets/gltf/warehouse.gltf",
+      "symbol_far": "\u25a6",
+      "fallback_2d": "icon-warehouse"
+    },
+    "vehicle": {
+      "category": "transport",
+      "primitive": "mesh",
+      "grammar": "mobile",
+      "asset_near": "/assets/gltf/vehicle.gltf",
+      "symbol_far": "\u25b8",
+      "fallback_2d": "icon-vehicle"
+    },
+    "personnel": {
+      "category": "humanitarian",
+      "primitive": "mesh",
+      "grammar": "mobile",
+      "asset_near": "/assets/gltf/personnel.gltf",
+      "symbol_far": "\u2630",
+      "fallback_2d": "icon-personnel"
+    },
+    "food": {
+      "category": "supply",
+      "primitive": "mesh",
+      "grammar": "static_stock",
+      "asset_near": "/assets/gltf/food.gltf",
+      "symbol_far": "\u25a4",
+      "fallback_2d": "icon-food"
+    },
+    "medicine": {
+      "category": "health",
+      "primitive": "mesh",
+      "grammar": "static_stock",
+      "asset_near": "/assets/gltf/medicine.gltf",
+      "symbol_far": "\u2295",
+      "fallback_2d": "icon-medicine"
+    },
+    "fuel": {
+      "category": "supply",
+      "primitive": "mesh",
+      "grammar": "static_stock",
+      "asset_near": "/assets/gltf/fuel.gltf",
+      "symbol_far": "\u2b24",
+      "fallback_2d": "icon-fuel"
+    },
+    "zone": {
+      "category": "humanitarian",
+      "primitive": "ring",
+      "asset_near": null,
+      "symbol_far": "\u25cb",
+      "fallback_2d": "polygon"
+    },
+    "camp": {
+      "category": "humanitarian",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/camp.gltf",
+      "symbol_far": "\u25b3",
+      "fallback_2d": "icon-camp"
+    },
+    "region": {
+      "category": "geography",
+      "primitive": "outline",
+      "fallback_2d": "line"
+    },
+    "district": {
+      "category": "geography",
+      "primitive": "outline",
+      "fallback_2d": "line"
+    },
+    "settlement": {
+      "category": "geography",
+      "primitive": "outline",
+      "fallback_2d": "line"
+    },
+    "hazard_area": {
+      "category": "geography",
+      "primitive": "outline",
+      "fallback_2d": "polygon"
+    },
+    "operational_area": {
+      "category": "geography",
+      "primitive": "mask",
+      "fallback_2d": "polygon"
+    },
+    "service_area": {
+      "category": "geography",
+      "primitive": "outline",
+      "fallback_2d": "polygon"
+    },
+    "flood": {
+      "category": "hazard",
+      "primitive": "volume",
+      "fallback_2d": "polygon"
+    },
+    "cyclone": {
+      "category": "hazard",
+      "primitive": "field",
+      "fallback_2d": "line"
+    },
+    "fire": {
+      "category": "hazard",
+      "primitive": "volume",
+      "fallback_2d": "polygon"
+    },
+    "landslide": {
+      "category": "hazard",
+      "primitive": "mesh",
+      "asset_near": "/assets/gltf/landslide.gltf",
+      "fallback_2d": "polygon",
+      "symbol_far": "\u25e2"
+    }
+  }
+}

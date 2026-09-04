@@ -1,0 +1,6 @@
+pydantic>=2.6
+numpy>=1.26
+shapely>=2.0
+python-dotenv>=1.0
+langgraph>=0.2.0
+langchain-aws>=0.2.0

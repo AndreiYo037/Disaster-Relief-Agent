@@ -1,0 +1,152 @@
+[
+  {
+    "from": "route:R14",
+    "to": "bridge:B7",
+    "rel": "reachable_from"
+  },
+  {
+    "from": "route:R14",
+    "to": "zone:B",
+    "rel": "serves"
+  },
+  {
+    "from": "route:R22",
+    "to": "zone:B",
+    "rel": "serves"
+  },
+  {
+    "from": "route:R22",
+    "to": "bridge:us11",
+    "rel": "reachable_from"
+  },
+  {
+    "from": "warehouse:W1",
+    "to": "zone:B",
+    "rel": "supplies"
+  },
+  {
+    "from": "warehouse:W1",
+    "to": "zone:C",
+    "rel": "supplies"
+  },
+  {
+    "from": "truck:17",
+    "to": "warehouse:W1",
+    "rel": "connects"
+  },
+  {
+    "from": "infra:pump6",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "infra:pumpInd",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "infra:water",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "hospital:charity",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "hospital:university",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "hospital:NDH",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "hospital:touro",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "hospital:methodist",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "shelter:dome",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "shelter:morial",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "infra:pumpInd",
+    "to": "zone:B",
+    "rel": "serves"
+  },
+  {
+    "from": "infra:pump6",
+    "to": "zone:C",
+    "rel": "serves"
+  },
+  {
+    "from": "breach:ihnc",
+    "to": "zone:B",
+    "rel": "floods"
+  },
+  {
+    "from": "breach:london",
+    "to": "zone:C",
+    "rel": "floods"
+  },
+  {
+    "from": "breach:london-n",
+    "to": "zone:C",
+    "rel": "floods"
+  },
+  {
+    "from": "breach:17th",
+    "to": "zone:C",
+    "rel": "floods"
+  },
+  {
+    "from": "infra:port",
+    "to": "warehouse:W1",
+    "rel": "supplies"
+  },
+  {
+    "from": "infra:water",
+    "to": "zone:B",
+    "rel": "supplies"
+  },
+  {
+    "from": "infra:water",
+    "to": "zone:C",
+    "rel": "supplies"
+  },
+  {
+    "from": "infra:power",
+    "to": "power:michoud",
+    "rel": "depends_on"
+  },
+  {
+    "from": "infra:power",
+    "to": "power:waterford",
+    "rel": "depends_on"
+  },
+  {
+    "from": "comms:eoc",
+    "to": "infra:power",
+    "rel": "depends_on"
+  },
+  {
+    "from": "airport:msy",
+    "to": "infra:power",
+    "rel": "depends_on"
+  }
+]

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crisis-os.local/world-snapshot.schema.json",
+  "title": "WorldSnapshot",
+  "description": "The only object the 3D diorama may read. Phase 2 LangGraph emits this same document. A visual channel with no field here must not render.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "crisis_id",
+    "keyframe_id",
+    "valid_at",
+    "recorded_at",
+    "entities",
+    "route_segments",
+    "relationships",
+    "population",
+    "hazards",
+    "plans",
+    "permits",
+    "tasks",
+    "events",
+    "viz"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "crisis_id": { "type": "string" },
+    "keyframe_id": { "enum": ["t0", "b7", "reroute"] },
+    "valid_at": { "type": "string", "format": "date-time" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
+    "route_segments": { "type": "array", "items": { "$ref": "#/$defs/route_segment" } },
+    "relationships": { "type": "array", "items": { "$ref": "#/$defs/relationship" } },
+    "population": { "$ref": "#/$defs/population" },
+    "hazards": { "$ref": "#/$defs/hazards" },
+    "plans": { "type": "array" },
+    "permits": { "type": "array" },
+    "tasks": { "type": "array" },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+    "forecasts": { "type": "array" },
+    "pulse": { "type": "object" },
+    "viz": { "type": "object" }
+  },
+  "$defs": {
+    "entity": {
+      "type": "object",
+      "required": ["entity_id", "type", "name", "geometry", "state"],
+      "properties": {
+        "entity_id": { "type": "string" },
+        "type": { "type": "string" },
+        "name": { "type": "string" },
+        "geometry": { "type": "object" },
+        "state": { "type": "string" },
+        "confidence": { "type": "number" },
+        "verification_status": { "type": "string" },
+        "label": { "type": "string" },
+        "attributes": { "type": "object" },
+        "source_event_id": { "type": ["string", "null"] },
+        "valid_from": { "type": "string" },
+        "valid_until": { "type": ["string", "null"] },
+        "synthetic": { "type": "boolean" }
+      }
+    },
+    "route_segment": {
+      "type": "object",
+      "required": ["segment_id", "route_id", "path", "state"],
+      "properties": {
+        "segment_id": { "type": "string" },
+        "route_id": { "type": "string" },
+        "path": { "type": "array" },
+        "state": { "enum": ["open", "degraded", "blocked", "submerged"] }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["from_entity", "to_entity", "rel_type", "active"],
+      "properties": {
+        "from_entity": { "type": "string" },
+        "to_entity": { "type": "string" },
+        "rel_type": { "type": "string" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "population": {
+      "type": "object",
+      "required": ["dataset_id", "classes", "bin_edges_per_km2", "cells"],
+      "properties": {
+        "dataset_id": { "type": "string" },
+        "version": { "type": "string" },
+        "spatial_resolution_m": { "type": "number" },
+        "bin_method": { "type": "string" },
+        "bin_edges_per_km2": { "type": "array" },
+        "min_aggregation_cell_count": { "type": "number" },
+        "classes": { "type": "object" },
+        "cells": { "type": "array" },
+        "movement": { "type": "array" }
+      }
+    },
+    "hazards": {
+      "type": "object",
+      "properties": {
+        "flood": { "type": "object" },
+        "cyclone": { "type": "object" },
+        "fire": { "type": "object" },
+        "landslide": { "type": "object" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_id", "event_type", "verification_status"],
+      "properties": {
+        "event_id": { "type": "string" },
+        "event_type": { "type": "string" },
+        "subject_entity": { "type": "string" },
+        "verification_status": { "type": "string" },
+        "geometry": { "type": "object" },
+        "decay": { "type": "number" },
+        "source_event_id": { "type": "string" }
+      }
+    }
+  }
+}
