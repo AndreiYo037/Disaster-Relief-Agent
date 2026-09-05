@@ -101,6 +101,7 @@
         "flood": { "type": "object" },
         "cyclone": { "type": "object" },
         "fire": { "type": "object" },
+        "contamination": { "type": "object" },
         "landslide": { "type": "object" }
       }
     },

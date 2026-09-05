@@ -70,12 +70,15 @@ export function renderLegend(el: HTMLElement, snap: WorldSnapshot, flags: LayerF
   el.innerHTML = flags.popTotal
     ? `<div>POPULATION DENSITY · people/km² · ${snap.population.bin_method}</div>
        <div>low &lt; ${e[0]} · med ${e[0]}–${e[1]} · high ${e[1]}–${e[2]} · very high &gt; ${e[2]}</div>
+       <div style="margin-top:4px">entities: type mesh only · color = damage spectrum · green → yellow → orange → red</div>
+       <div style="margin-top:4px">hazards always on · cyclone track · fire particles (riverfront) · green = Murphy Oil Meraux spill</div>
        <div style="margin-top:4px">flood = HUD district depth × flooded-unit share · city stage ${snap.hazards.flood.stage_m} m · Δ ${snap.hazards.flood.d_stage_dt}</div>`
     : `<div>two operations · realloc (stock) · evacuate (occupancy / displacement)</div>
        <div>access (bridges, roads, breaches) is a shared constraint — drawn with either operation</div>
        <div>roads: open green · degraded amber · blocked red · submerged blue</div>
+       <div>hazards always on · cyclone · fire particles · green contamination (Murphy Oil)</div>
        <div>evac movement = pulsing orange arcs</div>
-       <div>label plate = damage · green undamaged · yellow unknown · orange damaged · red destroyed</div>
+       <div>label plate + mesh = damage · green undamaged · yellow unknown · orange damaged · red destroyed</div>
        <div>glyph = type · unverified ping is grey</div>`;
 }
 
@@ -88,10 +91,8 @@ export function renderPopCtl(el: HTMLElement, flags: LayerFlags, onChange: (f: L
     <div class="hint" style="margin:8px 0 2px 0">Access (B7, roads, breaches, pumps) is a constraint on both — not its own operation.</div>
     <div style="font-weight:700;color:#c7d3ee;margin:10px 0 4px;letter-spacing:.08em;font-size:10px">POPULATION</div>
     ${chk("popTotal", "Overall population", flags)}
-    <div style="font-size:9px;margin:8px 0 3px;color:#8195b8;letter-spacing:.08em">HAZARDS</div>
-    ${chk("cyclone", "Cyclone (ghosted)", flags)}
-    ${chk("fire", "Fire (synthetic)", flags)}
-    ${chk("landslide", "Landslide (synthetic)", flags)}
+    <div style="font-size:9px;margin:8px 0 3px;color:#8195b8;letter-spacing:.08em">HAZARDS · always on</div>
+    <div class="hint">cyclone track · fire (riverfront particles) · contamination (green = Murphy Oil spill)</div>
     <div style="font-size:9px;margin-top:6px;opacity:.7">Forecast population: disabled</div>`;
   el.querySelectorAll("input").forEach((inp) => {
     inp.addEventListener("change", () => {

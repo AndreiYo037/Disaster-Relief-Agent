@@ -1,0 +1,33 @@
+{
+  "dataset_id": "katrina-fire-sites",
+  "source_key": "wikipedia-katrina-nola-fires",
+  "retrieved": "2026-09-06",
+  "vintage": "2005-09-02",
+  "note": "Documented post-storm riverfront / Warehouse District fires. Wikipedia: structure fire at 329 Tchoupitoulas St photographed the morning of 2 Sep 2005. NOFD/hazmat also fought the Mandeville Street Wharf warehouse fire and a fire at 3200 Chartres St. These are point sites, not a mapped burn scar. Shown on 31 Aug logistics keyframes as the Katrina fire cluster (the photographs are 2 Sep).",
+  "urls": [
+    "https://en.wikipedia.org/wiki/Effects_of_Hurricane_Katrina_in_New_Orleans"
+  ],
+  "sites": [
+    {
+      "id": "tchoupitoulas-329",
+      "name": "329 Tchoupitoulas Street",
+      "lon": -90.0676,
+      "lat": 29.9484,
+      "radius_m": 70
+    },
+    {
+      "id": "mandeville-wharf",
+      "name": "Mandeville Street Wharf",
+      "lon": -90.0549,
+      "lat": 29.9618,
+      "radius_m": 90
+    },
+    {
+      "id": "chartres-3200",
+      "name": "3200 Chartres Street",
+      "lon": -90.0472,
+      "lat": 29.9612,
+      "radius_m": 55
+    }
+  ]
+}

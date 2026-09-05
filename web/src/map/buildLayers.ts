@@ -10,9 +10,6 @@ export interface LayerFlags {
   opRealloc: boolean;
   opEvacuate: boolean;
   popTotal: boolean;
-  cyclone: boolean;
-  fire: boolean;
-  landslide: boolean;
   fallback2d: boolean;
 }
 
@@ -75,12 +72,19 @@ function farSymbol(type: string): string {
   return map[type] ?? "•";
 }
 
+function mToLonLat(lon: number, lat: number, x: number, z: number): [number, number] {
+  const mLat = 1 / 110570;
+  const mLon = 1 / (111320 * Math.max(0.2, Math.cos(lat * Math.PI / 180)));
+  return [lon + x * mLon, lat + z * mLat];
+}
+
 export function buildLayers(
   snap: WorldSnapshot,
   registry: SymbolRegistry,
   flags: LayerFlags,
   altitudeM: number,
   onClick: (e: Entity | { kind: string; id: string; payload: unknown }) => void,
+  fireT = 0,
 ): Layer[] {
   const layers: Layer[] = [];
   const near = !flags.fallback2d && altitudeM < snap.viz.lod_switch_altitude_m;
@@ -206,7 +210,7 @@ export function buildLayers(
     }
   }
 
-  if (flags.cyclone) {
+  if (snap.hazards.cyclone?.track) {
     const track = snap.hazards.cyclone.track.map((p) => [p.lon, p.lat]);
     layers.push(new PathLayer({
       id: "cyclone-track",
@@ -215,6 +219,7 @@ export function buildLayers(
       getColor: [176, 107, 255, 140],
       getWidth: 4,
       widthMinPixels: 2,
+      pickable: false,
     }));
     const cone = snap.hazards.cyclone.cone_nm * 0.012;
     const mid = snap.hazards.cyclone.track[Math.floor(snap.hazards.cyclone.track.length / 2)];
@@ -228,13 +233,14 @@ export function buildLayers(
       stroked: true,
       filled: true,
       radiusUnits: "meters",
+      pickable: false,
     }));
     const rainN = Math.min(snap.viz.max_particle_count / 4, Math.round(snap.hazards.cyclone.rainfall_mm_h * 80));
-    const rain = Array.from({ length: rainN }, (_, i) => ({
-      lon: -90.3 + (i % 40) * 0.018,
-      lat: 29.85 + Math.floor(i / 40) * 0.018,
-    }));
     if (snap.hazards.cyclone.rainfall_mm_h > 0) {
+      const rain = Array.from({ length: rainN }, (_, i) => ({
+        lon: -90.3 + (i % 40) * 0.018,
+        lat: 29.85 + Math.floor(i / 40) * 0.018,
+      }));
       layers.push(new ScatterplotLayer({
         id: "rain",
         data: rain,
@@ -242,44 +248,81 @@ export function buildLayers(
         getRadius: 40,
         getFillColor: [140, 180, 255, 40],
         radiusUnits: "meters",
+        pickable: false,
       }));
     }
   }
 
-  if (flags.fire && snap.hazards.fire.active) {
+  const contam = snap.hazards.contamination?.areas ?? [];
+  if (contam.length) {
     layers.push(new PolygonLayer({
-      id: "fire",
-      data: [{ polygon: snap.hazards.fire.perimeter }],
-      getPolygon: (d: { polygon: number[][] }) => d.polygon,
-      getFillColor: [255, 80, 20, 160],
-      getLineColor: [255, 160, 40, 220],
-      extruded: false,
-    }));
-    const { u, v } = snap.hazards.fire.wind;
-    const smokeN = Math.min(400, Math.round(snap.hazards.fire.spread_rate * 400));
-    const origin = snap.hazards.fire.perimeter[0];
-    const smoke = Array.from({ length: smokeN }, (_, i) => ({
-      lon: origin[0] + u * 0.002 * (i / smokeN),
-      lat: origin[1] + v * 0.002 * (i / smokeN),
-    }));
-    layers.push(new ScatterplotLayer({
-      id: "smoke",
-      data: smoke,
-      getPosition: (p: { lon: number; lat: number }) => [p.lon, p.lat],
-      getRadius: 90,
-      getFillColor: [80, 80, 80, 50],
-      radiusUnits: "meters",
+      id: "contamination",
+      data: contam,
+      getPolygon: (d: { ring: number[][] }) => d.ring,
+      stroked: true,
+      filled: true,
+      getFillColor: [28, 210, 68, 140],
+      getLineColor: [70, 255, 120, 230],
+      lineWidthMinPixels: 2,
+      pickable: false,
     }));
   }
 
-  if (flags.landslide && snap.hazards.landslide.active) {
-    layers.push(new PathLayer({
-      id: "landslide",
-      data: [{ path: snap.hazards.landslide.path }],
-      getPath: (d: { path: number[][] }) => d.path,
-      getColor: [120, 80, 40, 220],
-      getWidth: 14,
-      widthMinPixels: 4,
+  const fire = snap.hazards.fire;
+  if (fire?.active && (fire.sites || []).length) {
+    const wind = fire.wind || { u: 0.12, v: 0.06 };
+    const particles: { lon: number; lat: number; z: number; radius: number; color: [number, number, number, number] }[] = [];
+    for (const s of fire.sites!) {
+      const r0 = s.radius_m || 70;
+      for (let i = 0; i < 96; i++) {
+        const h = Math.sin(i * 12.9898 + s.lon * 78.233) * 43758.5453;
+        const rnd = h - Math.floor(h);
+        const u = (rnd + fireT) % 1;
+        const ang = i * 2.399 + fireT * 1.7;
+        const spread = r0 * (0.12 + (1 - u) * 0.55);
+        const east = Math.cos(ang) * spread + wind.u * u * 180;
+        const north = Math.sin(ang) * spread * 0.45 + wind.v * u * 180;
+        const ll = mToLonLat(s.lon, s.lat, east, north);
+        const smoke = u > 0.42;
+        particles.push({
+          lon: ll[0], lat: ll[1], z: u * (55 + r0 * 0.9),
+          radius: smoke ? 18 + u * 42 : 8 + (1 - u) * 16,
+          color: smoke
+            ? [48, 44, 40, Math.round(90 - u * 55)]
+            : u < 0.18
+              ? [255, 252, 160, 240]
+              : [255, 90 + Math.round(u * 40), 12, 220],
+        });
+      }
+    }
+    layers.push(new ScatterplotLayer({
+      id: "fire-core",
+      data: fire.sites,
+      getPosition: (s: { lon: number; lat: number }) => [s.lon, s.lat, 4],
+      getRadius: (s: { radius_m?: number }) => (s.radius_m || 70) * 0.7,
+      getFillColor: [255, 58, 8, 210],
+      radiusUnits: "meters",
+      pickable: false,
+    }));
+    layers.push(new ScatterplotLayer({
+      id: "fire-ember",
+      data: particles.filter((p) => p.color[0] > 80),
+      getPosition: (p: { lon: number; lat: number; z: number }) => [p.lon, p.lat, p.z],
+      getRadius: (p: { radius: number }) => p.radius,
+      getFillColor: (p: { color: [number, number, number, number] }) => p.color,
+      radiusUnits: "meters",
+      pickable: false,
+      updateTriggers: { getPosition: fireT },
+    }));
+    layers.push(new ScatterplotLayer({
+      id: "fire-smoke",
+      data: particles.filter((p) => p.color[0] <= 80),
+      getPosition: (p: { lon: number; lat: number; z: number }) => [p.lon, p.lat, p.z],
+      getRadius: (p: { radius: number }) => p.radius,
+      getFillColor: (p: { color: [number, number, number, number] }) => p.color,
+      radiusUnits: "meters",
+      pickable: false,
+      updateTriggers: { getPosition: fireT },
     }));
   }
 

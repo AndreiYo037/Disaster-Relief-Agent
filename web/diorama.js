@@ -6,7 +6,7 @@
     uncertain: [255, 210, 50],
     damaged: [255, 152, 28],
     critical: [255, 84, 48],
-    inaccessible: [220, 36, 48], depleted: [220, 36, 48],
+    inaccessible: [220, 36, 48], destroyed: [220, 36, 48], depleted: [220, 36, 48],
   };
   const SEG_COLOR = {
     open: [55, 214, 122, 150],
@@ -44,10 +44,11 @@
   let snap = null;
   let selected = null;
   let flowT = 0;
+  let fireT = 0;
   let flags = {
     opRealloc: true, opEvacuate: true,
     popTotal: true,
-    cyclone: true, fire: false, landslide: false, fallback2d: false,
+    fallback2d: false,
   };
   let map, overlay;
 
@@ -172,13 +173,13 @@
   function solidKey(ent) {
     const t = registry.types[ent.type];
     if (!t || t.primitive !== "mesh") return null;
-    if (ent.type === "bridge" && ent.state === "inaccessible") return "bridge.failed";
+    if (ent.type === "bridge" && (ent.state === "inaccessible" || ent.state === "destroyed")) return "bridge.failed";
     if (ent.type === "breach" && (ent.state === "critical" || ent.state === "inaccessible")) return "breach.open";
     return solids[ent.type] ? ent.type : null;
   }
   function typeSymbol(ent) {
     const rec = registry.types[ent.type] || {};
-    if (ent.type === "bridge" && ent.state === "inaccessible" && rec.symbol_failed) return rec.symbol_failed;
+    if (ent.type === "bridge" && (ent.state === "inaccessible" || ent.state === "destroyed") && rec.symbol_failed) return rec.symbol_failed;
     if (ent.type === "breach" && (ent.state === "critical" || ent.state === "inaccessible") && rec.symbol_open) {
       return rec.symbol_open;
     }
@@ -220,13 +221,31 @@
     if (ent.type === "airport") return 80;
     return 90;
   }
-  function mixColor(base, stateRgb, alpha) {
-    return [
-      Math.round(base[0] * 0.18 + stateRgb[0] * 0.82),
-      Math.round(base[1] * 0.18 + stateRgb[1] * 0.82),
-      Math.round(base[2] * 0.18 + stateRgb[2] * 0.82),
-      alpha,
-    ];
+  function stateWord(state) {
+    if (state === "operational" || state === "full") return "undamaged";
+    if (state === "uncertain") return "unknown";
+    if (state === "inaccessible" || state === "destroyed") return "destroyed";
+    return state || "unknown";
+  }
+  function entityFill(ent, _cat, alpha) {
+    const s = rgb(ent.state);
+    return [s[0], s[1], s[2], alpha];
+  }
+  function stateHaloRadius(ent) {
+    if (ent.type === "bridge" || ent.type === "airport") return 1100;
+    if (ent.type === "hospital" || ent.type === "shelter" || ent.type === "warehouse") return 820;
+    return 720;
+  }
+  const BUILD_COLOR = {
+    residential: [210, 200, 185, 200], commercial: [190, 185, 175, 220],
+    hospital: [240, 240, 245, 230], warehouse: [150, 130, 110, 220],
+    school: [180, 170, 150, 220], landmark: [220, 210, 190, 230],
+  };
+  function osmBuildingColor(d) {
+    if (d.damage === "destroyed") return flags.popTotal ? [118, 40, 34, 210] : [88, 32, 28, 235];
+    if (d.damage === "damaged") return flags.popTotal ? [210, 128, 48, 190] : [186, 108, 42, 225];
+    const c = BUILD_COLOR[d.kind] || BUILD_COLOR.residential;
+    return flags.popTotal ? [c[0], c[1], c[2], 70] : c;
   }
   function fillRatio(ent) {
     const a = ent.attributes || {};
@@ -321,7 +340,7 @@
       if (ent.type !== "bridge" || !paths || !paths.length) continue;
       const cat = solids[solidKey(ent)] || solids.bridge;
       const alpha = Math.round(beliefAlpha(ent) * 255);
-      const color = mixColor(cat.color, rgb(ent.state), alpha);
+      const color = entityFill(ent, cat, alpha);
       const pierColor = [
         Math.max(0, color[0] - 28),
         Math.max(0, color[1] - 28),
@@ -331,7 +350,7 @@
       const width = ent.attributes.span_width_m || 12;
       const deckH = ent.attributes.deck_h_m || 12;
       const spacing = ent.attributes.pier_spacing_m || 70;
-      const failed = ent.state === "inaccessible";
+      const failed = ent.state === "inaccessible" || ent.state === "destroyed";
       for (const raw of paths) {
         const segs = [];
         if (failed) {
@@ -380,7 +399,7 @@
       const heading = headingOf(ent);
       const lon = ent.geometry.lon, lat = ent.geometry.lat;
       const alpha = Math.round(beliefAlpha(ent) * 255);
-      const color = mixColor(cat.color, rgb(ent.state), alpha);
+      const color = entityFill(ent, cat, alpha);
       for (const part of cat.parts) {
         const polygon = part.ring_m.map(([x, z]) => {
           const [rx, rz] = rotateXZ(x * scale, z * scale, heading);
@@ -490,11 +509,6 @@
       };
     });
     const geo = snap.geography || { roads: [], canals: [], buildings: [] };
-    const BUILD_COLOR = {
-      residential: [210, 200, 185, 200], commercial: [190, 185, 175, 220],
-      hospital: [240, 240, 245, 230], warehouse: [150, 130, 110, 220],
-      school: [180, 170, 150, 220], landmark: [220, 210, 190, 230],
-    };
     if (geo.buildings && geo.buildings.length && SolidPolygonLayer) {
       layers.push(new SolidPolygonLayer({
         id: "osm-buildings",
@@ -502,11 +516,9 @@
         getPolygon: (d) => d.ring,
         extruded: !flags.fallback2d && !flags.popTotal,
         getElevation: (d) => (flags.fallback2d || flags.popTotal) ? 0 : d.height_m,
-        getFillColor: (d) => {
-          const c = BUILD_COLOR[d.kind] || BUILD_COLOR.residential;
-          return flags.popTotal ? [c[0], c[1], c[2], 70] : c;
-        },
-        getLineColor: [40, 40, 40, 80],
+        getFillColor: (d) => osmBuildingColor(d),
+        getLineColor: (d) => d.damage === "destroyed" ? [70, 22, 18, 180]
+          : d.damage === "damaged" ? [140, 70, 28, 160] : [40, 40, 40, 80],
         lineWidthMinPixels: 0.3,
       }));
     }
@@ -626,18 +638,18 @@
       }
     }
 
-    if (flags.cyclone) {
+    if (snap.hazards.cyclone && snap.hazards.cyclone.track) {
       const track = snap.hazards.cyclone.track.map((p) => [p.lon, p.lat]);
       layers.push(new PathLayer({
         id: "cyclone-track", data: [{ path: track }], getPath: (d) => d.path,
-        getColor: [176, 107, 255, 140], getWidth: 4, widthMinPixels: 2,
+        getColor: [176, 107, 255, 140], getWidth: 4, widthMinPixels: 2, pickable: false,
       }));
       const mid = snap.hazards.cyclone.track[Math.floor(snap.hazards.cyclone.track.length / 2)];
       layers.push(new ScatterplotLayer({
         id: "cyclone-cone", data: [mid], getPosition: (p) => [p.lon, p.lat],
         getRadius: snap.hazards.cyclone.cone_nm * 0.012 * 111000,
         getFillColor: [176, 107, 255, 25], getLineColor: [176, 107, 255, 80],
-        stroked: true, filled: true, radiusUnits: "meters",
+        stroked: true, filled: true, radiusUnits: "meters", pickable: false,
       }));
       const rainN = Math.min(snap.viz.max_particle_count / 4, Math.round(snap.hazards.cyclone.rainfall_mm_h * 80));
       if (snap.hazards.cyclone.rainfall_mm_h > 0) {
@@ -646,45 +658,127 @@
         }));
         layers.push(new ScatterplotLayer({
           id: "rain", data: rain, getPosition: (p) => [p.lon, p.lat],
-          getRadius: 40, getFillColor: [140, 180, 255, 40], radiusUnits: "meters",
+          getRadius: 40, getFillColor: [140, 180, 255, 40], radiusUnits: "meters", pickable: false,
         }));
       }
     }
 
-    if (flags.fire && snap.hazards.fire.active && snap.hazards.fire.spread_rate > 0) {
+    const contam = (snap.hazards.contamination && snap.hazards.contamination.areas) || [];
+    if (contam.length) {
       layers.push(new PolygonLayer({
-        id: "fire", data: [{ polygon: snap.hazards.fire.perimeter }],
-        getPolygon: (d) => d.polygon, getFillColor: [255, 80, 20, 160], getLineColor: [255, 160, 40, 220],
-      }));
-      const { u, v } = snap.hazards.fire.wind;
-      const origin = snap.hazards.fire.perimeter[0];
-      const smokeN = Math.min(400, Math.round(snap.hazards.fire.spread_rate * 400));
-      const smoke = Array.from({ length: smokeN }, (_, i) => ({
-        lon: origin[0] + u * 0.002 * (i / smokeN),
-        lat: origin[1] + v * 0.002 * (i / smokeN),
-      }));
-      layers.push(new ScatterplotLayer({
-        id: "smoke", data: smoke, getPosition: (p) => [p.lon, p.lat],
-        getRadius: 90, getFillColor: [80, 80, 80, 50], radiusUnits: "meters",
-      }));
-      const core = snap.hazards.fire.perimeter.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]);
-      const n = snap.hazards.fire.perimeter.length;
-      layers.push(new ScatterplotLayer({
-        id: "fire-core", data: [{ lon: core[0] / n, lat: core[1] / n }],
-        getPosition: (p) => [p.lon, p.lat], getRadius: 70,
-        getFillColor: [255, 90, 20, 240], radiusUnits: "meters",
+        id: "contamination",
+        data: contam,
+        getPolygon: (d) => d.ring,
+        stroked: true,
+        filled: true,
+        extruded: false,
+        getFillColor: [28, 210, 68, 140],
+        getLineColor: [70, 255, 120, 230],
+        lineWidthMinPixels: 2,
+        pickable: false,
+        parameters: { depthTest: false },
       }));
     }
-    if (flags.landslide && snap.hazards.landslide.active) {
-      layers.push(new PathLayer({
-        id: "landslide", data: [{ path: snap.hazards.landslide.path }],
-        getPath: (d) => d.path, getColor: [120, 80, 40, 220], getWidth: 14, widthMinPixels: 4,
+
+    const fire = snap.hazards.fire || {};
+    if (fire.active && (fire.sites || []).length) {
+      const wind = fire.wind || { u: 0.12, v: 0.06 };
+      const particles = [];
+      for (const s of fire.sites) {
+        const r0 = s.radius_m || 70;
+        const n = 96;
+        for (let i = 0; i < n; i++) {
+          const h = Math.sin(i * 12.9898 + (s.lon || 0) * 78.233) * 43758.5453;
+          const rnd = h - Math.floor(h);
+          const u = (rnd + fireT) % 1;
+          const ang = i * 2.399 + fireT * 1.7;
+          const spread = r0 * (0.12 + (1 - u) * 0.55);
+          const east = Math.cos(ang) * spread + wind.u * u * 180;
+          const north = Math.sin(ang) * spread * 0.45 + wind.v * u * 180;
+          const ll = mToLonLat(s.lon, s.lat, east, north);
+          const smoke = u > 0.42;
+          particles.push({
+            lon: ll[0], lat: ll[1], z: u * (55 + r0 * 0.9),
+            radius: smoke ? 18 + u * 42 : 8 + (1 - u) * 16,
+            color: smoke
+              ? [48, 44, 40, Math.round(90 - u * 55)]
+              : u < 0.18
+                ? [255, 252, 160, 240]
+                : [255, 90 + Math.round(u * 40), 12, 220],
+          });
+        }
+      }
+      const embers = particles.filter((p) => p.color[0] > 80);
+      const smoke = particles.filter((p) => p.color[0] <= 80);
+      layers.push(new ScatterplotLayer({
+        id: "fire-core",
+        data: fire.sites,
+        getPosition: (s) => [s.lon, s.lat, 4],
+        getRadius: (s) => (s.radius_m || 70) * 0.7,
+        getFillColor: [255, 58, 8, 210],
+        radiusUnits: "meters",
+        pickable: false,
+        parameters: { depthTest: false },
+      }));
+      layers.push(new ScatterplotLayer({
+        id: "fire-ember",
+        data: embers,
+        getPosition: (p) => [p.lon, p.lat, p.z],
+        getRadius: (p) => p.radius,
+        getFillColor: (p) => p.color,
+        radiusUnits: "meters",
+        pickable: false,
+        parameters: { depthTest: false },
+        updateTriggers: { getPosition: fireT },
+      }));
+      layers.push(new ScatterplotLayer({
+        id: "fire-smoke",
+        data: smoke,
+        getPosition: (p) => [p.lon, p.lat, p.z],
+        getRadius: (p) => p.radius,
+        getFillColor: (p) => p.color,
+        radiusUnits: "meters",
+        pickable: false,
+        parameters: { depthTest: false },
+        updateTriggers: { getPosition: fireT },
       }));
     }
 
     const placed = entities.filter((e) => registry.types[e.type]?.primitive === "mesh");
     const { rows, fills } = entitySolids(placed);
     const pickEnt = (info) => { if (info.object?.entity) onClickEntity(info.object.entity); };
+    const stateMarks = entities.filter((e) => e.geometry && e.type !== "route" && e.type !== "route_segment");
+    layers.push(new ScatterplotLayer({
+      id: "entity-state-halo-glow",
+      data: stateMarks,
+      getPosition: (e) => [e.geometry.lon, e.geometry.lat],
+      getRadius: (e) => stateHaloRadius(e) * 1.55,
+      radiusUnits: "meters",
+      radiusMinPixels: 42,
+      radiusMaxPixels: 220,
+      getFillColor: (e) => { const c = rgb(e.state); return [c[0], c[1], c[2], 70]; },
+      stroked: false,
+      filled: true,
+      pickable: false,
+      parameters: { depthTest: false },
+    }));
+    layers.push(new ScatterplotLayer({
+      id: "entity-state-halo",
+      data: stateMarks,
+      getPosition: (e) => [e.geometry.lon, e.geometry.lat],
+      getRadius: (e) => stateHaloRadius(e),
+      radiusUnits: "meters",
+      radiusMinPixels: 32,
+      radiusMaxPixels: 160,
+      getFillColor: (e) => { const c = rgb(e.state); return [c[0], c[1], c[2], 120]; },
+      getLineColor: (e) => { const c = rgb(e.state); return [c[0], c[1], c[2], 255]; },
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 6,
+      lineWidthMaxPixels: 12,
+      pickable: false,
+      parameters: { depthTest: false },
+    }));
     const bridgeGeom = bridgeSpanSolids(placed);
     if (bridgeGeom.strokes.length) {
       layers.push(new PathLayer({
@@ -751,7 +845,7 @@
       id: "entity-names",
       data: named,
       getPosition: (e) => [e.geometry.lon, e.geometry.lat],
-      getText: (e) => `${typeSymbol(e)}  ${e.name}`,
+      getText: (e) => `${typeSymbol(e)}  ${e.name}  · ${stateWord(e.state)}`,
       getSize: 9,
       getColor: [244, 247, 252, 255],
       billboard: true,
@@ -907,13 +1001,16 @@
          <div>sampled on OSM buildings + land roads (basemap fabric) · low &lt; ${e[0]} · med ${e[0]}–${e[1]} · high ${e[1]}–${e[2]} · very high &gt; ${e[2]}</div>
          <div style="margin-top:4px">evac movement = pulsing orange arcs · slow arrows Lower 9 → Dome / Convention Center</div>
          <div style="margin-top:4px">roads: open green · degraded amber · blocked red · submerged blue</div>
+         <div style="margin-top:4px">entities: type mesh only · color = damage spectrum · green undamaged → yellow unknown → orange damaged → red destroyed</div>
+         <div style="margin-top:4px">hazards always on · cyclone track · fire particles (riverfront) · green = Murphy Oil Meraux spill</div>
          <div style="margin-top:4px">flood = HUD district depth × flooded-unit share · city stage ${snap.hazards.flood.stage_m} m · Δ ${snap.hazards.flood.d_stage_dt}</div>
          <div style="margin-top:4px;opacity:.8">${(snap.geography && snap.geography.vintage) || ""}</div>`
       : `<div>two operations · realloc (stock) · evacuate (occupancy / displacement)</div>
          <div>access (bridges, roads, breaches) is a shared constraint — drawn with either operation</div>
          <div>roads: open green · degraded amber · blocked red · submerged blue</div>
+         <div>hazards always on · cyclone · fire particles · green contamination (Murphy Oil)</div>
          <div>evac movement = pulsing orange arcs</div>
-         <div>label plate = damage · green undamaged · yellow unknown · orange damaged · red destroyed</div>
+         <div>mesh = entity type · color = damage · green undamaged · yellow unknown · orange damaged · red destroyed</div>
          <div>glyph = type · unverified ping is grey</div>
          <div style="margin-top:6px;color:#c7d3ee">ENTITY SYMBOLS</div>
          ${typeLegendHtml()}`;
@@ -930,10 +1027,8 @@
       <div class="hint" style="margin:8px 0 2px 0">Access (B7, roads, breaches, pumps) is a constraint on both — not its own operation.</div>
       <div style="font-weight:700;color:#c7d3ee;margin:10px 0 4px;letter-spacing:.08em;font-size:10px">POPULATION</div>
       ${row("popTotal", "Overall population")}
-      <div style="font-size:9px;margin:8px 0 3px;color:#8195b8;letter-spacing:.08em">HAZARDS</div>
-      ${row("cyclone", "Cyclone (ghosted)")}
-      ${row("fire", "Fire (synthetic)")}
-      ${row("landslide", "Landslide (synthetic)")}
+      <div style="font-size:9px;margin:8px 0 3px;color:#8195b8;letter-spacing:.08em">HAZARDS · always on</div>
+      <div class="hint">cyclone track · fire (riverfront particles) · contamination (green = Murphy Oil spill)</div>
       <div style="font-size:9px;margin-top:6px;opacity:.7">Forecast population: disabled</div>`;
     el.querySelectorAll("input").forEach((inp) => {
       inp.addEventListener("change", () => { flags[inp.id] = inp.checked; redraw(); });
@@ -1020,9 +1115,16 @@
       applyKf("t0");
       setInterval(() => {
         if (!overlay || !snap) return;
-        if (!(flags.opEvacuate && snap.population.movement.length)) return;
-        flowT = (flowT + 0.008) % 1;
-        overlay.setProps({ layers: buildLayers() });
+        let tick = false;
+        if (flags.opEvacuate && snap.population.movement.length) {
+          flowT = (flowT + 0.008) % 1;
+          tick = true;
+        }
+        if (snap.hazards.fire && snap.hazards.fire.active) {
+          fireT = (fireT + 0.03) % 1;
+          tick = true;
+        }
+        if (tick) overlay.setProps({ layers: buildLayers() });
       }, 80);
     });
     map.on("moveend", redraw);

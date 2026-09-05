@@ -139,6 +139,42 @@ def flood_stage(params: dict, keyframe: str) -> tuple[float, float]:
     return hud_weighted_depth_m("lower-9th"), 0.0
 
 
+def load_contamination() -> dict:
+    return load_osm_json("katrina_contamination.json") or {}
+
+
+def load_fires() -> dict:
+    return load_osm_json("katrina_fires.json") or {}
+
+
+def contamination_hazard(keyframe: str) -> dict:
+    raw = load_contamination()
+    areas = list(raw.get("areas") or [])
+    return {
+        "active": bool(areas),
+        "areas": areas,
+        "source_key": raw.get("source_key"),
+        "vintage": raw.get("vintage"),
+        "note": raw.get("note") or "",
+    }
+
+
+def fire_hazard(keyframe: str) -> dict:
+    raw = load_fires()
+    sites = list(raw.get("sites") or [])
+    return {
+        "synthetic": False,
+        "active": bool(sites),
+        "sites": sites,
+        "perimeter": [],
+        "spread_rate": 0.35 if sites else 0.0,
+        "wind": {"u": 0.12, "v": 0.06},
+        "source_key": raw.get("source_key"),
+        "vintage": raw.get("vintage"),
+        "note": raw.get("note") or "No Katrina fire binding retrieved — hazard off.",
+    }
+
+
 def entity_ll(eid: str) -> dict:
     spec = next(e for e in ENTITIES_SPEC if e["entity_id"] == eid)
     return {"lon": spec["lon"], "lat": spec["lat"]}
@@ -298,6 +334,42 @@ def mark_orphan_cells(cells: list[dict], buildings: list[dict]) -> None:
         c["orphan"] = bd >= max_d2
 
 
+def mark_building_flood_damage(buildings: list[dict], keyframe: str) -> None:
+    """HUD wet_frac / depth → intact | damaged | destroyed. Height follows damage."""
+    hud = load_hud_flood()
+    districts = []
+    for d in hud["districts"]:
+        if keyframe == "b7" and not d.get("early_29aug"):
+            continue
+        if d.get("flooded_units", 0) <= 0:
+            continue
+        depth_m, wet_frac = district_flood_metrics(d)
+        districts.append({
+            "id": d["id"], "ring": d["ring"],
+            "depth_m": depth_m, "wet_frac": wet_frac,
+        })
+    for b in buildings:
+        cx, cy = _bldg_xy(b)
+        hit = next((d for d in districts if _pip(cx, cy, d["ring"])), None)
+        h0 = float(b.get("height_m") or 8)
+        if hit is None:
+            b["damage"] = "intact"
+            b["wet_frac"] = 0.0
+            b["depth_m"] = 0.0
+            continue
+        b["wet_frac"] = round(hit["wet_frac"], 3)
+        b["depth_m"] = round(hit["depth_m"], 3)
+        b["flood_district"] = hit["id"]
+        if hit["wet_frac"] >= 0.55 or hit["depth_m"] >= 1.8:
+            b["damage"] = "destroyed"
+            b["height_m"] = round(max(1.2, h0 * 0.18), 2)
+        elif hit["wet_frac"] >= 0.12:
+            b["damage"] = "damaged"
+            b["height_m"] = round(max(2.4, h0 * 0.55), 2)
+        else:
+            b["damage"] = "intact"
+
+
 def geography_bundle(keyframe: str, cells: list | None = None) -> dict:
     roads_raw = load_osm_json("osm_roads.json")
     canals_raw = load_osm_json("osm_canals.json")
@@ -328,6 +400,7 @@ def geography_bundle(keyframe: str, cells: list | None = None) -> dict:
         buildings = drape_population(buildings, cells)
     else:
         buildings = [b for b in buildings if not in_open_water(*_bldg_xy(b))]
+    mark_building_flood_damage(buildings, keyframe)
     return {
         "vintage": roads_raw.get("vintage") or "current OSM — Twin Span is the 2011 rebuild",
         "source_key": "osm-extract-nola",
@@ -670,9 +743,8 @@ def build_snapshot(params: dict, keyframe: str) -> dict:
             "cyclone": {"track": load_best_track(), "cone_nm": 0,
                         "rainfall_mm_h": 0,
                         "ghosted": True, "source": "noaa-tcr-al122005"},
-            "fire": {"synthetic": False, "active": False, "perimeter": [],
-                     "spread_rate": 0.0, "wind": {"u": 0.0, "v": 0.0},
-                     "note": "No Katrina fire binding retrieved — hazard off."},
+            "fire": fire_hazard(keyframe),
+            "contamination": contamination_hazard(keyframe),
             "landslide": {"synthetic": False, "active": False, "path": [],
                           "note": "No Katrina landslide binding — hazard off."},
         },

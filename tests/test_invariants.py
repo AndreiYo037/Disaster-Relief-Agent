@@ -127,8 +127,20 @@ def test_sourced_flood_and_population():
     assert abs(b7["hazards"]["flood"]["stage_m"] - 11.3 * 0.3048) < 0.001
     assert t0["hazards"]["flood"]["wet_mask"]["flooded_units"] == 103165
     assert t0["population"]["dataset_id"] == "census-2000-sf1"
-    assert t0["hazards"]["fire"]["active"] is False
+    assert t0["hazards"]["fire"]["active"] is True
+    assert t0["hazards"]["fire"]["synthetic"] is False
+    assert len(t0["hazards"]["fire"]["sites"]) >= 3
+    assert t0["hazards"]["contamination"]["active"] is True
+    assert any(a["id"] == "murphy-oil" and a["ring"] for a in t0["hazards"]["contamination"]["areas"])
     assert t0["hazards"]["landslide"]["active"] is False
+    charity = next(e for e in t0["entities"] if e["entity_id"] == "hospital:charity")
+    assert charity["state"] == "inaccessible"
+    touro = next(e for e in t0["entities"] if e["entity_id"] == "hospital:touro")
+    assert touro["state"] == "damaged"
+    b7t0 = next(e for e in t0["entities"] if e["entity_id"] == "bridge:B7")
+    assert b7t0["state"] == "uncertain"
+    b7b = next(e for e in b7["entities"] if e["entity_id"] == "bridge:B7")
+    assert b7b["state"] == "inaccessible"
     names = {e["name"] for e in t0["entities"]}
     assert "I-10 Twin Span Bridge" in names
     assert "Ernest N. Morial Convention Center" in names
@@ -142,6 +154,11 @@ def test_sourced_flood_and_population():
     assert len(geo["buildings"]) > 100
     assert len(geo["canals"]) > 10
     assert "2011" in geo["vintage"]
+    dmg = {b.get("damage") for b in geo["buildings"]}
+    assert "destroyed" in dmg and "intact" in dmg
+    wrecked = [b for b in geo["buildings"] if b.get("damage") == "destroyed"]
+    assert len(wrecked) > 20
+    assert all((b.get("height_m") or 9) < 6 for b in wrecked[:40])
 
     hoods2 = json.loads((ROOT / "data" / "katrina" / "sourced" / "neighborhoods_census2000.json").read_text(encoding="utf-8"))
     wet = [n["id"] for n in hoods2["neighborhoods"] if in_open_water(n["lon"], n["lat"])]

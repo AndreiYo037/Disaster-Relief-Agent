@@ -27,8 +27,9 @@ async function main(): Promise<void> {
   let flags: LayerFlags = {
     opRealloc: true, opEvacuate: true,
     popTotal: true,
-    cyclone: true, fire: true, landslide: true, fallback2d: fallback,
+    fallback2d: fallback,
   };
+  let fireT = 0;
 
   const mapEl = document.getElementById("map")!;
   const map = createMap(mapEl, snap);
@@ -45,7 +46,7 @@ async function main(): Promise<void> {
 
   const redraw = () => {
     const alt = cameraAltitudeM(map);
-    overlay.setProps({ layers: buildLayers(snap, registry, flags, alt, onClick) });
+    overlay.setProps({ layers: buildLayers(snap, registry, flags, alt, onClick, fireT) });
     renderPulse(document.getElementById("pulse")!, snap);
     renderInspector(document.getElementById("inspector")!, snap, selected);
     renderLegend(document.getElementById("legend")!, snap, flags);
@@ -75,6 +76,11 @@ async function main(): Promise<void> {
   });
   map.on("moveend", redraw);
   map.on("zoomend", redraw);
+  setInterval(() => {
+    if (!(snap.hazards.fire && snap.hazards.fire.active)) return;
+    fireT = (fireT + 0.03) % 1;
+    overlay.setProps({ layers: buildLayers(snap, registry, flags, cameraAltitudeM(map), onClick, fireT) });
+  }, 80);
 }
 
 main().catch((err) => {

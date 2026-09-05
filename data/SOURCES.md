@@ -29,7 +29,8 @@ a retrieval date before its parameters can be marked `verified`.**
 | `usgs-circ-1306-ch3h` | USGS Circ. 1306 ch. 3H — inundation; Dartmouth Flood Observatory polygons 30 Aug / 2 Sep; city volume ~85e9 gal 30 Aug, ~131e9 gal 2 Sep. DFO GIS URL 404; volume not bound as stage | https://pubs.usgs.gov/circ/1306/pdf/c1306_ch3_h.pdf | 2026-09-04 | retrieved |
 | `hud-noaa-flood-2005-08-31` | HUD overlay of NOAA 31 Aug 2005 flood depths on Orleans planning districts. Housing-unit table: Mid-City 23,651 flooded … Algiers / French Quarter / New Aurora-English Turn = 0. `data/katrina/sourced/hud_flood_districts.json` | https://nola.gov/nola/media/Safety-and-Permits/floodplain-management/Extent-Depth-of-Flooding-Katrina.pdf ; https://www.huduser.gov/periodicals/cityscpe/vol9num1/ch9.pdf | 2026-09-04 | retrieved |
 | `fema-dr1603` | FEMA — Louisiana Hurricane Katrina disaster declaration (DR-1603-LA) | https://www.fema.gov/disaster/1603 | — | not retrieved |
-| `fhwa-i10-twin-span` | FHWA fact sheet — Twin Span damage 29 Aug; US-11 left as only eastern route | https://www.fhwa.dot.gov/candc/factsheets/interstate10louisiana.pdf | 2026-09-04 | retrieved |
+| `epa-murphy-oil-katrina` | EPA / Wikipedia — Murphy Oil Meraux tank 250-2, ~25,110 barrels mixed crude, ~1,700 homes / ~1 sq mi in Chalmette–Meraux, 30 Aug 2005. Geometry is a class-area sketch, not EPA GIS. `data/katrina/sourced/katrina_contamination.json` | https://archive.epa.gov/katrina/web/html/index-6.html ; https://en.wikipedia.org/wiki/Murphy_Oil_USA_refinery_spill | 2026-09-06 | retrieved |
+| `wikipedia-katrina-nola-fires` | Wikipedia *Effects of Hurricane Katrina in New Orleans* — fire at 329 Tchoupitoulas St photographed 2 Sep 2005; Mandeville Street Wharf and 3200 Chartres St also cited. Point sites. `data/katrina/sourced/katrina_fires.json` | https://en.wikipedia.org/wiki/Effects_of_Hurricane_Katrina_in_New_Orleans | 2026-09-06 | retrieved |
 
 ### URL confidence
 

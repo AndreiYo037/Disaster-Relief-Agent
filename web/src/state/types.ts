@@ -53,7 +53,16 @@ export interface WorldSnapshot {
       gauge_id: string;
     };
     cyclone: { track: { lon: number; lat: number; cat: number }[]; cone_nm: number; rainfall_mm_h: number; ghosted: boolean };
-    fire: { synthetic: boolean; active: boolean; perimeter: number[][]; spread_rate: number; wind: { u: number; v: number }; note: string };
+    fire: {
+      synthetic: boolean; active: boolean; perimeter: number[][]; spread_rate: number;
+      wind: { u: number; v: number }; note: string;
+      sites?: { id: string; name: string; lon: number; lat: number; radius_m: number }[];
+    };
+    contamination?: {
+      active: boolean;
+      areas: { id: string; name: string; kind: string; lon: number; lat: number; ring: number[][] }[];
+      note: string;
+    };
     landslide: { synthetic: boolean; active: boolean; path: number[][]; note: string };
   };
   plans: { plan_id: string; status: string; via: string; actions: { qty: number; via: string }[]; equity_ok: boolean }[];
@@ -97,6 +106,7 @@ export const STATE_COLOR: Record<string, [number, number, number]> = {
   damaged: [255, 152, 28],
   critical: [255, 84, 48],
   inaccessible: [220, 36, 48],
+  destroyed: [220, 36, 48],
   depleted: [220, 36, 48],
 };
 
