@@ -70,19 +70,21 @@ export function renderLegend(el: HTMLElement, snap: WorldSnapshot, flags: LayerF
   el.innerHTML = flags.popTotal
     ? `<div>POPULATION DENSITY · people/km² · ${snap.population.bin_method}</div>
        <div>low &lt; ${e[0]} · med ${e[0]}–${e[1]} · high ${e[1]}–${e[2]} · very high &gt; ${e[2]}</div>
-       <div style="margin-top:4px">flood volume = stage ${snap.hazards.flood.stage_m} m · Δ ${snap.hazards.flood.d_stage_dt}</div>`
+       <div style="margin-top:4px">flood = HUD district depth × flooded-unit share · city stage ${snap.hazards.flood.stage_m} m · Δ ${snap.hazards.flood.d_stage_dt}</div>`
     : `<div>two operations · realloc (stock) · evacuate (occupancy / displacement)</div>
        <div>access (bridges, roads, breaches) is a shared constraint — drawn with either operation</div>
-       <div>operational green · uncertain amber · inaccessible red</div>
-       <div>unverified ping is grey — entity colour unchanged</div>`;
+       <div>roads: open green · degraded amber · blocked red · submerged blue</div>
+       <div>evac movement = pulsing orange arcs</div>
+       <div>label plate = damage · green undamaged · yellow unknown · orange damaged · red destroyed</div>
+       <div>glyph = type · unverified ping is grey</div>`;
 }
 
 export function renderPopCtl(el: HTMLElement, flags: LayerFlags, onChange: (f: LayerFlags) => void): void {
   el.innerHTML = `<div style="font-weight:700;color:#c7d3ee;letter-spacing:.08em;font-size:10px">OPERATIONS</div>
     ${chk("opRealloc", "Resource reallocation", flags)}
-    <div class="hint">W1 · convoy 17 · PODs · fuel · medicine · water · port</div>
+    <div class="hint">water · food · medicine · fuel · vehicles · personnel · warehouses</div>
     ${chk("opEvacuate", "Evacuation", flags)}
-    <div class="hint">shelters · camp · hospitals · zones · displacement</div>
+    <div class="hint">shelters · camp · hospitals · orange arcs = movement</div>
     <div class="hint" style="margin:8px 0 2px 0">Access (B7, roads, breaches, pumps) is a constraint on both — not its own operation.</div>
     <div style="font-weight:700;color:#c7d3ee;margin:10px 0 4px;letter-spacing:.08em;font-size:10px">POPULATION</div>
     ${chk("popTotal", "Overall population", flags)}

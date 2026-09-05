@@ -16,8 +16,8 @@ export interface LayerFlags {
   fallback2d: boolean;
 }
 
-const OP_REALLOC = new Set(["warehouse", "vehicle", "food", "fuel", "medicine", "water", "port"]);
-const OP_EVACUATE = new Set(["shelter", "camp", "zone", "personnel", "hospital", "clinic", "school"]);
+const OP_REALLOC = new Set(["warehouse", "vehicle", "food", "fuel", "medicine", "water", "personnel"]);
+const OP_EVACUATE = new Set(["shelter", "camp", "zone", "hospital", "clinic", "school"]);
 
 function opOf(ent: Entity): "realloc" | "evacuate" | "access" {
   if (OP_REALLOC.has(ent.type)) return "realloc";
@@ -40,6 +40,16 @@ function eventOn(ev: { subject_entity?: string }, snap: WorldSnapshot, flags: La
 
 function rgb(state: string): [number, number, number] {
   return STATE_COLOR[state] ?? [130, 149, 184];
+}
+
+function statePlate(state: string): [number, number, number, number] {
+  const c = rgb(state);
+  return [
+    Math.round(c[0] * 0.42 + 6),
+    Math.round(c[1] * 0.34 + 6),
+    Math.round(c[2] * 0.34 + 6),
+    240,
+  ];
 }
 
 function densityColor(d: number, edges: number[], alpha: number): [number, number, number, number] {
@@ -75,44 +85,6 @@ export function buildLayers(
   const layers: Layer[] = [];
   const near = !flags.fallback2d && altitudeM < snap.viz.lod_switch_altitude_m;
   const entities = snap.entities.filter((e) => registry.types[e.type] && opOn(e, flags));
-
-  const w = snap.viz.hero_region_bounds;
-  const heroRing = [
-    [w[0], w[1]], [w[2], w[1]], [w[2], w[3]], [w[0], w[3]], [w[0], w[1]],
-  ];
-  layers.push(new PolygonLayer({
-    id: "hero-mask",
-    data: [{ polygon: heroRing }],
-    getPolygon: (d: { polygon: number[][] }) => d.polygon,
-    stroked: true,
-    filled: false,
-    getLineColor: [124, 156, 255, 90],
-    lineWidthMinPixels: 1,
-  }));
-
-  if (flags.opEvacuate) {
-    const zonePolys = Object.entries(snap.zone_rings).map(([id, ring]) => {
-      const ent = entities.find((e) => e.entity_id === id);
-      const dens = snap.population.cells
-        .filter((c) => Math.abs(c.lon - (ent?.geometry.lon ?? 0)) < 0.03)
-        .reduce((a, c) => a + c.density, 0) / Math.max(1, snap.population.cells.length);
-      return { id, ring, entity: ent, dens };
-    });
-    layers.push(new PolygonLayer({
-      id: "zones",
-      data: zonePolys,
-      getPolygon: (d: { ring: number[][] }) => d.ring,
-      stroked: true,
-      filled: true,
-      getFillColor: (d: { dens: number }) => densityColor(d.dens, snap.population.bin_edges_per_km2, 22),
-      getLineColor: [232, 238, 252, 180],
-      lineWidthMinPixels: 2,
-      pickable: true,
-      onClick: (info: { object?: { entity?: Entity } }) => {
-        if (info.object?.entity) onClick(info.object.entity);
-      },
-    }));
-  }
 
   if (flags.popTotal) {
     const heat = snap.population.heat ?? [];
@@ -152,7 +124,7 @@ export function buildLayers(
       data: snap.population.cells.filter((c) => c.displaced > 0),
       getPosition: (c: { lon: number; lat: number }) => [c.lon, c.lat],
       getRadius: 80,
-      getFillColor: [176, 107, 255, 90],
+      getFillColor: [255, 140, 50, 55],
       radiusUnits: "meters",
     }));
   }
@@ -162,26 +134,41 @@ export function buildLayers(
       data: snap.population.movement,
       getSourcePosition: (m: { from: number[] }) => m.from,
       getTargetPosition: (m: { to: number[] }) => m.to,
-      getSourceColor: [180, 180, 200, 40],
-      getTargetColor: [176, 107, 255, 200],
-      getWidth: (m: { magnitude: number }) => 2 + m.magnitude * 6,
+      getSourceColor: [255, 168, 72, 120],
+      getTargetColor: [255, 96, 28, 220],
+      getWidth: (m: { magnitude: number }) => 2.2 + m.magnitude * 5,
+      getHeight: 0.58,
       greatCircle: false,
+      widthMinPixels: 2,
     }));
   }
 
   const flood = snap.hazards.flood;
-  const floodPolys = (flood.wet_mask.coordinates || []).map((poly) => ({
-    polygon: poly[0],
-    elevation: 8 + flood.stage_m * 12,
-  }));
-  const floodAlpha = Math.min(200, 70 + flood.d_stage_dt * 400);
+  const mask = flood.wet_mask as {
+    coordinates?: number[][][][];
+    features?: { ring: number[][]; depth_m: number; wet_frac: number }[];
+  };
+  const floodFeats = mask.features?.length
+    ? mask.features
+    : (mask.coordinates || []).map((poly) => ({
+      ring: poly[0], depth_m: flood.stage_m, wet_frac: 1,
+    }));
+  const floodPolys = floodFeats.map((d) => {
+    const depth = d.depth_m || 0;
+    const frac = d.wet_frac == null ? 1 : d.wet_frac;
+    return {
+      polygon: d.ring,
+      elevation: flags.fallback2d ? 0 : Math.max(0.3, depth * (0.25 + 0.75 * frac) * 2.5),
+      alpha: Math.round(28 + frac * 155 + Math.min(25, depth * 10)),
+    };
+  });
   layers.push(new SolidPolygonLayer({
     id: "flood",
     data: floodPolys,
     getPolygon: (d: { polygon: number[][] }) => d.polygon,
     extruded: !flags.fallback2d,
     getElevation: (d: { elevation: number }) => (flags.fallback2d ? 0 : d.elevation),
-    getFillColor: [30, 90, 180, floodAlpha],
+    getFillColor: (d: { alpha: number }) => [30, 90, 180, d.alpha],
     wireframe: false,
   }));
 
@@ -199,7 +186,11 @@ export function buildLayers(
         if (s.route_id === ghostRoute && s.route_id !== solidRoute) return [180, 180, 200, 90];
         return SEG_COLOR[s.state] ?? [180, 180, 200, 200];
       },
-      getWidth: 8,
+      getWidth: (s: { state: string }) => {
+        if (s.state === "blocked" || s.state === "degraded") return 16;
+        if (s.state === "submerged") return 6;
+        return 8;
+      },
       widthMinPixels: 3,
     }));
 
@@ -350,9 +341,12 @@ export function buildLayers(
       getColor: [232, 238, 252, 240],
       billboard: true,
       background: true,
-      getBackgroundColor: [8, 14, 28, 220],
+      getBackgroundColor: (e: Entity) => statePlate(e.state),
       backgroundPadding: [8, 4, 8, 4],
-      getBorderColor: [200, 214, 240, 40],
+      getBorderColor: (e: Entity) => {
+        const c = rgb(e.state);
+        return [c[0], c[1], c[2], 230];
+      },
       getBorderWidth: 1,
     }));
   }

@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from .bridges import load_bridge_spans
 from .catalog import (
     BASE_STATES, ENTITIES_SPEC, RELATIONSHIPS, ROUTE_PATHS, ZONE_RINGS,
 )
@@ -111,15 +112,23 @@ def interpolate_hydrograph(when: datetime) -> tuple[float, float]:
     return vals[-1] * FT_M, 0.0
 
 
+def district_flood_metrics(d: dict) -> tuple[float, float]:
+    """HUD-weighted mean depth (m) and share of housing units that flooded."""
+    n = d["flooded_units"]
+    tot = d.get("total_units") or 0
+    wet_frac = (n / tot) if tot else 0.0
+    if n <= 0:
+        return 0.0, 0.0
+    mids = load_hud_flood()["bin_midpoints_ft"]
+    wft = (d["units_2_4"] * mids[0] + d["units_4_7"] * mids[1] + d["units_gt7"] * mids[2]) / n
+    return wft * FT_M, wet_frac
+
+
 def hud_weighted_depth_m(district_id: str) -> float:
     hud = load_hud_flood()
-    mids = hud["bin_midpoints_ft"]
     d = next(x for x in hud["districts"] if x["id"] == district_id)
-    n = d["flooded_units"]
-    if n <= 0:
-        return 0.0
-    wft = (d["units_2_4"] * mids[0] + d["units_4_7"] * mids[1] + d["units_gt7"] * mids[2]) / n
-    return wft * FT_M
+    depth_m, _ = district_flood_metrics(d)
+    return depth_m
 
 
 def flood_stage(params: dict, keyframe: str) -> tuple[float, float]:
@@ -133,6 +142,16 @@ def flood_stage(params: dict, keyframe: str) -> tuple[float, float]:
 def entity_ll(eid: str) -> dict:
     spec = next(e for e in ENTITIES_SPEC if e["entity_id"] == eid)
     return {"lon": spec["lon"], "lat": spec["lat"]}
+
+
+_BRIDGE_SPANS: dict | None = None
+
+
+def _bridge_span_cache() -> dict:
+    global _BRIDGE_SPANS
+    if _BRIDGE_SPANS is None:
+        _BRIDGE_SPANS = load_bridge_spans()
+    return _BRIDGE_SPANS
 
 
 def load_osm_json(name: str) -> dict:
@@ -436,7 +455,7 @@ def wet_mask(keyframe: str) -> dict:
         note = (
             "Rings follow east-bank land bowls on the basemap (lake seawall, 17th St, IHNC, "
             "river levee). LOW subset is Lower 9th + Lakeview at ~06:00 CDT 29 Aug. "
-            "Not a 06:00 observed water polygon and not FEMA MOTF GIS."
+            "Extrusion is each district's HUD-weighted depth, not a 06:00 observed water polygon."
         )
     else:
         districts = [d for d in hud["districts"] if d["flooded_units"] > 0]
@@ -444,12 +463,21 @@ def wet_mask(keyframe: str) -> dict:
         note = (
             "HUD overlay of NOAA 31 Aug 2005 flood depths on Orleans planning districts. "
             "Algiers, French Quarter, and New Aurora/English Turn omitted (0 flooded units). "
-            "Fill rings follow the flooded land outline on the basemap (seawall, canals, river levee), "
-            "not MOTF shapefiles and not open water."
+            "Each ring's height is that district's HUD-weighted mean depth; opacity is flooded-unit share. "
+            "Not MOTF shapefiles and not open water."
         )
+    features = []
+    for d in districts:
+        depth_m, wet_frac = district_flood_metrics(d)
+        features.append({
+            "id": d["id"], "name": d["name"], "ring": d["ring"],
+            "depth_m": round(depth_m, 3), "wet_frac": round(wet_frac, 4),
+            "flooded_units": d["flooded_units"], "total_units": d["total_units"],
+        })
     return {
         "type": "MultiPolygon",
         "coordinates": [[d["ring"]] for d in districts],
+        "features": features,
         "source_key": hud["source_key"],
         "vintage": vintage,
         "flooded_units": sum(d["flooded_units"] for d in districts),
@@ -503,6 +531,14 @@ def _entity_record(spec: dict, state: str, params: dict, vstatus: str, source: s
         attrs = {"stage_m": 0.0, "d_stage_dt": 0.0}
     if extra:
         attrs.update(extra)
+    if spec.get("type") == "bridge":
+        span = _bridge_span_cache().get(eid)
+        if span:
+            attrs.update(span)
+        elif spec.get("heading_deg") is not None:
+            attrs["heading_deg"] = spec["heading_deg"]
+    elif spec.get("heading_deg") is not None:
+        attrs["heading_deg"] = spec["heading_deg"]
     return {
         "entity_id": eid, "type": spec["type"], "name": spec["name"],
         "geometry": {"lon": spec["lon"], "lat": spec["lat"]},

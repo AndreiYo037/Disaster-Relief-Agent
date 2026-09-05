@@ -2,34 +2,28 @@
 (() => {
   const KEYS = ["t0", "b7", "reroute"];
   const STATE_COLOR = {
-    operational: [55, 214, 122], full: [55, 214, 122],
-    uncertain: [255, 176, 32], damaged: [255, 176, 32],
-    critical: [255, 89, 100], inaccessible: [255, 89, 100], depleted: [255, 89, 100],
+    operational: [46, 204, 96], full: [46, 204, 96],
+    uncertain: [255, 210, 50],
+    damaged: [255, 152, 28],
+    critical: [255, 84, 48],
+    inaccessible: [220, 36, 48], depleted: [220, 36, 48],
   };
   const SEG_COLOR = {
-    open: [55, 214, 122, 220], degraded: [255, 176, 32, 220],
-    blocked: [255, 89, 100, 255], submerged: [40, 90, 180, 180],
+    open: [55, 214, 122, 150],
+    degraded: [255, 196, 0, 255],
+    blocked: [255, 40, 56, 255],
+    submerged: [56, 176, 255, 255],
   };
   const EVENT_GLYPH = {
     infrastructure_damage: "✕", road_closure: "╪", displacement: "→",
     service_interruption: "⚡", supply_shortage: "▽", facility_closure: "▣",
     security_event: "·", hazard_expansion: "◎",
   };
-  const CAT_PLATE = {
-    transport: [16, 36, 72, 230],
-    health: [72, 22, 32, 230],
-    humanitarian: [32, 52, 28, 230],
-    utilities: [16, 52, 72, 230],
-    hazard: [72, 28, 16, 230],
-    supply: [56, 42, 18, 230],
-    geography: [28, 32, 48, 230],
-    other: [8, 14, 28, 230],
-  };
   const CAT_ORDER = ["transport", "health", "humanitarian", "utilities", "supply", "hazard", "geography"];
   const STOCK_TYPES = new Set(["warehouse", "food", "medicine", "fuel", "water"]);
   const OCCUPANCY_TYPES = new Set(["shelter", "camp"]);
-  const OP_REALLOC = new Set(["warehouse", "vehicle", "food", "fuel", "medicine", "water", "port"]);
-  const OP_EVACUATE = new Set(["shelter", "camp", "zone", "personnel", "hospital", "clinic", "school"]);
+  const OP_REALLOC = new Set(["warehouse", "vehicle", "food", "fuel", "medicine", "water", "personnel"]);
+  const OP_EVACUATE = new Set(["shelter", "camp", "zone", "hospital", "clinic", "school"]);
   const OP_LABEL = {
     realloc: "resource reallocation",
     evacuate: "evacuation",
@@ -49,6 +43,7 @@
   let kf = "t0";
   let snap = null;
   let selected = null;
+  let flowT = 0;
   let flags = {
     opRealloc: true, opEvacuate: true,
     popTotal: true,
@@ -78,6 +73,19 @@
   }
 
   function rgb(state) { return STATE_COLOR[state] || [130, 149, 184]; }
+  function statePlate(state) {
+    const c = rgb(state);
+    return [
+      Math.round(c[0] * 0.42 + 6),
+      Math.round(c[1] * 0.34 + 6),
+      Math.round(c[2] * 0.34 + 6),
+      240,
+    ];
+  }
+  function stateBorder(state) {
+    const c = rgb(state);
+    return [c[0], c[1], c[2], 230];
+  }
   function densColor(d, edges, a) {
     const t = d <= edges[0] ? 0 : d <= edges[1] ? 0.33 : d <= edges[2] ? 0.66 : 1;
     return [Math.round(40 + t * 180), Math.round(80 + t * 40), Math.round(140 - t * 40), a];
@@ -102,24 +110,64 @@
     };
   }
 
+  const EVAC_ARC_HEIGHT = 0.65;
+  const TILE_SIZE = 512;
+  const EARTH_CIRCUMFERENCE = 40.03e6;
+
   function mToLonLat(lon, lat, x, z) {
     const mLat = 1 / 110570;
     const mLon = 1 / (111320 * Math.max(0.2, Math.cos(lat * Math.PI / 180)));
     return [lon + x * mLon, lat + z * mLat];
   }
+  function lngLatToWorld(lng, lat) {
+    const sin = Math.sin((lat * Math.PI) / 180);
+    const y = 0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI;
+    return [(lng + 180) / 360 * TILE_SIZE, y * TILE_SIZE];
+  }
+  function arcSample(from, to, t, height) {
+    const h = height == null ? EVAC_ARC_HEIGHT : height;
+    const lon = from[0] + (to[0] - from[0]) * t;
+    const lat = from[1] + (to[1] - from[1]) * t;
+    const a = lngLatToWorld(from[0], from[1]);
+    const b = lngLatToWorld(to[0], to[1]);
+    const dist = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const zCommon = Math.sqrt(Math.max(0, t * (1 - t))) * dist * h;
+    const viewLat = (map && map.getCenter) ? map.getCenter().lat : lat;
+    const upm = TILE_SIZE / (EARTH_CIRCUMFERENCE * Math.max(0.2, Math.cos(viewLat * Math.PI / 180)));
+    return [lon, lat, zCommon / upm];
+  }
+  function evacArcArrows(moves, t) {
+    const arrows = [];
+    const halfW = 120;
+    for (const m of moves) {
+      const n = 8;
+      for (let i = 0; i < n; i++) {
+        const u = Math.min(0.97, Math.max(0.03, (i / n + t) % 1));
+        const tip = arcSample(m.from, m.to, u);
+        const back = arcSample(m.from, m.to, u - 0.03);
+        const lat = tip[1];
+        const dE = (tip[0] - back[0]) * 111320 * Math.cos(lat * Math.PI / 180);
+        const dN = (tip[1] - back[1]) * 110570;
+        const horiz = Math.hypot(dE, dN) || 1;
+        const pe = -dN / horiz, pn = dE / horiz;
+        const leftLl = mToLonLat(back[0], back[1], pe * halfW, pn * halfW);
+        const rightLl = mToLonLat(back[0], back[1], -pe * halfW, -pn * halfW);
+        const z = back[2] || 0;
+        arrows.push({
+          path: [
+            [leftLl[0], leftLl[1], z],
+            tip,
+            [rightLl[0], rightLl[1], z],
+          ],
+        });
+      }
+    }
+    return arrows;
+  }
   function rotateXZ(x, z, headingDeg) {
     const theta = (90 - headingDeg) * Math.PI / 180;
     const c = Math.cos(theta), s = Math.sin(theta);
     return [x * c - z * s, x * s + z * c];
-  }
-  function pointInRing(lon, lat, ring) {
-    let inside = false;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
-      const denom = (yj - yi) || 1e-12;
-      if ((yi > lat) !== (yj > lat) && lon < ((xj - xi) * (lat - yi)) / denom + xi) inside = !inside;
-    }
-    return inside;
   }
   function solidKey(ent) {
     const t = registry.types[ent.type];
@@ -159,7 +207,7 @@
     return ent ? opOn(ent) : true;
   }
   function typeScale(type) {
-    if (type === "bridge") return 14;
+    if (type === "bridge") return 8;
     if (type === "vehicle") return 18;
     if (type === "airport") return 10;
     if (type === "gauge" || type === "comm") return 12;
@@ -174,9 +222,9 @@
   }
   function mixColor(base, stateRgb, alpha) {
     return [
-      Math.round(base[0] * 0.5 + stateRgb[0] * 0.5),
-      Math.round(base[1] * 0.5 + stateRgb[1] * 0.5),
-      Math.round(base[2] * 0.5 + stateRgb[2] * 0.5),
+      Math.round(base[0] * 0.18 + stateRgb[0] * 0.82),
+      Math.round(base[1] * 0.18 + stateRgb[1] * 0.82),
+      Math.round(base[2] * 0.18 + stateRgb[2] * 0.82),
       alpha,
     ];
   }
@@ -186,6 +234,140 @@
     if (a.capacity > 0 && a.occupancy != null) return Math.max(0, Math.min(1, a.occupancy / a.capacity));
     return null;
   }
+  function pathDistM(a, b) {
+    const dy = (b[1] - a[1]) * 110570;
+    const dx = (b[0] - a[0]) * 111320 * Math.cos(a[1] * Math.PI / 180);
+    return Math.hypot(dx, dy);
+  }
+  function pathHeadingDeg(path) {
+    if (!path || path.length < 2) return 90;
+    const i = Math.max(1, Math.floor(path.length / 2));
+    const a = path[i - 1], b = path[Math.min(path.length - 1, i + 1)];
+    const dlon = (b[0] - a[0]) * Math.cos(a[1] * Math.PI / 180);
+    const dlat = b[1] - a[1];
+    return (Math.atan2(dlon, dlat) * 180 / Math.PI + 360) % 360;
+  }
+  function offsetLonLat(lon, lat, eastM, northM) {
+    return mToLonLat(lon, lat, eastM, northM);
+  }
+  function perpUnit(path, i) {
+    const prev = path[Math.max(0, i - 1)];
+    const next = path[Math.min(path.length - 1, i + 1)];
+    const dy = (next[1] - prev[1]) * 110570;
+    const dx = (next[0] - prev[0]) * 111320 * Math.cos(((prev[1] + next[1]) / 2) * Math.PI / 180);
+    const len = Math.hypot(dx, dy) || 1;
+    return { east: -dy / len, north: dx / len };
+  }
+  function ribbonPolygon(path, widthM, z) {
+    const half = widthM / 2;
+    const left = [];
+    const right = [];
+    for (let i = 0; i < path.length; i++) {
+      const n = perpUnit(path, i);
+      const l = offsetLonLat(path[i][0], path[i][1], n.east * half, n.north * half);
+      const r = offsetLonLat(path[i][0], path[i][1], -n.east * half, -n.north * half);
+      left.push(z == null ? l : [l[0], l[1], z]);
+      right.push(z == null ? r : [r[0], r[1], z]);
+    }
+    const ring = left.concat(right.reverse());
+    ring.push(ring[0]);
+    return ring;
+  }
+  function offsetPath(path, eastM, northM) {
+    return path.map(([lon, lat]) => offsetLonLat(lon, lat, eastM, northM));
+  }
+  function samplePath(path, spacingM) {
+    if (!path || path.length < 2) return [];
+    const pts = [];
+    let acc = 0;
+    let nextAt = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const a = path[i], b = path[i + 1];
+      const seg = pathDistM(a, b);
+      while (nextAt <= acc + seg + 1e-6) {
+        const f = seg > 0 ? (nextAt - acc) / seg : 0;
+        pts.push({
+          lon: a[0] + (b[0] - a[0]) * f,
+          lat: a[1] + (b[1] - a[1]) * f,
+          heading: pathHeadingDeg([a, b]),
+        });
+        nextAt += spacingM;
+        if (pts.length > 400) return pts;
+      }
+      acc += seg;
+    }
+    return pts;
+  }
+  function pierSquare(lon, lat, heading, sx, sz) {
+    const corners = [[-sx, -sz], [sx, -sz], [sx, sz], [-sx, sz]];
+    return corners.map(([x, z]) => {
+      const [rx, rz] = rotateXZ(x, z, heading);
+      return mToLonLat(lon, lat, rx, rz);
+    });
+  }
+  function splitFailedPath(path) {
+    const n = path.length;
+    return {
+      west: path.slice(0, Math.max(2, Math.floor(n * 0.44))),
+      east: path.slice(Math.min(n - 2, Math.floor(n * 0.58))),
+    };
+  }
+  function bridgeSpanSolids(entities) {
+    const slabs = [];
+    const piers = [];
+    const strokes = [];
+    for (const ent of entities) {
+      const paths = ent.attributes?.span_paths;
+      if (ent.type !== "bridge" || !paths || !paths.length) continue;
+      const cat = solids[solidKey(ent)] || solids.bridge;
+      const alpha = Math.round(beliefAlpha(ent) * 255);
+      const color = mixColor(cat.color, rgb(ent.state), alpha);
+      const pierColor = [
+        Math.max(0, color[0] - 28),
+        Math.max(0, color[1] - 28),
+        Math.max(0, color[2] - 28),
+        alpha,
+      ];
+      const width = ent.attributes.span_width_m || 12;
+      const deckH = ent.attributes.deck_h_m || 12;
+      const spacing = ent.attributes.pier_spacing_m || 70;
+      const failed = ent.state === "inaccessible";
+      for (const raw of paths) {
+        const segs = [];
+        if (failed) {
+          const { west, east } = splitFailedPath(raw);
+          const n = perpUnit(raw, Math.floor(raw.length / 2));
+          segs.push({ path: west, elevation: deckH * 0.92, drop: false });
+          segs.push({
+            path: offsetPath(east, n.east * 22, n.north * 22 - 8),
+            elevation: 2.4,
+            drop: true,
+          });
+        } else {
+          segs.push({ path: raw, elevation: deckH, drop: false });
+        }
+        for (const seg of segs) {
+          if (!seg.path || seg.path.length < 2) continue;
+          strokes.push({ path: seg.path, width, color, entity: ent });
+          slabs.push({
+            polygon: ribbonPolygon(seg.path, width, flags.fallback2d ? 0 : seg.elevation),
+            entity: ent,
+            color,
+          });
+          if (seg.drop) continue;
+          for (const pier of samplePath(seg.path, spacing)) {
+            piers.push({
+              polygon: pierSquare(pier.lon, pier.lat, pier.heading, 2.2, Math.max(5, width * 0.45)),
+              elevation: flags.fallback2d ? 0 : seg.elevation,
+              entity: ent,
+              color: pierColor,
+            });
+          }
+        }
+      }
+    }
+    return { slabs, piers, strokes };
+  }
   function entitySolids(entities) {
     const rows = [];
     const fills = [];
@@ -193,6 +375,7 @@
       const key = solidKey(ent);
       const cat = key && solids[key];
       if (!cat) continue;
+      if (ent.type === "bridge" && ent.attributes?.span_paths?.length) continue;
       const scale = typeScale(ent.type);
       const heading = headingOf(ent);
       const lon = ent.geometry.lon, lat = ent.geometry.lat;
@@ -240,57 +423,72 @@
     const layers = [];
     const near = !flags.fallback2d && cameraAltitudeM() < snap.viz.lod_switch_altitude_m;
     const entities = snap.entities.filter((e) => registry.types[e.type] && opOn(e));
-    const [w, s, e, n] = snap.viz.hero_region_bounds;
-
-    layers.push(new PolygonLayer({
-      id: "hero-mask", data: [{ polygon: [[w, s], [e, s], [e, n], [w, n], [w, s]] }],
-      getPolygon: (d) => d.polygon, stroked: true, filled: false,
-      getLineColor: [124, 156, 255, 90], lineWidthMinPixels: 1,
-    }));
-
-    if (flags.opEvacuate) {
-      const zonePolys = Object.entries(snap.zone_rings).map(([id, ring]) => {
-        const ent = entities.find((x) => x.entity_id === id);
-        const cells = snap.population.cells.filter((c) => pointInRing(c.lon, c.lat, ring));
-        const dens = cells.length
-          ? cells.reduce((s, c) => s + c.density, 0) / cells.length
-          : (ent?.attributes?.population || 0) / 2;
-        return { id, ring, entity: ent, dens };
-      });
-      layers.push(new PolygonLayer({
-        id: "zones", data: zonePolys, getPolygon: (d) => d.ring, stroked: true, filled: true,
-        getFillColor: (d) => densColor(d.dens, snap.population.bin_edges_per_km2, 22),
-        getLineColor: [232, 238, 252, 200], lineWidthMinPixels: 2,
-        pickable: true,
-        onClick: (info) => { if (info.object?.entity) onClickEntity(info.object.entity); },
-      }));
-    }
 
     if (flags.opEvacuate) {
       layers.push(new ScatterplotLayer({
         id: "pop-displaced", data: snap.population.cells.filter((c) => c.displaced > 0),
         getPosition: (c) => [c.lon, c.lat],
         getRadius: 80,
-        getFillColor: [176, 107, 255, 90], radiusUnits: "meters",
+        getFillColor: [255, 140, 50, 55], radiusUnits: "meters",
       }));
     }
     if (flags.opEvacuate && snap.population.movement.length && ArcLayer) {
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 420);
+      const glow = Math.round(120 + pulse * 135);
+      layers.push(new ArcLayer({
+        id: "pop-move-glow", data: snap.population.movement,
+        getSourcePosition: (m) => m.from, getTargetPosition: (m) => m.to,
+        getSourceColor: [255, 40, 0, Math.round(40 + pulse * 70)],
+        getTargetColor: [255, 80, 0, Math.round(50 + pulse * 80)],
+        getWidth: (m) => (14 + m.magnitude * 10) * (0.85 + pulse * 0.5),
+        getHeight: EVAC_ARC_HEIGHT,
+        greatCircle: false,
+        widthMinPixels: 10,
+      }));
       layers.push(new ArcLayer({
         id: "pop-move", data: snap.population.movement,
         getSourcePosition: (m) => m.from, getTargetPosition: (m) => m.to,
-        getSourceColor: [180, 180, 200, 40], getTargetColor: [176, 107, 255, 200],
-        getWidth: (m) => 2 + m.magnitude * 6,
+        getSourceColor: [255, 220, 40, glow],
+        getTargetColor: [255, 60, 0, glow],
+        getWidth: (m) => (5 + m.magnitude * 6) * (0.8 + pulse * 0.55),
+        getHeight: EVAC_ARC_HEIGHT,
+        greatCircle: false,
+        widthMinPixels: 5,
+      }));
+      const arrows = evacArcArrows(snap.population.movement, flowT);
+      layers.push(new PathLayer({
+        id: "pop-move-arrows",
+        data: arrows,
+        getPath: (d) => d.path,
+        getColor: [255, 236, 80, 255],
+        getWidth: 10,
+        widthMinPixels: 3,
+        capRounded: false,
+        jointRounded: false,
+        parameters: { depthTest: false },
+        updateTriggers: { getPath: flowT },
       }));
     }
 
     const flood = snap.hazards.flood;
-    const floodPolys = (flood.wet_mask.coordinates || []).map((poly) => ({
-      polygon: poly[0],
-      elevation: (flags.fallback2d || flags.popTotal) ? 0 : Math.max(1.2, flood.stage_m * 1.4),
-    }));
-    const floodAlpha = flags.popTotal
-      ? Math.min(110, 40 + Math.abs(flood.d_stage_dt) * 180)
-      : Math.min(170, 50 + Math.abs(flood.d_stage_dt) * 350);
+    const mask = flood.wet_mask || {};
+    const floodFeats = (mask.features && mask.features.length)
+      ? mask.features
+      : (mask.coordinates || []).map((poly) => ({
+        ring: poly[0], depth_m: flood.stage_m, wet_frac: 1,
+      }));
+    const floodPolys = floodFeats.map((d) => {
+      const depth = d.depth_m || 0;
+      const frac = d.wet_frac == null ? 1 : d.wet_frac;
+      const flat = flags.fallback2d || flags.popTotal;
+      return {
+        polygon: d.ring,
+        elevation: flat ? 0 : Math.max(0.3, depth * (0.25 + 0.75 * frac) * 2.5),
+        alpha: flags.popTotal
+          ? Math.round(18 + frac * 70)
+          : Math.round(28 + frac * 155 + Math.min(25, depth * 10)),
+      };
+    });
     const geo = snap.geography || { roads: [], canals: [], buildings: [] };
     const BUILD_COLOR = {
       residential: [210, 200, 185, 200], commercial: [190, 185, 175, 220],
@@ -314,12 +512,13 @@
     }
     if (geo.roads && geo.roads.length) {
       const roadW = (hw) => (hw && hw.startsWith("motorway") ? 7 : hw && hw.startsWith("trunk") ? 5 : 3);
+      const openRoads = geo.roads.filter((x) => x.state === "open" || !x.state);
       layers.push(new PathLayer({
-        id: "osm-roads", data: geo.roads,
+        id: "osm-roads", data: openRoads,
         getPath: (x) => x.path,
-        getColor: (x) => SEG_COLOR[x.state] || [230, 230, 220, 180],
+        getColor: SEG_COLOR.open,
         getWidth: (x) => roadW(x.highway),
-        widthMinPixels: 1.5,
+        widthMinPixels: 1.2,
         capRounded: true, jointRounded: true,
       }));
     }
@@ -327,7 +526,7 @@
       id: "flood", data: floodPolys, getPolygon: (d) => d.polygon,
       extruded: !flags.fallback2d && !flags.popTotal,
       getElevation: (d) => d.elevation,
-      getFillColor: [30, 90, 180, floodAlpha],
+      getFillColor: (d) => [30, 90, 180, d.alpha],
     }));
     if (flags.popTotal) {
       const heat = (snap.population.heat && snap.population.heat.length)
@@ -366,6 +565,34 @@
       }
     }
 
+    const geoRoads = (snap.geography && snap.geography.roads) || [];
+    const submergedRoads = geoRoads.filter((x) => x.state === "submerged");
+    const shutRoads = geoRoads.filter((x) => x.state === "degraded" || x.state === "blocked");
+    if (submergedRoads.length) {
+      const roadW = (hw) => (hw && hw.startsWith("motorway") ? 5 : hw && hw.startsWith("trunk") ? 3.5 : 2);
+      layers.push(new PathLayer({
+        id: "osm-roads-submerged", data: submergedRoads,
+        getPath: (x) => x.path,
+        getColor: SEG_COLOR.submerged,
+        getWidth: (x) => roadW(x.highway),
+        widthMinPixels: 1.4,
+        capRounded: true, jointRounded: true,
+        parameters: { depthTest: false },
+      }));
+    }
+    if (shutRoads.length) {
+      const roadW = (hw) => (hw && hw.startsWith("motorway") ? 12 : hw && hw.startsWith("trunk") ? 9 : 6);
+      layers.push(new PathLayer({
+        id: "osm-roads-constraint", data: shutRoads,
+        getPath: (x) => x.path,
+        getColor: (x) => SEG_COLOR[x.state] || [230, 230, 220, 255],
+        getWidth: (x) => roadW(x.highway),
+        widthMinPixels: 5,
+        capRounded: true, jointRounded: true,
+        parameters: { depthTest: false },
+      }));
+    }
+
     const permit = snap.permits[0];
     const plan = snap.plans[0];
     const solidRoute = flags.opRealloc && permit?.status === "active" ? permit.authorized_route : null;
@@ -379,7 +606,11 @@
           if (x.route_id === ghostRoute && x.route_id !== solidRoute) return [180, 180, 200, 90];
           return SEG_COLOR[x.state] || [180, 180, 200, 200];
         },
-        getWidth: 14, widthMinPixels: 4,
+        getWidth: (x) => {
+          if (x.state === "blocked" || x.state === "degraded") return 22;
+          if (x.state === "submerged") return 8;
+          return 14;
+        }, widthMinPixels: 4,
       }));
       if (ghostRoute && snap.route_paths[ghostRoute] && ghostRoute !== solidRoute) {
         layers.push(new PathLayer({
@@ -454,6 +685,48 @@
     const placed = entities.filter((e) => registry.types[e.type]?.primitive === "mesh");
     const { rows, fills } = entitySolids(placed);
     const pickEnt = (info) => { if (info.object?.entity) onClickEntity(info.object.entity); };
+    const bridgeGeom = bridgeSpanSolids(placed);
+    if (bridgeGeom.strokes.length) {
+      layers.push(new PathLayer({
+        id: "bridge-spans",
+        data: bridgeGeom.strokes,
+        getPath: (d) => d.path,
+        getColor: (d) => d.color,
+        getWidth: (d) => d.width,
+        widthUnits: "meters",
+        widthMinPixels: 3,
+        capRounded: true,
+        jointRounded: true,
+        pickable: true,
+        onClick: pickEnt,
+      }));
+    }
+    if (SolidPolygonLayer && !flags.fallback2d) {
+      if (bridgeGeom.piers.length) {
+        layers.push(new SolidPolygonLayer({
+          id: "bridge-piers",
+          data: bridgeGeom.piers,
+          getPolygon: (d) => d.polygon,
+          extruded: true,
+          getElevation: (d) => d.elevation,
+          getFillColor: (d) => d.color,
+          pickable: true,
+          onClick: pickEnt,
+        }));
+      }
+      if (bridgeGeom.slabs.length) {
+        layers.push(new SolidPolygonLayer({
+          id: "bridge-decks",
+          data: bridgeGeom.slabs,
+          getPolygon: (d) => d.polygon,
+          extruded: false,
+          filled: true,
+          getFillColor: (d) => d.color,
+          pickable: true,
+          onClick: pickEnt,
+        }));
+      }
+    }
     function pushFootprints(id, data) {
       if (SolidPolygonLayer) {
         layers.push(new SolidPolygonLayer({
@@ -488,9 +761,9 @@
       getTextAnchor: "middle",
       getAlignmentBaseline: "bottom",
       background: true,
-      getBackgroundColor: (e) => CAT_PLATE[catOf(e)] || CAT_PLATE.other,
+      getBackgroundColor: (e) => statePlate(e.state),
       backgroundPadding: [6, 3, 6, 3],
-      getBorderColor: [200, 214, 240, 40],
+      getBorderColor: (e) => stateBorder(e.state),
       getBorderWidth: 1,
       parameters: { depthTest: false },
     }));
@@ -632,12 +905,16 @@
     document.getElementById("legend").innerHTML = flags.popTotal
       ? `<div>POPULATION DENSITY · people/km² · ${snap.population.bin_method}</div>
          <div>sampled on OSM buildings + land roads (basemap fabric) · low &lt; ${e[0]} · med ${e[0]}–${e[1]} · high ${e[1]}–${e[2]} · very high &gt; ${e[2]}</div>
-         <div style="margin-top:4px">flood volume = stage ${snap.hazards.flood.stage_m} m · Δ ${snap.hazards.flood.d_stage_dt}</div>
+         <div style="margin-top:4px">evac movement = pulsing orange arcs · slow arrows Lower 9 → Dome / Convention Center</div>
+         <div style="margin-top:4px">roads: open green · degraded amber · blocked red · submerged blue</div>
+         <div style="margin-top:4px">flood = HUD district depth × flooded-unit share · city stage ${snap.hazards.flood.stage_m} m · Δ ${snap.hazards.flood.d_stage_dt}</div>
          <div style="margin-top:4px;opacity:.8">${(snap.geography && snap.geography.vintage) || ""}</div>`
       : `<div>two operations · realloc (stock) · evacuate (occupancy / displacement)</div>
          <div>access (bridges, roads, breaches) is a shared constraint — drawn with either operation</div>
-         <div>operational green · uncertain amber · inaccessible red</div>
-         <div>unverified ping is grey — entity colour unchanged</div>
+         <div>roads: open green · degraded amber · blocked red · submerged blue</div>
+         <div>evac movement = pulsing orange arcs</div>
+         <div>label plate = damage · green undamaged · yellow unknown · orange damaged · red destroyed</div>
+         <div>glyph = type · unverified ping is grey</div>
          <div style="margin-top:6px;color:#c7d3ee">ENTITY SYMBOLS</div>
          ${typeLegendHtml()}`;
   }
@@ -647,9 +924,9 @@
     const row = (id, label) => `<label><input type="checkbox" id="${id}" ${flags[id] ? "checked" : ""}/> ${label}</label>`;
     el.innerHTML = `<div style="font-weight:700;color:#c7d3ee;letter-spacing:.08em;font-size:10px">OPERATIONS</div>
       ${row("opRealloc", "Resource reallocation")}
-      <div class="hint">W1 · convoy 17 · PODs · fuel · medicine · water · port</div>
+      <div class="hint">water · food · medicine · fuel · vehicles · personnel · warehouses</div>
       ${row("opEvacuate", "Evacuation")}
-      <div class="hint">shelters · camp · hospitals · zones · displacement</div>
+      <div class="hint">shelters · camp · hospitals · orange arcs = movement</div>
       <div class="hint" style="margin:8px 0 2px 0">Access (B7, roads, breaches, pumps) is a constraint on both — not its own operation.</div>
       <div style="font-weight:700;color:#c7d3ee;margin:10px 0 4px;letter-spacing:.08em;font-size:10px">POPULATION</div>
       ${row("popTotal", "Overall population")}
@@ -741,6 +1018,12 @@
     map.on("load", () => {
       renderPopCtl();
       applyKf("t0");
+      setInterval(() => {
+        if (!overlay || !snap) return;
+        if (!(flags.opEvacuate && snap.population.movement.length)) return;
+        flowT = (flowT + 0.008) % 1;
+        overlay.setProps({ layers: buildLayers() });
+      }, 80);
     });
     map.on("moveend", redraw);
     map.on("zoomend", redraw);

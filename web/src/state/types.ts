@@ -44,7 +44,14 @@ export interface WorldSnapshot {
     forecast_enabled: boolean;
   };
   hazards: {
-    flood: { stage_m: number; d_stage_dt: number; wet_mask: { coordinates: number[][][][] }; gauge_id: string };
+    flood: {
+      stage_m: number; d_stage_dt: number;
+      wet_mask: {
+        coordinates: number[][][][];
+        features?: { id: string; ring: number[][]; depth_m: number; wet_frac: number }[];
+      };
+      gauge_id: string;
+    };
     cyclone: { track: { lon: number; lat: number; cat: number }[]; cone_nm: number; rainfall_mm_h: number; ghosted: boolean };
     fire: { synthetic: boolean; active: boolean; perimeter: number[][]; spread_rate: number; wind: { u: number; v: number }; note: string };
     landslide: { synthetic: boolean; active: boolean; path: number[][]; note: string };
@@ -84,18 +91,18 @@ export interface SymbolRegistry {
 }
 
 export const STATE_COLOR: Record<string, [number, number, number]> = {
-  operational: [55, 214, 122],
-  full: [55, 214, 122],
-  uncertain: [255, 176, 32],
-  damaged: [255, 176, 32],
-  critical: [255, 89, 100],
-  inaccessible: [255, 89, 100],
-  depleted: [255, 89, 100],
+  operational: [46, 204, 96],
+  full: [46, 204, 96],
+  uncertain: [255, 210, 50],
+  damaged: [255, 152, 28],
+  critical: [255, 84, 48],
+  inaccessible: [220, 36, 48],
+  depleted: [220, 36, 48],
 };
 
 export const SEG_COLOR: Record<string, [number, number, number, number]> = {
-  open: [55, 214, 122, 220],
-  degraded: [255, 176, 32, 220],
-  blocked: [255, 89, 100, 255],
-  submerged: [40, 90, 180, 180],
+  open: [55, 214, 122, 150],
+  degraded: [255, 196, 0, 255],
+  blocked: [255, 40, 56, 255],
+  submerged: [56, 176, 255, 255],
 };

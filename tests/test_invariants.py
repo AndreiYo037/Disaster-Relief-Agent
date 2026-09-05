@@ -135,6 +135,8 @@ def test_sourced_flood_and_population():
     b7e = next(e for e in t0["entities"] if e["entity_id"] == "bridge:B7")
     assert abs(b7e["geometry"]["lon"] + 89.82486) < 1e-4
     assert abs(b7e["geometry"]["lat"] - 30.18264) < 1e-4
+    assert b7e["attributes"]["span_paths"]
+    assert b7e["attributes"]["span_length_m"] > 7000
     geo = t0["geography"]
     assert len(geo["roads"]) > 100
     assert len(geo["buildings"]) > 100
@@ -171,6 +173,40 @@ def test_sourced_flood_and_population():
             assert not (lon < -89.85 and lat > 30.062), (lon, lat)
     b7_rings = b7["hazards"]["flood"]["wet_mask"]["coordinates"]
     assert len(b7_rings) == 2
+    feats = {f["id"]: f for f in t0["hazards"]["flood"]["wet_mask"]["features"]}
+    assert feats["warehouse-cbd"]["depth_m"] < feats["lower-9th"]["depth_m"]
+    assert feats["warehouse-cbd"]["wet_frac"] < 0.15
+    assert feats["lower-9th"]["wet_frac"] > 0.7
+    assert feats["lakeview"]["depth_m"] > feats["garden"]["depth_m"]
+    assert len(t0["hazards"]["flood"]["wet_mask"]["features"]) == len(
+        t0["hazards"]["flood"]["wet_mask"]["coordinates"]
+    )
+
+
+def test_bridge_spans_follow_osm():
+    from crisis_os.bridges import dist_m, load_bridge_spans, path_length_m
+    from crisis_os.catalog import ENTITIES_SPEC
+
+    spans = load_bridge_spans()
+    pins = {e["entity_id"]: (e["lon"], e["lat"]) for e in ENTITIES_SPEC if e["type"] == "bridge"}
+    assert set(spans) == set(pins)
+    for eid, rec in spans.items():
+        assert rec["span_paths"], eid
+        pin = pins[eid]
+        nearest = min(dist_m(list(pin), pt) for path in rec["span_paths"] for pt in path)
+        assert nearest < 700, (eid, nearest)
+        assert rec["span_length_m"] > 400, (eid, rec["span_length_m"])
+        for path in rec["span_paths"]:
+            assert path_length_m(path) > 300, (eid, path_length_m(path))
+    assert spans["bridge:B7"]["span_length_m"] > 7000
+    assert len(spans["bridge:B7"]["span_paths"]) == 2
+    assert spans["bridge:us11"]["span_length_m"] > 4000
+    assert spans["bridge:danziger"]["span_length_m"] > 800
+    ccc = spans["bridge:ccc"]["span_paths"][0]
+    assert abs(ccc[0][0] - ccc[-1][0]) > abs(ccc[0][1] - ccc[-1][1])
+    # Causeway is clipped to the south landing, not the full lake crossing.
+    assert 2500 < spans["bridge:causeway"]["span_length_m"] < 6000
+    assert len(spans["bridge:causeway"]["span_paths"]) == 2
 
 
 def test_equity_and_spine():
@@ -196,5 +232,6 @@ if __name__ == "__main__":
     test_distinctive_type_solids()
     test_no_synthetic_katrina_entities()
     test_sourced_flood_and_population()
+    test_bridge_spans_follow_osm()
     test_equity_and_spine()
     print("ok")

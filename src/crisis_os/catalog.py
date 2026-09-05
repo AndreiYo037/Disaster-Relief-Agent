@@ -2,12 +2,14 @@
 
 Coordinates are the real 2005 sites (Wikipedia / OSM / IPET). The live basemap is
 modern imagery, so bridge:B7 sits on the 2011 Twin Span alignment — labelled as such.
+3D bridge decks follow OSM span_paths (length, heading, position), not heading_deg boxes.
 """
 
 ENTITIES_SPEC = [
     # Canonical demo IDs
     dict(entity_id="bridge:B7", type="bridge", name="I-10 Twin Span Bridge",
-         lon=-89.82486, lat=30.18264, aliases=["Twin Span", "the north bridge", "I-10 bridge"]),
+         lon=-89.82486, lat=30.18264, heading_deg=78,
+         aliases=["Twin Span", "the north bridge", "I-10 bridge"]),
     dict(entity_id="route:R14", type="route", name="I-10 East (to Slidell)",
          lon=-89.8550, lat=30.1550, aliases=["I-10 east"]),
     dict(entity_id="route:R22", type="route", name="US-11 Lake Pontchartrain bridge (alt)",
@@ -24,13 +26,13 @@ ENTITIES_SPEC = [
          lon=-90.0986, lat=29.9267, aliases=["Memorial", "Baptist", "NDH", "Ochsner Baptist"]),
 
     dict(entity_id="bridge:us11", type="bridge", name="Maestri Bridge (US-11)",
-         lon=-89.84306, lat=30.18722, aliases=["US-11"]),
+         lon=-89.84306, lat=30.18722, heading_deg=72, aliases=["US-11"]),
     dict(entity_id="bridge:ccc", type="bridge", name="Crescent City Connection (US-90)",
-         lon=-90.05750, lat=29.93861, aliases=["CCC", "GNO bridge"]),
+         lon=-90.05750, lat=29.93861, heading_deg=12, aliases=["CCC", "GNO bridge"]),
     dict(entity_id="bridge:danziger", type="bridge", name="Danziger Bridge",
-         lon=-90.0267, lat=30.0094, aliases=["Danziger"]),
+         lon=-90.0267, lat=30.0094, heading_deg=100, aliases=["Danziger"]),
     dict(entity_id="bridge:causeway", type="bridge", name="Lake Pontchartrain Causeway (south landing)",
-         lon=-90.1539, lat=30.0266, aliases=["Causeway"]),
+         lon=-90.1539, lat=30.0266, heading_deg=2, aliases=["Causeway"]),
     dict(entity_id="road:i10", type="road", name="I-10 at Claiborne Avenue overpass",
          lon=-90.0755, lat=29.9642, aliases=["I-10"]),
 
