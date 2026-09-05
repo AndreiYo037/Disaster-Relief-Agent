@@ -1,0 +1,9 @@
+# Non-secret MVP runtime configuration. Credentials are supplied by the AWS SDK.
+provider = "bedrock"
+model_id = "openai.gpt-oss-120b-1:0"
+region = "us-east-1"
+timeout_seconds = 30
+max_output_tokens = 2048
+
+allowed_model_ids = ["openai.gpt-oss-120b-1:0"]
+allowed_regions = ["us-east-1"]

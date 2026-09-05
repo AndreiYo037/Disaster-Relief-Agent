@@ -97,6 +97,33 @@ Replay executes one graph run per keyframe in chronological order: `t0`, `b7`, t
 
 LangGraph is required for typed state, reducers, checkpointing, and human-interrupt support. Checkpoints are stored in the existing SQLite database using LangGraph checkpoint tables.
 
+### 6.1 Reducer implementation contract
+
+Each append-only collection is a reducer-backed field, not a shared mutable dictionary. The implementation should use the equivalent of:
+
+```python
+GraphState = TypedDict(
+    "GraphState",
+    {
+        "evidence": Annotated[list[EvidenceEnvelope], append_unique],
+        "observations": Annotated[list[Observation], append_unique],
+        "claims": Annotated[list[Claim], append_unique],
+        "verification_runs": Annotated[list[VerificationRun], append_unique],
+        "evaluations": Annotated[list[Evaluation], append_unique],
+        "incidents": Annotated[list[Incident], append_unique],
+        "work_items": Annotated[list[WorkItem], append_unique],
+        "summaries": Annotated[list[Summary], append_unique],
+        "agent_errors": Annotated[list[AgentError], append_unique],
+        "lane_results": Annotated[list[LaneResult], append_unique],
+        "feedback_requests": Annotated[list[FeedbackRequest], append_unique],
+    },
+)
+```
+
+`append_unique(existing, incoming)` is pure and deterministic: it preserves existing order, appends unseen record IDs, treats an identical duplicate as a no-op, and raises a typed `StateConflict` when the same ID has different content. Nodes must validate and serialize records before returning them. A `StateConflict` is recorded as an `AgentError` and follows the normal retry/degraded path; reducers never overwrite a record.
+
+Parallel lanes may write only to these collection fields. Immutable run metadata (`crisis_id`, `run_id`, `keyframe_id`, `trace_id`, `policy_version`) is written at graph start. Lifecycle status, per-incident feedback counters, and terminal run status have one writer (`OrchestratorAgent`) and no parallel reducer. Per-lane completion is represented by append-only `LaneResult` records; a join derives readiness from those records rather than racing on a shared boolean. Counters are keyed by incident and incremented only by the Orchestrator, so review and feedback limits cannot be lost through concurrent writes.
+
 ## 7. Shared Graph State
 
 `GraphState` is typed and append-only. Every result carries these correlation identifiers:
@@ -121,10 +148,13 @@ incidents[]
 work_items[]
 summaries[]
 agent_errors[]
+lane_results[]
 feedback_requests[]
 checkpoints / run metadata
 loop counters and policy version
 ```
+
+`LaneResult` is the per-lane join record with `lane_id`, terminal `status` (`SUCCEEDED`, `DEGRADED`, or `FAILED`), output references, error references, and completion timestamp. `FeedbackRequest` is the bounded re-query record with `incident_id`, target source lane, requested evidence type, reason, cycle number, and status. Both are append-only and carry the run correlation identifiers.
 
 All collection entries are immutable after append. Corrections create a new record linked to the prior record.
 
@@ -176,7 +206,7 @@ Each verification run records five checks:
 4. Internal consistency
 5. Corroboration
 
-Each check is `pass`, `unknown`, or `fail`. The record includes passed-check count, `PASS | UNKNOWN | FAIL` verdict, confidence, failed checks, reason, verifier version, policy version, evidence references, and correlation IDs.
+Each check is `pass`, `unknown`, or `fail`. The record includes pass/unknown/fail counts, a categorical `PASS | UNKNOWN | FAIL` verdict, continuous confidence, failed checks, reason, verifier version, policy version, evidence references, and correlation IDs.
 
 Deterministic verdict rules are:
 
@@ -185,6 +215,17 @@ Deterministic verdict rules are:
 - 0–1 passing checks: `FAIL`
 
 The default freshness window is six hours. Event-specific time and distance tolerances are policy configuration, not prompt instructions.
+
+Categorical verdict and continuous confidence are separate fields. The verdict is derived from the number of checks with `pass`: 4-5 passes yields `PASS`, 2-3 passes yields `UNKNOWN`, and 0-1 passes yields `FAIL`; `unknown` checks do not count as passes. The continuous support value used by prioritisation is:
+
+```text
+check_value(pass)    = 1.0
+check_value(unknown) = 0.5
+check_value(fail)    = 0.0
+V = sum(check_value(each check)) / 5
+```
+
+`V` is therefore continuous in `[0, 1]` and never replaces the categorical verdict. For example, three passes and two unknowns produce `verdict=UNKNOWN` and `V=0.8`. This preserves the distinction between “not enough passing checks for verification” and “partially supported for harm ranking.”
 
 ### 8.5 Evaluation
 
@@ -244,13 +285,17 @@ The canonical summary includes:
 
 Every surfaced factual statement must have evidence references or an explicit uncertainty label.
 
+### 8.10 LaneResult and FeedbackRequest
+
+`LaneResult` records `lane_id`, terminal status (`SUCCEEDED`, `DEGRADED`, or `FAILED`), output references, error references, completion timestamp, and correlation IDs. `FeedbackRequest` records `incident_id`, target source lane, requested evidence type, reason, cycle number, status, and correlation IDs. Both are append-only and are the only records used by the parallel-lane join and bounded feedback edges.
+
 ## 9. Deterministic Policy and Safety
 
 Models may extract, normalize, query permitted evidence, or improve wording. Deterministic code owns validation, verification scoring, evaluation aggregation, priority, deduplication, routing, state transitions, and approval gates.
 
 ### 9.1 Priority
 
-Verification confidence is `V = passed_checks / 5`, using pass `1`, unknown `0.5`, and fail `0`.
+Verification confidence is the continuous `V` defined above: pass `1`, unknown `0.5`, and fail `0`, averaged across all five checks. The categorical verdict remains a separate pass-count result.
 
 ```text
 harm_score = 100 * (0.55L + 0.25D + 0.10C + 0.10T)
@@ -266,7 +311,7 @@ Otherwise:
 - priority >= 60: `MONITOR`
 - otherwise: `UNVERIFIED`
 
-An unverified incident may be highly prioritized and surfaced, but it cannot become an executable dispatch.
+An unverified incident may be highly prioritized and surfaced, but it cannot become an executable dispatch. All non-`PASS` incidents, including high-priority and high-harm `UNKNOWN`, contradictory, stale, degraded, and `FAIL` incidents, remain in the unverified queue. The queue is sorted by priority descending and retains `URGENT_HUMAN_REVIEW` and `REQUEST_EVIDENCE` items rather than hiding or suppressing them.
 
 ### 9.2 Incident Lifecycle
 
@@ -286,35 +331,52 @@ Recommendations, monitoring items, evidence requests, route candidates, and UI p
 
 ### 9.4 Partial Failure and Bounds
 
-Transient failures retry twice with bounded backoff. Every attempt is recorded. Other lanes continue. A failed or invalid lane emits `DEGRADED` or `UNKNOWN` output and may create a targeted evidence request.
+Every node invocation is wrapped by one attempt policy that validates the returned typed envelope before it can enter shared state. Each attempt records start/end time, error class, validation result, and token/tool usage.
 
-The graph enforces:
+Error classes and handling are explicit:
 
-- `max_retries=2`
-- `max_review_rounds=3`
-- `max_feedback_cycles=3` per incident
-- a LangGraph recursion/step limit sized for the 15-node topology
+- `TRANSIENT` (timeout, connection reset, throttling, provider 5xx): retry with bounded exponential backoff.
+- `RECOVERABLE_OUTPUT` (malformed JSON, schema-invalid model output, invalid tool response): retry with a constrained repair instruction; validate the repaired response again.
+- `PERMANENT_CONFIG` (invalid model/region, disallowed tool, missing required argument): fail at the boundary; do not retry.
+- `PERMANENT_AUTH` (credential or permission failure): do not retry; mark the lane degraded and surface the error.
+- `POLICY_REJECTED` (unknown event type, PII violation, provenance violation): do not retry; retain the rejected input reference and emit a typed error result.
+
+`TRANSIENT` and `RECOVERABLE_OUTPUT` errors retry up to `max_retries=2` after the initial attempt. Backoff is capped and configurable; retry timing is recorded. Other lanes continue. After exhaustion, the affected lane emits a schema-valid `LaneResult(status=DEGRADED, error_refs=[...])` rather than silently disappearing:
+
+- source failure: preserve accepted evidence, emit no unsupported claim, and create an evidence request;
+- verification failure: retain the claim as `UNKNOWN`/unverified and block promotion to the verified tab;
+- evaluation failure: retain the verification record, omit executable planning, and route to `REQUEST_EVIDENCE`;
+- Dispatch failure: retain incidents but emit no route or assignment and mark planning degraded;
+- Orchestrator failure: do not mutate lifecycle state; checkpoint the error for resume;
+- Summariser failure: render a deterministic fallback from validated records and mark the summary degraded.
+
+The graph enforces `max_review_rounds=3`, `max_feedback_cycles=3` per incident, and a LangGraph recursion/step limit sized for the 15-node topology. A join proceeds when every lane has a terminal `SUCCEEDED`, `DEGRADED`, or `FAILED` `LaneResult`; one unavailable lane cannot deadlock the run.
 
 Invalid model IDs, regions, tools, and runtime configuration fail before an agent call.
 
 ## 10. Tools, Models, and Runtime Configuration
 
-Every agent has an explicit allow-list. No agent receives a general-purpose database connection or external-actuation tool.
+Every agent has an explicit allow-list. No agent receives a general-purpose database connection, arbitrary SQL, shell/network access, or external-actuation tool. Tool calls pass through a deny-by-default gateway that validates the tool name and JSON arguments against the agent manifest, records denied attempts, and injects only returned typed data into graph state.
 
-| Agent group | Allowed capabilities |
+| Agent group | Exact MVP tool IDs |
 |---|---|
-| Source agents | Own typed adapter, artifact storage, and evidence-write command. |
-| Verification agents | Scoped evidence/claim reads and verification-write command. |
-| Evaluation agents | Scoped evidence/claim/policy reads and evaluation-write command. |
-| Dispatch | World-model route/resource reads and incident/work-item commands. |
-| Orchestrator | Graph state, checkpoint, incident, and feedback-request commands. |
-| Summariser | Incident/evidence/work-item reads and summary/projection write. |
+| `SatelliteSourceAgent` | `adapter.satellite.read_fixture`, `artifact.put`, `evidence.append`, `observation.append`, `claim.append` |
+| `TelemetrySourceAgent` | `adapter.telemetry.read_fixture`, `artifact.put`, `evidence.append`, `observation.append`, `claim.append` |
+| `FieldReportSourceAgent` | `adapter.field_report.read_fixture`, `artifact.put`, `evidence.append`, `observation.append`, `claim.append` |
+| `CommunityReportSourceAgent` | `adapter.community.read_fixture`, `artifact.put`, `evidence.append`, `observation.append`, `claim.append` |
+| Verification agents | `evidence.get_by_ids`, `claims.get_by_ids`, `claims.find_corroboration`, `verification.append` |
+| Evaluation agents | `evidence.get_by_ids`, `claims.get_by_ids`, `policy.get_version`, `evaluation.append` |
+| Dispatch | `world.routes.read`, `world.resources.read`, `incidents.append`, `work_items.append` |
+| Orchestrator | `state.read_current`, `incidents.append`, `feedback_requests.append`, `checkpoint.read`, `checkpoint.write` |
+| Summariser | `incidents.read`, `evidence.get_by_ids`, `work_items.read`, `summary.append`, `projection.write` |
 
-The runtime interface is provider-neutral, but the MVP live provider is AWS Bedrock:
+Live adapter IDs (`adapter.*.read_live`) are reserved for the later live-ingestion phase and are not enabled by the MVP manifests. `projection.write` writes only the validated versioned projection; it cannot call a frontend or mutate UI state directly. No listed tool may activate a route, send a vehicle, release supplies, operate a drone/robot, or otherwise actuate the physical world.
+
+The runtime interface is provider-neutral, but the MVP live provider is AWS Bedrock. The checked-in non-secret configuration is [`config/agent-runtime.toml`](../../../config/agent-runtime.toml):
 
 - model ID: `openai.gpt-oss-120b-1:0`
 - region: `us-east-1`
-- provider/model/region allow-list validation is mandatory
+- provider/model/region allow-list validation is mandatory; startup must fail clearly if the configured model is not available in the configured Bedrock region
 - timeout and token budget are explicit configuration values
 
 Replay fixtures do not require AWS credentials. Bedrock calls are covered by contract mocks in tests.
@@ -352,7 +414,7 @@ The deterministic projection preserves all existing `WorldSnapshot` fields and a
 - Dispatch-suggested routes
 - Dispatch priorities
 
-Verified-tab membership is determined by Orchestrator status: only `PASS` incidents appear in the verified tab. `UNKNOWN`, `FAIL`, contradictory, stale, and degraded incidents appear in the unverified tab. Intermediate verification and evaluation details remain persisted and available to audit endpoints but are not required in the primary dashboard.
+Verified-tab membership is determined by Orchestrator status: only `PASS` incidents appear in the verified tab. `UNKNOWN`, `FAIL`, contradictory, stale, and degraded incidents appear in the unverified tab, including high-priority and high-harm incidents. The unverified tab is an operational queue, not a discard/archive view: it is sorted by priority descending, displays urgency and next step, and retains `URGENT_HUMAN_REVIEW` and `REQUEST_EVIDENCE` items. Intermediate verification and evaluation details remain persisted and available to audit endpoints but are not required in the primary dashboard.
 
 The existing read-only HTTP pattern remains the compatibility target: versioned projections are available through `/api/state?keyframe=...` for replay and polling during live runs. The frontend never reads the database directly.
 
@@ -393,7 +455,8 @@ Required checks:
 
 Acceptance targets:
 
-- 100% schema-valid outputs on the fixture suite.
+- at least 95% of fixture node outputs schema-valid on the first attempt (without retry) for healthy scenarios;
+- 100% schema-valid agent result envelopes after the configured retry budget (`max_retries=2`), with exhausted failures represented as typed `DEGRADED`/`FAILED` results rather than invalid JSON;
 - 0 autonomous physical dispatches.
 - 100% provenance coverage for surfaced factual statements.
 - deterministic priority/routing results for identical inputs.
@@ -446,4 +509,3 @@ The following decisions resolve the draft’s open requirements:
 - Unverified high-harm incidents remain visible but never executable.
 - One coordinator identity handles approval, modification, and rejection.
 - The UI integration is projection-based and preserves `/api/state` compatibility.
-
