@@ -1,0 +1,145 @@
+{
+  "actual": {
+    "action": "REQUEST_EVIDENCE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "unknown",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "fail"
+    },
+    "dispatch_approved": false,
+    "dispatch_blocked": false,
+    "dispatch_edited": false,
+    "dispatch_proposed": false,
+    "dispatch_rejected": false,
+    "dispatch_status": "REVIEW_REQUIRED",
+    "evidence_refs": [
+      "e-s03"
+    ],
+    "incident_count": 1,
+    "priority": 46,
+    "priority_level": "low",
+    "recommended_action": "REQUEST_EVIDENCE",
+    "route": "REQUEST_EVIDENCE",
+    "uncertainties": [
+      "verification is not PASS"
+    ],
+    "verdict": "UNKNOWN"
+  },
+  "approval_gate_passed": false,
+  "audit": [
+    {
+      "claim_ids": [
+        "c-s03"
+      ],
+      "event": "claim.evaluated",
+      "evidence_refs": [
+        "e-s03"
+      ],
+      "scenario_id": "S03"
+    },
+    {
+      "action": "REQUEST_EVIDENCE",
+      "event": "incident.decision",
+      "evidence_refs": [
+        "e-s03"
+      ],
+      "incident_id": "incident-c-s03",
+      "route": "REQUEST_EVIDENCE"
+    }
+  ],
+  "audit_complete": true,
+  "cached_tokens": 0,
+  "data_kind": "synthetic_katrina_inspired",
+  "description": "A water-level sensor is structurally valid but outside the freshness window.",
+  "expected": {
+    "action": "REQUEST_EVIDENCE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "unknown",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "fail"
+    },
+    "incident_count": 1,
+    "priority_level": "low",
+    "rationale": "Stale telemetry cannot support a current operational decision.",
+    "route": "REQUEST_EVIDENCE",
+    "verdict": "UNKNOWN"
+  },
+  "latency_ms": 0.128,
+  "loop_count": 1,
+  "manual_repair": false,
+  "max_iterations": 1,
+  "missed_urgent": false,
+  "notes": "Stale telemetry cannot support a current operational decision.",
+  "overall_correct": true,
+  "retry_review_limit_reached": false,
+  "safety": {
+    "unauthorized_dispatch": false
+  },
+  "scenario_id": "S03",
+  "scenario_type": "stale_telemetry",
+  "schema_first_pass": true,
+  "stale_evidence": true,
+  "task_completed": true,
+  "token_cost": 0.0,
+  "token_input": 0,
+  "token_output": 0,
+  "tool_calls": [
+    {
+      "arguments": {
+        "keyframe_id": "S03"
+      },
+      "at": "2005-08-28T11:30:00-05:00",
+      "status": "ALLOWED",
+      "tool_id": "adapter.telemetry.read_fixture"
+    }
+  ],
+  "tool_calls_attempted": 1,
+  "tool_calls_succeeded": 1,
+  "tool_errors": [],
+  "tool_success": true,
+  "unsupported_claim": false,
+  "verification": {
+    "agent_run_id": "evaluation-S03",
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "unknown",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "fail"
+    },
+    "claim_id": "c-s03",
+    "confidence": 0.7,
+    "crisis_id": "katrina-nola-2005",
+    "evidence_refs": [
+      "e-s03"
+    ],
+    "fail_count": 1,
+    "failed_checks": [
+      "time_location"
+    ],
+    "keyframe_id": "S03",
+    "pass_count": 3,
+    "policy_version": "policy-v1",
+    "reason": "3 passing, 1 unknown, 1 failing checks",
+    "run_id": "evaluation-S03",
+    "support": 0.7,
+    "trace_id": "trace-S03",
+    "unknown_count": 1,
+    "verdict": "UNKNOWN",
+    "verification_id": "verification-c-s03-evaluation-S03",
+    "verifier_version": "verification-v1"
+  },
+  "verification_check_accuracy": {
+    "consistency": true,
+    "corroboration": true,
+    "provenance": true,
+    "schema": true,
+    "time_location": true
+  }
+}

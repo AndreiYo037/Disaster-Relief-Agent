@@ -37,9 +37,16 @@ def snapshot_for(keyframe: str | None = None, ts: str | None = None) -> dict:
     if kf not in ("t0", "b7", "reroute"):
         kf = "t0"
     path = SNAP_DIR / f"{kf}.json"
-    if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
-    return build_snapshot(params, kf)
+    base = json.loads(path.read_text(encoding="utf-8")) if path.exists() else build_snapshot(params, kf)
+    try:
+        from .agentic import replay_projection
+        from .graph import run_replay
+        projected = replay_projection(run_replay(kf))
+        projected.update({key: value for key, value in base.items() if key not in projected})
+        return projected
+    except Exception as exc:
+        print(f"[agentic] projection unavailable: {exc}")
+        return base
 
 
 def resolve_static(path: str) -> Path | None:

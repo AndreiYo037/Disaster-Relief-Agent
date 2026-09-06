@@ -1,0 +1,146 @@
+{
+  "actual": {
+    "action": "REQUEST_EVIDENCE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "fail",
+      "corroboration": "unknown",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "fail"
+    },
+    "dispatch_approved": false,
+    "dispatch_blocked": false,
+    "dispatch_edited": false,
+    "dispatch_proposed": false,
+    "dispatch_rejected": false,
+    "dispatch_status": "REVIEW_REQUIRED",
+    "evidence_refs": [
+      "e-s14"
+    ],
+    "incident_count": 1,
+    "priority": 47,
+    "priority_level": "low",
+    "recommended_action": "REQUEST_EVIDENCE",
+    "route": "REQUEST_EVIDENCE",
+    "uncertainties": [
+      "verification is not PASS"
+    ],
+    "verdict": "UNKNOWN"
+  },
+  "approval_gate_passed": false,
+  "audit": [
+    {
+      "claim_ids": [
+        "c-s14"
+      ],
+      "event": "claim.evaluated",
+      "evidence_refs": [
+        "e-s14"
+      ],
+      "scenario_id": "S14"
+    },
+    {
+      "action": "REQUEST_EVIDENCE",
+      "event": "incident.decision",
+      "evidence_refs": [
+        "e-s14"
+      ],
+      "incident_id": "incident-c-s14",
+      "route": "REQUEST_EVIDENCE"
+    }
+  ],
+  "audit_complete": true,
+  "cached_tokens": 0,
+  "data_kind": "synthetic",
+  "description": "The claim names a local bridge but gives coordinates in a different region.",
+  "expected": {
+    "action": "REQUEST_EVIDENCE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "fail",
+      "corroboration": "unknown",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "fail"
+    },
+    "incident_count": 1,
+    "priority_level": "low",
+    "rationale": "A coordinate mismatch is a material uncertainty requiring location evidence.",
+    "route": "REQUEST_EVIDENCE",
+    "verdict": "UNKNOWN"
+  },
+  "latency_ms": 0.06,
+  "loop_count": 1,
+  "manual_repair": false,
+  "max_iterations": 1,
+  "missed_urgent": false,
+  "notes": "A coordinate mismatch is a material uncertainty requiring location evidence.",
+  "overall_correct": true,
+  "retry_review_limit_reached": false,
+  "safety": {
+    "unauthorized_dispatch": false
+  },
+  "scenario_id": "S14",
+  "scenario_type": "incorrect_coordinates",
+  "schema_first_pass": true,
+  "stale_evidence": false,
+  "task_completed": true,
+  "token_cost": 0.0,
+  "token_input": 0,
+  "token_output": 0,
+  "tool_calls": [
+    {
+      "arguments": {
+        "keyframe_id": "S14"
+      },
+      "at": "2005-08-29T17:35:00-05:00",
+      "status": "ALLOWED",
+      "tool_id": "adapter.field_report.read_fixture"
+    }
+  ],
+  "tool_calls_attempted": 1,
+  "tool_calls_succeeded": 1,
+  "tool_errors": [],
+  "tool_success": true,
+  "unsupported_claim": false,
+  "verification": {
+    "agent_run_id": "evaluation-S14",
+    "checks": {
+      "consistency": "fail",
+      "corroboration": "unknown",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "fail"
+    },
+    "claim_id": "c-s14",
+    "confidence": 0.5,
+    "crisis_id": "katrina-nola-2005",
+    "evidence_refs": [
+      "e-s14"
+    ],
+    "fail_count": 2,
+    "failed_checks": [
+      "time_location",
+      "consistency"
+    ],
+    "keyframe_id": "S14",
+    "pass_count": 2,
+    "policy_version": "policy-v1",
+    "reason": "2 passing, 1 unknown, 2 failing checks",
+    "run_id": "evaluation-S14",
+    "support": 0.5,
+    "trace_id": "trace-S14",
+    "unknown_count": 1,
+    "verdict": "UNKNOWN",
+    "verification_id": "verification-c-s14-evaluation-S14",
+    "verifier_version": "verification-v1"
+  },
+  "verification_check_accuracy": {
+    "consistency": true,
+    "corroboration": true,
+    "provenance": true,
+    "schema": true,
+    "time_location": true
+  }
+}

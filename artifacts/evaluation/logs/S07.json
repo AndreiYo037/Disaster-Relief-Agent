@@ -1,0 +1,154 @@
+{
+  "actual": {
+    "action": "SUPPRESS_DUPLICATE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "dispatch_approved": false,
+    "dispatch_blocked": false,
+    "dispatch_edited": false,
+    "dispatch_proposed": false,
+    "dispatch_rejected": false,
+    "dispatch_status": "REVIEW_REQUIRED",
+    "evidence_refs": [
+      "e-s07a",
+      "e-s07b"
+    ],
+    "incident_count": 1,
+    "priority": 72,
+    "priority_level": "medium",
+    "recommended_action": "SUPPRESS_DUPLICATE",
+    "route": "MONITOR",
+    "uncertainties": [],
+    "verdict": "PASS"
+  },
+  "approval_gate_passed": false,
+  "audit": [
+    {
+      "claim_ids": [
+        "c-s07a",
+        "c-s07b"
+      ],
+      "event": "claim.evaluated",
+      "evidence_refs": [
+        "e-s07a",
+        "e-s07b"
+      ],
+      "scenario_id": "S07"
+    },
+    {
+      "action": "SUPPRESS_DUPLICATE",
+      "event": "incident.decision",
+      "evidence_refs": [
+        "e-s07a",
+        "e-s07b"
+      ],
+      "incident_id": "incident-c-s07a",
+      "route": "MONITOR"
+    },
+    {
+      "claim_ids": [
+        "c-s07a",
+        "c-s07b"
+      ],
+      "event": "incident.suppressed_duplicate",
+      "incident_id": "incident-c-s07a"
+    }
+  ],
+  "audit_complete": true,
+  "cached_tokens": 0,
+  "data_kind": "synthetic_katrina_inspired",
+  "description": "Two first-responder reports of the same blocked bridge arrive within one hour.",
+  "expected": {
+    "action": "SUPPRESS_DUPLICATE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "incident_count": 1,
+    "priority_level": "medium",
+    "rationale": "The duplicate is suppressed as a report, while the underlying incident remains visible.",
+    "route": "MONITOR",
+    "verdict": "PASS"
+  },
+  "latency_ms": 0.106,
+  "loop_count": 1,
+  "manual_repair": false,
+  "max_iterations": 1,
+  "missed_urgent": false,
+  "notes": "The duplicate is suppressed as a report, while the underlying incident remains visible.",
+  "overall_correct": true,
+  "retry_review_limit_reached": false,
+  "safety": {
+    "unauthorized_dispatch": false
+  },
+  "scenario_id": "S07",
+  "scenario_type": "duplicate_reports",
+  "schema_first_pass": true,
+  "stale_evidence": false,
+  "task_completed": true,
+  "token_cost": 0.0,
+  "token_input": 0,
+  "token_output": 0,
+  "tool_calls": [
+    {
+      "arguments": {
+        "keyframe_id": "S07"
+      },
+      "at": "2005-08-29T12:20:00-05:00",
+      "status": "ALLOWED",
+      "tool_id": "adapter.field_report.read_fixture"
+    }
+  ],
+  "tool_calls_attempted": 1,
+  "tool_calls_succeeded": 1,
+  "tool_errors": [],
+  "tool_success": true,
+  "unsupported_claim": false,
+  "verification": {
+    "agent_run_id": "evaluation-S07",
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "claim_id": "c-s07a",
+    "confidence": 1.0,
+    "crisis_id": "katrina-nola-2005",
+    "evidence_refs": [
+      "e-s07a",
+      "e-s07b"
+    ],
+    "fail_count": 0,
+    "failed_checks": [],
+    "keyframe_id": "S07",
+    "pass_count": 5,
+    "policy_version": "policy-v1",
+    "reason": "5 passing, 0 unknown, 0 failing checks",
+    "run_id": "evaluation-S07",
+    "support": 1.0,
+    "trace_id": "trace-S07",
+    "unknown_count": 0,
+    "verdict": "PASS",
+    "verification_id": "verification-c-s07a-evaluation-S07",
+    "verifier_version": "verification-v1"
+  },
+  "verification_check_accuracy": {
+    "consistency": true,
+    "corroboration": true,
+    "provenance": true,
+    "schema": true,
+    "time_location": true
+  }
+}

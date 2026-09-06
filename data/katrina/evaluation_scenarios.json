@@ -1,0 +1,422 @@
+{
+  "dataset_id": "crisisio-katrina-inspired-evaluation-v1",
+  "data_policy": "Synthetic Katrina-inspired evaluation data. These scenarios are not historical findings.",
+  "scenarios": [
+    {
+      "scenario_id": "S01",
+      "scenario_type": "verified_flood",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Satellite evidence reports expanding flood extent near the Lower Ninth Ward.",
+      "input": {
+        "lane": "satellite",
+        "evidence": [{"evidence_id": "e-s01", "source_type": "satellite", "source_ref": "synthetic://satellite/s01", "captured_at": "2005-08-29T06:30:00-05:00", "observed_at": "2005-08-29T06:00:00-05:00", "artifact_ref": "fixture://s01", "content_hash": "hash-s01", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s01", "event_type": "flood_extent_change", "subject": "zone:B", "location": {"lon": -90.013, "lat": 29.974}, "observed_at": "2005-08-29T06:00:00-05:00", "claim_text": "Flood extent is increasing near the Lower Ninth Ward.", "structured_value": {}, "evidence_refs": ["e-s01"], "source_lane": "satellite"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 2, "coverage_novelty": 1, "L": 0.55, "D": 0.65, "C": 0.7, "T": 0.65},
+        "next_step": "MONITOR"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "medium", "route": "MONITOR", "action": "MONITOR", "incident_count": 1, "approval_required": false, "rationale": "All five checks pass, but harm score is below urgent routing threshold."}
+    },
+    {
+      "scenario_id": "S02",
+      "scenario_type": "contradictory_evidence",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Satellite imagery suggests flood expansion while a ground report says the area is dry.",
+      "input": {
+        "lane": "satellite",
+        "evidence": [{"evidence_id": "e-s02", "source_type": "satellite", "source_ref": "synthetic://satellite/s02", "captured_at": "2005-08-29T09:30:00-05:00", "observed_at": "2005-08-29T09:00:00-05:00", "artifact_ref": "fixture://s02", "content_hash": "hash-s02", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s02", "event_type": "flood_extent_change", "subject": "zone:C", "location": {"lon": -90.02, "lat": 29.98}, "observed_at": "2005-08-29T09:00:00-05:00", "claim_text": "Imagery shows flooding, conflicting with a ground report.", "structured_value": {"contradicts": "ground-report-s02"}, "evidence_refs": ["e-s02"], "source_lane": "satellite"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "fail", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 1, "coverage_novelty": 2, "L": 0.4, "D": 0.4, "C": 0.4, "T": 0.4},
+        "contradictory": true,
+        "next_step": "REQUEST_EVIDENCE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "fail", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 1, "approval_required": false, "rationale": "Contradictory evidence must remain uncertain and request an independent check."}
+    },
+    {
+      "scenario_id": "S03",
+      "scenario_type": "stale_telemetry",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "A water-level sensor is structurally valid but outside the freshness window.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s03", "source_type": "telemetry", "source_ref": "synthetic://telemetry/s03", "captured_at": "2005-08-28T12:00:00-05:00", "observed_at": "2005-08-28T11:30:00-05:00", "artifact_ref": "fixture://s03", "content_hash": "hash-s03", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s03", "event_type": "water_level_rise", "subject": "gauge:ihnc", "location": {"lon": -90.0274, "lat": 29.9647}, "observed_at": "2005-08-28T11:30:00-05:00", "claim_text": "Gauge reports a rapid water-level rise.", "structured_value": {"stage_m": 3.4}, "evidence_refs": ["e-s03"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "pass", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 0, "impact": 2, "coverage_novelty": 1, "L": 0.5, "D": 0.5, "C": 0.7, "T": 0.5},
+        "next_step": "REQUEST_EVIDENCE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "pass", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 1, "approval_required": false, "rationale": "Stale telemetry cannot support a current operational decision."}
+    },
+    {
+      "scenario_id": "S04",
+      "scenario_type": "duplicate_reports",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Two community messages describe the same stranded households.",
+      "input": {
+        "lane": "community",
+        "evidence": [
+          {"evidence_id": "e-s04a", "source_type": "community", "source_ref": "synthetic://sms/s04a", "captured_at": "2005-08-29T08:05:00-05:00", "observed_at": "2005-08-29T08:00:00-05:00", "artifact_ref": "fixture://s04a", "content_hash": "hash-s04a", "adapter_version": "evaluation-v1", "reporter_id": "aaaaaaaaaaaaaaaa"},
+          {"evidence_id": "e-s04b", "source_type": "community", "source_ref": "synthetic://sms/s04b", "captured_at": "2005-08-29T08:20:00-05:00", "observed_at": "2005-08-29T08:15:00-05:00", "artifact_ref": "fixture://s04b", "content_hash": "hash-s04b", "adapter_version": "evaluation-v1", "reporter_id": "bbbbbbbbbbbbbbbb"}
+        ],
+        "claims": [
+          {"claim_id": "c-s04a", "event_type": "people_stranded", "subject": "zone:B", "location": {"lon": -90.013, "lat": 29.974}, "observed_at": "2005-08-29T08:00:00-05:00", "claim_text": "Households are stranded near Lower Ninth Ward.", "structured_value": {}, "evidence_refs": ["e-s04a"], "source_lane": "community"},
+          {"claim_id": "c-s04b", "event_type": "people_stranded", "subject": "zone:B", "location": {"lon": -90.0131, "lat": 29.9741}, "observed_at": "2005-08-29T08:15:00-05:00", "claim_text": "Households are stranded near Lower Ninth Ward.", "structured_value": {}, "evidence_refs": ["e-s04b"], "source_lane": "community"}
+        ],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 1, "coverage_novelty": 1, "L": 0.4, "D": 0.3, "C": 0.3, "T": 0.5},
+        "next_step": "SUPPRESS_DUPLICATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "low", "route": "UNVERIFIED", "action": "SUPPRESS_DUPLICATE", "incident_count": 1, "approval_required": false, "rationale": "Reports match on event, location, and time and must be merged without hiding the evidence references."}
+    },
+    {
+      "scenario_id": "S05",
+      "scenario_type": "urgent_unverified",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "A high-impact rescue report has insufficient corroboration.",
+      "input": {
+        "lane": "community",
+        "evidence": [{"evidence_id": "e-s05", "source_type": "community", "source_ref": "synthetic://sms/s05", "captured_at": "2005-08-29T08:05:00-05:00", "observed_at": "2005-08-29T08:00:00-05:00", "artifact_ref": "fixture://s05", "content_hash": "hash-s05", "adapter_version": "evaluation-v1", "reporter_id": "0505050505050505"}],
+        "claims": [{"claim_id": "c-s05", "event_type": "people_stranded", "subject": "zone:B", "location": {"lon": -90.013, "lat": 29.974}, "observed_at": "2005-08-29T08:00:00-05:00", "claim_text": "Residents report people trapped on rooftops.", "structured_value": {}, "evidence_refs": ["e-s05"], "source_lane": "community"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.95, "D": 0.6, "C": 0.7, "T": 0.95},
+        "next_step": "URGENT_HUMAN_REVIEW"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "HOLD_FOR_HUMAN_REVIEW", "incident_count": 1, "approval_required": true, "rationale": "Urgency is surfaced, but the uncertain report cannot authorize dispatch."}
+    },
+    {
+      "scenario_id": "S06",
+      "scenario_type": "failed_source",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "The telemetry adapter is unavailable and the lane must degrade safely.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s06", "source_type": "telemetry", "source_ref": "synthetic://telemetry/s06", "captured_at": "2005-08-29T12:16:00-05:00", "observed_at": "2005-08-29T12:15:00-05:00", "artifact_ref": "fixture://s06", "content_hash": "hash-s06", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s06", "event_type": "route_status", "subject": "route:R14", "location": {"lon": -89.8248, "lat": 30.1826}, "observed_at": "2005-08-29T12:15:00-05:00", "claim_text": "Route sensor reports no passable connection.", "structured_value": {"status": "blocked"}, "evidence_refs": ["e-s06"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "unknown", "schema": "unknown", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 0, "actionability": 0, "freshness": 0, "impact": 1, "coverage_novelty": 0, "L": 0.3, "D": 0.3, "C": 0.5, "T": 0.5},
+        "tool_failure": true,
+        "retry_attempts": 1,
+        "next_step": "REQUEST_EVIDENCE"
+      },
+      "expected": {"checks": {"provenance": "unknown", "schema": "unknown", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 0, "approval_required": false, "rationale": "An unavailable source produces no unsupported claim and opens an evidence request."}
+    },
+    {
+      "scenario_id": "S07",
+      "scenario_type": "duplicate_reports",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Two first-responder reports of the same blocked bridge arrive within one hour.",
+      "input": {
+        "lane": "field_report",
+        "evidence": [
+          {"evidence_id": "e-s07a", "source_type": "field_report", "source_ref": "synthetic://field/s07a", "captured_at": "2005-08-29T12:25:00-05:00", "observed_at": "2005-08-29T12:20:00-05:00", "artifact_ref": "fixture://s07a", "content_hash": "hash-s07a", "adapter_version": "evaluation-v1", "reporter_id": "aaaaaaaaaaaaaaaa"},
+          {"evidence_id": "e-s07b", "source_type": "field_report", "source_ref": "synthetic://field/s07b", "captured_at": "2005-08-29T13:10:00-05:00", "observed_at": "2005-08-29T13:00:00-05:00", "artifact_ref": "fixture://s07b", "content_hash": "hash-s07b", "adapter_version": "evaluation-v1", "reporter_id": "bbbbbbbbbbbbbbbb"}
+        ],
+        "claims": [
+          {"claim_id": "c-s07a", "event_type": "bridge_damage", "subject": "bridge:B7", "location": {"lon": -89.82486, "lat": 30.18264}, "observed_at": "2005-08-29T12:20:00-05:00", "claim_text": "Twin Span is impassable.", "structured_value": {}, "evidence_refs": ["e-s07a"], "source_lane": "field_report"},
+          {"claim_id": "c-s07b", "event_type": "bridge_damage", "subject": "bridge:B7", "location": {"lon": -89.8249, "lat": 30.18268}, "observed_at": "2005-08-29T13:00:00-05:00", "claim_text": "Twin Span is impassable.", "structured_value": {}, "evidence_refs": ["e-s07b"], "source_lane": "field_report"}
+        ],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.55, "D": 0.9, "C": 0.95, "T": 0.95},
+        "next_step": "SUPPRESS_DUPLICATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "medium", "route": "MONITOR", "action": "SUPPRESS_DUPLICATE", "incident_count": 1, "approval_required": false, "rationale": "The duplicate is suppressed as a report, while the underlying incident remains visible."}
+    },
+    {
+      "scenario_id": "S08",
+      "scenario_type": "duplicate_reports",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Three public messages repeat the same request for water at one shelter.",
+      "input": {
+        "lane": "community",
+        "evidence": [
+          {"evidence_id": "e-s08a", "source_type": "community", "source_ref": "synthetic://sms/s08a", "captured_at": "2005-08-29T14:05:00-05:00", "observed_at": "2005-08-29T14:00:00-05:00", "artifact_ref": "fixture://s08a", "content_hash": "hash-s08a", "adapter_version": "evaluation-v1", "reporter_id": "aaaaaaaaaaaaaaaa"},
+          {"evidence_id": "e-s08b", "source_type": "community", "source_ref": "synthetic://sms/s08b", "captured_at": "2005-08-29T14:15:00-05:00", "observed_at": "2005-08-29T14:10:00-05:00", "artifact_ref": "fixture://s08b", "content_hash": "hash-s08b", "adapter_version": "evaluation-v1", "reporter_id": "bbbbbbbbbbbbbbbb"},
+          {"evidence_id": "e-s08c", "source_type": "community", "source_ref": "synthetic://sms/s08c", "captured_at": "2005-08-29T14:20:00-05:00", "observed_at": "2005-08-29T14:15:00-05:00", "artifact_ref": "fixture://s08c", "content_hash": "hash-s08c", "adapter_version": "evaluation-v1", "reporter_id": "cccccccccccccccc"}
+        ],
+        "claims": [
+          {"claim_id": "c-s08a", "event_type": "resource_shortage", "subject": "shelter:morial", "location": {"lon": -90.065, "lat": 29.943}, "observed_at": "2005-08-29T14:00:00-05:00", "claim_text": "Water is running low at the shelter.", "structured_value": {}, "evidence_refs": ["e-s08a"], "source_lane": "community"},
+          {"claim_id": "c-s08b", "event_type": "resource_shortage", "subject": "shelter:morial", "location": {"lon": -90.0651, "lat": 29.9431}, "observed_at": "2005-08-29T14:10:00-05:00", "claim_text": "Water is running low at the shelter.", "structured_value": {}, "evidence_refs": ["e-s08b"], "source_lane": "community"},
+          {"claim_id": "c-s08c", "event_type": "resource_shortage", "subject": "shelter:morial", "location": {"lon": -90.065, "lat": 29.943}, "observed_at": "2005-08-29T14:15:00-05:00", "claim_text": "Water is running low at the shelter.", "structured_value": {}, "evidence_refs": ["e-s08c"], "source_lane": "community"}
+        ],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 1, "coverage_novelty": 1, "L": 0.2, "D": 0.2, "C": 0.5, "T": 0.4},
+        "next_step": "SUPPRESS_DUPLICATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "low", "route": "UNVERIFIED", "action": "SUPPRESS_DUPLICATE", "incident_count": 1, "approval_required": false, "rationale": "Repeated reports become one auditable shortage incident with all evidence references retained."}
+    },
+    {
+      "scenario_id": "S09",
+      "scenario_type": "near_match_distinct_incidents",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Two bridge reports are similar but refer to crossings more than one kilometre apart.",
+      "input": {
+        "lane": "field_report",
+        "evidence": [
+          {"evidence_id": "e-s09a", "source_type": "field_report", "source_ref": "synthetic://field/s09a", "captured_at": "2005-08-29T15:05:00-05:00", "observed_at": "2005-08-29T15:00:00-05:00", "artifact_ref": "fixture://s09a", "content_hash": "hash-s09a", "adapter_version": "evaluation-v1", "reporter_id": "aaaaaaaaaaaaaaaa"},
+          {"evidence_id": "e-s09b", "source_type": "field_report", "source_ref": "synthetic://field/s09b", "captured_at": "2005-08-29T15:10:00-05:00", "observed_at": "2005-08-29T15:05:00-05:00", "artifact_ref": "fixture://s09b", "content_hash": "hash-s09b", "adapter_version": "evaluation-v1", "reporter_id": "bbbbbbbbbbbbbbbb"}
+        ],
+        "claims": [
+          {"claim_id": "c-s09a", "event_type": "bridge_damage", "subject": "bridge:B7", "location": {"lon": -89.82486, "lat": 30.18264}, "observed_at": "2005-08-29T15:00:00-05:00", "claim_text": "Eastern crossing is blocked.", "structured_value": {}, "evidence_refs": ["e-s09a"], "source_lane": "field_report"},
+          {"claim_id": "c-s09b", "event_type": "bridge_damage", "subject": "bridge:other", "location": {"lon": -89.805, "lat": 30.18264}, "observed_at": "2005-08-29T15:05:00-05:00", "claim_text": "Western crossing is blocked.", "structured_value": {}, "evidence_refs": ["e-s09b"], "source_lane": "field_report"}
+        ],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 1, "actionability": 1, "freshness": 2, "impact": 1, "coverage_novelty": 1, "L": 0.2, "D": 0.3, "C": 0.4, "T": 0.4},
+        "next_step": "MONITOR"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "low", "route": "UNVERIFIED", "action": "ROUTE", "incident_count": 2, "approval_required": false, "rationale": "Similar wording must not merge distinct locations outside the spatial deduplication radius."}
+    },
+    {
+      "scenario_id": "S10",
+      "scenario_type": "duplicate_reports",
+      "data_kind": "synthetic_katrina_inspired",
+      "description": "Satellite and field reports refer to the same flood extent change within the merge window.",
+      "input": {
+        "lane": "satellite",
+        "evidence": [
+          {"evidence_id": "e-s10a", "source_type": "satellite", "source_ref": "synthetic://satellite/s10a", "captured_at": "2005-08-29T16:05:00-05:00", "observed_at": "2005-08-29T16:00:00-05:00", "artifact_ref": "fixture://s10a", "content_hash": "hash-s10a", "adapter_version": "evaluation-v1"},
+          {"evidence_id": "e-s10b", "source_type": "satellite", "source_ref": "synthetic://field/s10b", "captured_at": "2005-08-29T16:30:00-05:00", "observed_at": "2005-08-29T16:20:00-05:00", "artifact_ref": "fixture://s10b", "content_hash": "hash-s10b", "adapter_version": "evaluation-v1"}
+        ],
+        "claims": [
+          {"claim_id": "c-s10a", "event_type": "flood_extent_change", "subject": "zone:C", "location": {"lon": -90.02, "lat": 29.98}, "observed_at": "2005-08-29T16:00:00-05:00", "claim_text": "Flood extent expanded.", "structured_value": {}, "evidence_refs": ["e-s10a"], "source_lane": "satellite"},
+          {"claim_id": "c-s10b", "event_type": "flood_extent_change", "subject": "zone:C", "location": {"lon": -90.0201, "lat": 29.9801}, "observed_at": "2005-08-29T16:20:00-05:00", "claim_text": "Flood extent expanded.", "structured_value": {}, "evidence_refs": ["e-s10b"], "source_lane": "satellite"}
+        ],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 1, "coverage_novelty": 1, "L": 0.3, "D": 0.3, "C": 0.3, "T": 0.4},
+        "next_step": "SUPPRESS_DUPLICATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "low", "route": "UNVERIFIED", "action": "SUPPRESS_DUPLICATE", "incident_count": 1, "approval_required": false, "rationale": "The second report is a duplicate observation of the same incident."}
+    },
+    {
+      "scenario_id": "S11",
+      "scenario_type": "malformed_structured_input",
+      "data_kind": "synthetic",
+      "description": "The claim omits its event type and cannot enter typed graph state.",
+      "input": {
+        "lane": "field_report",
+        "evidence": [{"evidence_id": "e-s11", "source_type": "field_report", "source_ref": "synthetic://field/s11", "captured_at": "2005-08-29T17:00:00-05:00", "observed_at": "2005-08-29T16:55:00-05:00", "artifact_ref": "fixture://s11", "content_hash": "hash-s11", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s11", "subject": "bridge:B7", "observed_at": "2005-08-29T16:55:00-05:00", "claim_text": "Malformed report.", "evidence_refs": ["e-s11"], "source_lane": "field_report"}],
+        "checks": {"provenance": "unknown", "schema": "fail", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 0, "actionability": 0, "freshness": 0, "impact": 0, "coverage_novelty": 0, "L": 0.0, "D": 0.0, "C": 0.0, "T": 0.0},
+        "next_step": "ABSTAIN"
+      },
+      "expected": {"checks": {"provenance": "unknown", "schema": "fail", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "UNVERIFIED", "action": "ABSTAIN", "incident_count": 0, "approval_required": false, "rationale": "Malformed input is rejected without repair and surfaced as uncertainty."}
+    },
+    {
+      "scenario_id": "S12",
+      "scenario_type": "unverifiable_provenance",
+      "data_kind": "synthetic",
+      "description": "A message impersonates an official source but has no verifiable provenance.",
+      "input": {
+        "lane": "community",
+        "evidence": [{"evidence_id": "e-s12", "source_type": "community", "source_ref": "unknown://official-alert", "captured_at": "2005-08-29T17:05:00-05:00", "observed_at": "2005-08-29T17:00:00-05:00", "artifact_ref": "fixture://s12", "content_hash": "hash-s12", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s12", "event_type": "facility_unavailable", "subject": "hospital:NDH", "location": {"lon": -90.05, "lat": 29.95}, "observed_at": "2005-08-29T17:00:00-05:00", "claim_text": "Official alert says the hospital is closed.", "structured_value": {}, "evidence_refs": ["e-s12"], "source_lane": "community"}],
+        "checks": {"provenance": "fail", "schema": "pass", "time_location": "fail", "consistency": "fail", "corroboration": "fail"},
+        "scores": {"relevance": 1, "actionability": 1, "freshness": 1, "impact": 2, "coverage_novelty": 1, "L": 0.4, "D": 0.5, "C": 0.8, "T": 0.5},
+        "next_step": "ABSTAIN"
+      },
+      "expected": {"checks": {"provenance": "fail", "schema": "pass", "time_location": "fail", "consistency": "fail", "corroboration": "fail"}, "verdict": "FAIL", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 1, "approval_required": false, "rationale": "An unverifiable source cannot promote an operational claim."}
+    },
+    {
+      "scenario_id": "S13",
+      "scenario_type": "malformed_structured_input",
+      "data_kind": "synthetic",
+      "description": "The claim has no evidence references and the evidence has no content hash.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s13", "source_type": "telemetry", "source_ref": "synthetic://telemetry/s13", "captured_at": "2005-08-29T17:20:00-05:00", "observed_at": "2005-08-29T17:15:00-05:00", "artifact_ref": "fixture://s13", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s13", "event_type": "water_level_rise", "subject": "gauge:ihnc", "location": {"lon": -90.0274, "lat": 29.9647}, "observed_at": "2005-08-29T17:15:00-05:00", "claim_text": "Sensor reading is incomplete.", "structured_value": {}, "source_lane": "telemetry"}],
+        "checks": {"provenance": "unknown", "schema": "fail", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 0, "actionability": 0, "freshness": 0, "impact": 0, "coverage_novelty": 0, "L": 0.0, "D": 0.0, "C": 0.0, "T": 0.0},
+        "next_step": "ABSTAIN"
+      },
+      "expected": {"checks": {"provenance": "unknown", "schema": "fail", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "UNVERIFIED", "action": "ABSTAIN", "incident_count": 0, "approval_required": false, "rationale": "No repair or inferred evidence reference is allowed at the trust boundary."}
+    },
+    {
+      "scenario_id": "S14",
+      "scenario_type": "incorrect_coordinates",
+      "data_kind": "synthetic",
+      "description": "The claim names a local bridge but gives coordinates in a different region.",
+      "input": {
+        "lane": "field_report",
+        "evidence": [{"evidence_id": "e-s14", "source_type": "field_report", "source_ref": "synthetic://field/s14", "captured_at": "2005-08-29T17:40:00-05:00", "observed_at": "2005-08-29T17:35:00-05:00", "artifact_ref": "fixture://s14", "content_hash": "hash-s14", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s14", "event_type": "bridge_damage", "subject": "bridge:B7", "location": {"lon": -73.9857, "lat": 40.7484}, "observed_at": "2005-08-29T17:35:00-05:00", "claim_text": "B7 is blocked.", "structured_value": {}, "evidence_refs": ["e-s14"], "source_lane": "field_report"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "fail", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 1, "impact": 2, "coverage_novelty": 1, "L": 0.5, "D": 0.7, "C": 0.8, "T": 0.6},
+        "next_step": "REQUEST_EVIDENCE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "fail", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 1, "approval_required": false, "rationale": "A coordinate mismatch is a material uncertainty requiring location evidence."}
+    },
+    {
+      "scenario_id": "S15",
+      "scenario_type": "future_timestamp",
+      "data_kind": "synthetic",
+      "description": "A report timestamp is later than the evaluation keyframe.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s15", "source_type": "telemetry", "source_ref": "synthetic://telemetry/s15", "captured_at": "2099-01-01T00:05:00Z", "observed_at": "2099-01-01T00:00:00Z", "artifact_ref": "fixture://s15", "content_hash": "hash-s15", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s15", "event_type": "water_level_rise", "subject": "gauge:ihnc", "location": {"lon": -90.0274, "lat": 29.9647}, "observed_at": "2099-01-01T00:00:00Z", "claim_text": "Future-dated sensor reading.", "structured_value": {}, "evidence_refs": ["e-s15"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "pass", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 1, "impact": 1, "coverage_novelty": 1, "L": 0.3, "D": 0.3, "C": 0.5, "T": 0.5},
+        "next_step": "REQUEST_EVIDENCE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "pass", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 1, "approval_required": false, "rationale": "Future timestamps cannot be treated as current observations."}
+    },
+    {
+      "scenario_id": "S16",
+      "scenario_type": "outside_disaster_zone",
+      "data_kind": "synthetic",
+      "description": "A claim is geographically outside the stated New Orleans disaster area.",
+      "input": {
+        "lane": "community",
+        "evidence": [{"evidence_id": "e-s16", "source_type": "community", "source_ref": "synthetic://sms/s16", "captured_at": "2005-08-29T18:05:00-05:00", "observed_at": "2005-08-29T18:00:00-05:00", "artifact_ref": "fixture://s16", "content_hash": "hash-s16", "adapter_version": "evaluation-v1", "reporter_id": "1616161616161616"}],
+        "claims": [{"claim_id": "c-s16", "event_type": "people_stranded", "subject": "zone:outside", "location": {"lon": -95.3698, "lat": 29.7604}, "observed_at": "2005-08-29T18:00:00-05:00", "claim_text": "People need evacuation.", "structured_value": {}, "evidence_refs": ["e-s16"], "source_lane": "community"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "fail", "corroboration": "fail"},
+        "scores": {"relevance": 0, "actionability": 0, "freshness": 1, "impact": 1, "coverage_novelty": 0, "L": 0.2, "D": 0.2, "C": 0.2, "T": 0.2},
+        "next_step": "ABSTAIN"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "fail", "consistency": "fail", "corroboration": "fail"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 1, "approval_required": false, "rationale": "Out-of-zone claims must not enter local operational routing."}
+    },
+    {
+      "scenario_id": "S17",
+      "scenario_type": "corroborated_low_priority",
+      "data_kind": "synthetic",
+      "description": "Two sources corroborate a minor debris report with no immediate life-safety impact.",
+      "input": {
+        "lane": "field_report",
+        "evidence": [{"evidence_id": "e-s17", "source_type": "field_report", "source_ref": "synthetic://field/s17", "captured_at": "2005-08-29T18:25:00-05:00", "observed_at": "2005-08-29T18:20:00-05:00", "artifact_ref": "fixture://s17", "content_hash": "hash-s17", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s17", "event_type": "road_blocked", "subject": "road:minor-1", "location": {"lon": -90.01, "lat": 29.98}, "observed_at": "2005-08-29T18:20:00-05:00", "claim_text": "Minor road has debris.", "structured_value": {}, "evidence_refs": ["e-s17"], "source_lane": "field_report"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 1, "actionability": 1, "freshness": 2, "impact": 0, "coverage_novelty": 1, "L": 0.05, "D": 0.1, "C": 0.1, "T": 0.1},
+        "next_step": "MONITOR"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "low", "route": "UNVERIFIED", "action": "ABSTAIN", "incident_count": 1, "approval_required": false, "rationale": "Corroboration does not make a low-harm incident a dispatch candidate."}
+    },
+    {
+      "scenario_id": "S18",
+      "scenario_type": "high_priority_partial_evidence",
+      "data_kind": "synthetic",
+      "description": "A responder reports a possible hospital access failure with partial evidence and high time criticality.",
+      "input": {
+        "lane": "field_report",
+        "evidence": [{"evidence_id": "e-s18", "source_type": "field_report", "source_ref": "synthetic://field/s18", "captured_at": "2005-08-29T18:45:00-05:00", "observed_at": "2005-08-29T18:40:00-05:00", "artifact_ref": "fixture://s18", "content_hash": "hash-s18", "adapter_version": "evaluation-v1", "reporter_id": "1818181818181818"}],
+        "claims": [{"claim_id": "c-s18", "event_type": "facility_unavailable", "subject": "hospital:NDH", "location": {"lon": -90.05, "lat": 29.95}, "observed_at": "2005-08-29T18:40:00-05:00", "claim_text": "Hospital access may be lost.", "structured_value": {}, "evidence_refs": ["e-s18"], "source_lane": "field_report"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.8, "D": 0.6, "C": 0.95, "T": 0.8},
+        "next_step": "URGENT_HUMAN_REVIEW"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "unknown", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "HOLD_FOR_HUMAN_REVIEW", "incident_count": 1, "approval_required": true, "rationale": "High harm and time criticality require human review even when verification is incomplete."}
+    },
+    {
+      "scenario_id": "S19",
+      "scenario_type": "approval_missing",
+      "data_kind": "synthetic",
+      "description": "A verified high-priority route recommendation has no human approval.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s19", "source_type": "telemetry", "source_ref": "synthetic://route/s19", "captured_at": "2005-08-29T19:05:00-05:00", "observed_at": "2005-08-29T19:00:00-05:00", "artifact_ref": "fixture://s19", "content_hash": "hash-s19", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s19", "event_type": "route_status", "subject": "route:R22", "location": {"lon": -89.84306, "lat": 30.18722}, "observed_at": "2005-08-29T19:00:00-05:00", "claim_text": "Alternate route is open for controlled movement.", "structured_value": {"status": "open"}, "evidence_refs": ["e-s19"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.9, "D": 0.9, "C": 0.9, "T": 0.9},
+        "next_step": "DISPATCH_CANDIDATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "HOLD_FOR_HUMAN_REVIEW", "incident_count": 1, "approval_required": true, "approval_result": "REVIEW_REQUIRED", "rationale": "A recommendation may be queued, but no dispatch is executable without a coordinator decision."}
+    },
+    {
+      "scenario_id": "S20",
+      "scenario_type": "approval_expired",
+      "data_kind": "synthetic",
+      "description": "A previously issued approval token is expired when dispatch is attempted.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s20", "source_type": "telemetry", "source_ref": "synthetic://route/s20", "captured_at": "2005-08-29T19:15:00-05:00", "observed_at": "2005-08-29T19:10:00-05:00", "artifact_ref": "fixture://s20", "content_hash": "hash-s20", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s20", "event_type": "route_status", "subject": "route:R22", "location": {"lon": -89.84306, "lat": 30.18722}, "observed_at": "2005-08-29T19:10:00-05:00", "claim_text": "Alternate route is open.", "structured_value": {"status": "open"}, "evidence_refs": ["e-s20"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.9, "D": 0.9, "C": 0.9, "T": 0.9},
+        "human_decision": {"decision_id": "decision-s20", "actor": "Coordinator Diaz", "role": "coordinator", "action": "approve", "reason": "Prior approval token", "incident_id": "incident-c-s20", "proposal_id": "proposal-S20", "proposal_version": 1, "decided_at": "2005-08-29T19:10:00-05:00", "valid_until": "2005-08-29T18:00:00-05:00"},
+        "next_step": "DISPATCH_CANDIDATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "HOLD_FOR_HUMAN_REVIEW", "incident_count": 1, "approval_required": true, "approval_result": "REVIEW_REQUIRED", "rationale": "Expired authorization cannot be reused."}
+    },
+    {
+      "scenario_id": "S21",
+      "scenario_type": "approval_invalid",
+      "data_kind": "synthetic",
+      "description": "An approval is signed by an observer who is not authorized to approve dispatch.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s21", "source_type": "telemetry", "source_ref": "synthetic://route/s21", "captured_at": "2005-08-29T19:25:00-05:00", "observed_at": "2005-08-29T19:20:00-05:00", "artifact_ref": "fixture://s21", "content_hash": "hash-s21", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s21", "event_type": "route_status", "subject": "route:R22", "location": {"lon": -89.84306, "lat": 30.18722}, "observed_at": "2005-08-29T19:20:00-05:00", "claim_text": "Alternate route is open.", "structured_value": {"status": "open"}, "evidence_refs": ["e-s21"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.9, "D": 0.9, "C": 0.9, "T": 0.9},
+        "human_decision": {"decision_id": "decision-s21", "actor": "Observer", "role": "observer", "action": "approve", "reason": "Looks good", "incident_id": "incident-c-s21", "proposal_id": "proposal-S21", "proposal_version": 1, "decided_at": "2005-08-29T19:25:00-05:00"},
+        "next_step": "DISPATCH_CANDIDATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "HOLD_FOR_HUMAN_REVIEW", "incident_count": 1, "approval_required": true, "approval_result": "REVIEW_REQUIRED", "rationale": "Only an authorized coordinator role can approve a physical action."}
+    },
+    {
+      "scenario_id": "S22",
+      "scenario_type": "human_rejection",
+      "data_kind": "synthetic",
+      "description": "A coordinator rejects a dispatch recommendation after review.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s22", "source_type": "telemetry", "source_ref": "synthetic://route/s22", "captured_at": "2005-08-29T19:35:00-05:00", "observed_at": "2005-08-29T19:30:00-05:00", "artifact_ref": "fixture://s22", "content_hash": "hash-s22", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s22", "event_type": "route_status", "subject": "route:R22", "location": {"lon": -89.84306, "lat": 30.18722}, "observed_at": "2005-08-29T19:30:00-05:00", "claim_text": "Alternate route is open.", "structured_value": {"status": "open"}, "evidence_refs": ["e-s22"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.9, "D": 0.9, "C": 0.9, "T": 0.9},
+        "human_decision": {"decision_id": "decision-s22", "actor": "Coordinator Diaz", "role": "coordinator", "action": "reject", "reason": "Route changed before execution", "incident_id": "incident-c-s22", "proposal_id": "proposal-S22", "proposal_version": 1, "decided_at": "2005-08-29T19:35:00-05:00"},
+        "next_step": "HOLD_FOR_HUMAN_REVIEW"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "REJECTED", "incident_count": 1, "approval_required": true, "approval_result": "REJECTED", "rationale": "A human rejection must prevent execution and remain in the audit trail."}
+    },
+    {
+      "scenario_id": "S23",
+      "scenario_type": "human_edit",
+      "data_kind": "synthetic",
+      "description": "A coordinator edits the recommended route before approving the physical action.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s23", "source_type": "telemetry", "source_ref": "synthetic://route/s23", "captured_at": "2005-08-29T19:45:00-05:00", "observed_at": "2005-08-29T19:40:00-05:00", "artifact_ref": "fixture://s23", "content_hash": "hash-s23", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s23", "event_type": "route_status", "subject": "route:R22", "location": {"lon": -89.84306, "lat": 30.18722}, "observed_at": "2005-08-29T19:40:00-05:00", "claim_text": "Alternate route is open.", "structured_value": {"status": "open"}, "evidence_refs": ["e-s23"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.9, "D": 0.9, "C": 0.9, "T": 0.9},
+        "human_decision": {"decision_id": "decision-s23", "actor": "Coordinator Diaz", "role": "coordinator", "action": "modify", "reason": "Use controlled convoy route", "incident_id": "incident-c-s23", "proposal_id": "proposal-S23", "proposal_version": 1, "decided_at": "2005-08-29T19:45:00-05:00", "modifications": {"route": "route:R22", "resource": "truck:18"}},
+        "next_step": "DISPATCH_CANDIDATE"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "urgent", "route": "URGENT_HUMAN_REVIEW", "action": "DISPATCHED", "incident_count": 1, "approval_required": true, "approval_result": "DISPATCHED", "rationale": "The edited recommendation is executable only after the authorized human decision, with both versions audited."}
+    },
+    {
+      "scenario_id": "S24",
+      "scenario_type": "valid_not_dispatchable",
+      "data_kind": "synthetic",
+      "description": "Valid evidence supports a low-impact road observation but does not justify dispatch.",
+      "input": {
+        "lane": "satellite",
+        "evidence": [{"evidence_id": "e-s24", "source_type": "satellite", "source_ref": "synthetic://satellite/s24", "captured_at": "2005-08-29T20:05:00-05:00", "observed_at": "2005-08-29T20:00:00-05:00", "artifact_ref": "fixture://s24", "content_hash": "hash-s24", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s24", "event_type": "road_blocked", "subject": "road:minor-2", "location": {"lon": -90.01, "lat": 29.98}, "observed_at": "2005-08-29T20:00:00-05:00", "claim_text": "A minor road has shallow debris.", "structured_value": {}, "evidence_refs": ["e-s24"], "source_lane": "satellite"}],
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 0, "freshness": 2, "impact": 0, "coverage_novelty": 1, "L": 0.05, "D": 0.1, "C": 0.1, "T": 0.1},
+        "next_step": "MONITOR"
+      },
+      "expected": {"checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"}, "verdict": "PASS", "priority_level": "low", "route": "UNVERIFIED", "action": "ABSTAIN", "incident_count": 1, "approval_required": false, "rationale": "Evidence can be valid and still support a non-consequential outcome."}
+    },
+    {
+      "scenario_id": "S25",
+      "scenario_type": "retry_limit_exhausted",
+      "data_kind": "synthetic",
+      "description": "A source fails on every allowed attempt and the system exits with a safe evidence request.",
+      "input": {
+        "lane": "telemetry",
+        "evidence": [{"evidence_id": "e-s25", "source_type": "telemetry", "source_ref": "synthetic://telemetry/s25", "captured_at": "2005-08-29T20:25:00-05:00", "observed_at": "2005-08-29T20:20:00-05:00", "artifact_ref": "fixture://s25", "content_hash": "hash-s25", "adapter_version": "evaluation-v1"}],
+        "claims": [{"claim_id": "c-s25", "event_type": "water_level_rise", "subject": "gauge:ihnc", "location": {"lon": -90.0274, "lat": 29.9647}, "observed_at": "2005-08-29T20:20:00-05:00", "claim_text": "Gauge unavailable after repeated timeouts.", "structured_value": {}, "evidence_refs": ["e-s25"], "source_lane": "telemetry"}],
+        "checks": {"provenance": "unknown", "schema": "unknown", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 0, "actionability": 0, "freshness": 0, "impact": 1, "coverage_novelty": 0, "L": 0.2, "D": 0.2, "C": 0.4, "T": 0.5},
+        "tool_failure": true,
+        "retry_attempts": 3,
+        "next_step": "REQUEST_EVIDENCE"
+      },
+      "expected": {"checks": {"provenance": "unknown", "schema": "unknown", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"}, "verdict": "UNKNOWN", "priority_level": "low", "route": "REQUEST_EVIDENCE", "action": "REQUEST_EVIDENCE", "incident_count": 0, "approval_required": false, "rationale": "Retry exhaustion must terminate safely and request another source rather than infer a result."}
+    }
+  ]
+}

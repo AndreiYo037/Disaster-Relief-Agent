@@ -73,10 +73,22 @@ def check_equity(amounts: dict[str, float], floors: dict[str, float]) -> tuple[b
 
 
 def mint_permit(plan: dict, human: HumanDecision, floors: dict[str, float]) -> Permit:
+    db.insert_audit_if_new(
+        human.actor,
+        f"coordinator.{human.action}",
+        "plan",
+        plan["plan_id"],
+        human.decided_at,
+        human.model_dump_json(),
+    )
+    db.get_db().commit()
     if human.action not in ("approve", "modify"):
         raise PermissionError("no human approve/modify → no permit")
     if human.role not in ("logistics_lead", "coordinator", "named_authority"):
         raise PermissionError("role cannot mint this tier")
+    proposal_version = plan.get("proposal_version", 1)
+    if human.proposal_id != plan["plan_id"] or human.proposal_version != proposal_version:
+        raise PermissionError("decision is not bound to this proposal version")
     amounts = dict(plan.get("amounts", {}))
     if human.action == "modify" and human.modifications:
         amounts.update(human.modifications)
@@ -133,7 +145,7 @@ def run_demo() -> dict:
     assert ok_f
     modify_qty = pv(params, "governance", "human_modify_zone_B_qty_l")
     plan = {
-        "plan_id": "plan-1048", "via": "route:R14",
+        "plan_id": "plan-1048", "proposal_version": 1, "via": "route:R14",
         "depends_on": ["bridge:B7", "route:R14"],
         "amounts": {"zone:B": modify_qty, "zone:C": floors["zone:C"]},
     }
@@ -141,6 +153,7 @@ def run_demo() -> dict:
         actor="Coordinator Diaz", role="logistics_lead", action="modify",
         reason="partner NGO covering the remainder to Zone B",
         modifications={"zone:B": modify_qty},
+        proposal_id="plan-1048", proposal_version=1,
     )
     permit = mint_permit(plan, d1, floors)
     task = {"action": "deliver_water"}
@@ -161,10 +174,11 @@ def run_demo() -> dict:
     st = authorize(task, permit, plan)
     assert st == "SUSPENDED"
 
-    plan2 = {"plan_id": "plan-1052", "via": "route:R22", "depends_on": ["route:R22"],
+    plan2 = {"plan_id": "plan-1052", "proposal_version": 1, "via": "route:R22", "depends_on": ["route:R22"],
              "amounts": plan["amounts"]}
     d2 = HumanDecision(actor="Coordinator Diaz", role="logistics_lead", action="approve",
-                       reason="southern reroute confirmed clear")
+                       reason="southern reroute confirmed clear",
+                       proposal_id="plan-1052", proposal_version=1)
     p2 = mint_permit(plan2, d2, floors)
     st2 = authorize(task, p2, plan2)
     assert st2 == "IN_PROGRESS"

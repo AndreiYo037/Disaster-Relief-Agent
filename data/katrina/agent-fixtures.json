@@ -1,0 +1,197 @@
+{
+  "t0": {
+    "satellite": [
+      {
+        "evidence_id": "e-t0-sat-1",
+        "source_ref": "satellite://katrina/t0/flood-extent",
+        "observed_at": "2005-08-29T06:00:00-05:00",
+        "captured_at": "2005-08-29T06:30:00-05:00",
+        "subject": "zone:B",
+        "event_type": "flood_extent_change",
+        "location": {"lon": -90.013, "lat": 29.974},
+        "text": "Water extent is increasing around the Lower Ninth Ward.",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 2, "coverage_novelty": 1, "L": 0.55, "D": 0.65, "C": 0.7, "T": 0.65},
+        "next_step": "REQUEST_EVIDENCE"
+      }
+    ],
+    "telemetry": [
+      {
+        "evidence_id": "e-t0-tel-1",
+        "source_ref": "telemetry://ihnc/gauge/t0",
+        "observed_at": "2005-08-29T06:00:00-05:00",
+        "captured_at": "2005-08-29T06:05:00-05:00",
+        "subject": "gauge:ihnc",
+        "event_type": "water_level_rise",
+        "location": {"lon": -90.0274, "lat": 29.9647},
+        "text": "IHNC Lock gauge records a rapid rise in water level.",
+        "value": {"stage_m": 3.44, "trend": "rising"},
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.7, "D": 0.55, "C": 0.8, "T": 0.75},
+        "next_step": "MONITOR"
+      }
+    ],
+    "field_report": [
+      {
+        "evidence_id": "e-t0-field-1",
+        "source_ref": "field://responder-3/report-1",
+        "observed_at": "2005-08-29T07:00:00-05:00",
+        "captured_at": "2005-08-29T07:10:00-05:00",
+        "subject": "bridge:B7",
+        "event_type": "bridge_damage",
+        "location": {"lon": -89.82486, "lat": 30.18264},
+        "text": "Twin Span looks out; B7 may be impassable.",
+        "reporter": "responder-3",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 1, "L": 0.5, "D": 0.8, "C": 0.9, "T": 0.8},
+        "next_step": "REQUEST_EVIDENCE"
+      }
+    ],
+    "community": [
+      {
+        "evidence_id": "e-t0-com-1",
+        "source_ref": "community://sms/anon-1",
+        "observed_at": "2005-08-29T08:00:00-05:00",
+        "captured_at": "2005-08-29T08:05:00-05:00",
+        "subject": "zone:B",
+        "event_type": "people_stranded",
+        "location": {"lon": -90.013, "lat": 29.974},
+        "text": "People report being stranded near the Lower Ninth Ward.",
+        "reporter": "anon-1",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "unknown", "consistency": "unknown", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 1, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.8, "D": 0.45, "C": 0.6, "T": 0.9},
+        "next_step": "URGENT_HUMAN_REVIEW"
+      }
+    ]
+  },
+  "b7": {
+    "satellite": [
+      {
+        "evidence_id": "e-b7-sat-1",
+        "source_ref": "satellite://katrina/b7/bridge-change",
+        "observed_at": "2005-08-29T12:00:00-05:00",
+        "captured_at": "2005-08-29T12:30:00-05:00",
+        "subject": "bridge:B7",
+        "event_type": "bridge_damage",
+        "location": {"lon": -89.82486, "lat": 30.18264},
+        "text": "Imagery shows a break in the Twin Span crossing.",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.55, "D": 0.95, "C": 0.95, "T": 0.95},
+        "next_step": "DISPATCH_CANDIDATE"
+      }
+    ],
+    "telemetry": [
+      {
+        "evidence_id": "e-b7-tel-1",
+        "source_ref": "telemetry://route/R14/status",
+        "observed_at": "2005-08-29T12:15:00-05:00",
+        "captured_at": "2005-08-29T12:16:00-05:00",
+        "subject": "bridge:B7",
+        "event_type": "bridge_damage",
+        "location": {"lon": -89.82480, "lat": 30.18260},
+        "text": "Route sensor reports no passable connection across B7.",
+        "value": {"route": "route:R14", "status": "blocked"},
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.55, "D": 0.9, "C": 0.95, "T": 0.95},
+        "next_step": "DISPATCH_CANDIDATE"
+      }
+    ],
+    "field_report": [
+      {
+        "evidence_id": "e-b7-field-1",
+        "source_ref": "field://responder-3/report-2",
+        "observed_at": "2005-08-29T12:20:00-05:00",
+        "captured_at": "2005-08-29T12:25:00-05:00",
+        "subject": "bridge:B7",
+        "event_type": "bridge_damage",
+        "location": {"lon": -89.82490, "lat": 30.18268},
+        "text": "Responder confirms the Twin Span is impassable.",
+        "reporter": "responder-3",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.55, "D": 0.9, "C": 0.95, "T": 0.95},
+        "next_step": "DISPATCH_CANDIDATE"
+      }
+    ],
+    "community": [
+      {
+        "evidence_id": "e-b7-com-1",
+        "source_ref": "community://sms/anon-2",
+        "observed_at": "2005-08-29T12:45:00-05:00",
+        "captured_at": "2005-08-29T12:50:00-05:00",
+        "subject": "zone:B",
+        "event_type": "people_stranded",
+        "location": {"lon": -90.013, "lat": 29.974},
+        "text": "Residents report stranded households with no road access.",
+        "reporter": "anon-2",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "unknown", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 2, "L": 0.8, "D": 0.6, "C": 0.65, "T": 0.9},
+        "next_step": "URGENT_HUMAN_REVIEW"
+      }
+    ]
+  },
+  "reroute": {
+    "satellite": [
+      {
+        "evidence_id": "e-r22-sat-1",
+        "source_ref": "satellite://katrina/reroute/us11",
+        "observed_at": "2005-08-29T18:00:00-05:00",
+        "captured_at": "2005-08-29T18:30:00-05:00",
+        "subject": "route:R22",
+        "event_type": "route_status",
+        "location": {"lon": -89.84306, "lat": 30.18722},
+        "text": "Alternate US-11 crossing remains visibly open.",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "unknown"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 1, "coverage_novelty": 2, "L": 0.35, "D": 0.55, "C": 0.8, "T": 0.8},
+        "next_step": "DISPATCH_CANDIDATE"
+      }
+    ],
+    "telemetry": [
+      {
+        "evidence_id": "e-r22-tel-1",
+        "source_ref": "telemetry://route/R22/status",
+        "observed_at": "2005-08-29T18:10:00-05:00",
+        "captured_at": "2005-08-29T18:11:00-05:00",
+        "subject": "route:R22",
+        "event_type": "route_status",
+        "location": {"lon": -89.84306, "lat": 30.18722},
+        "text": "Route telemetry reports US-11 open for controlled convoy movement.",
+        "value": {"route": "route:R22", "status": "open"},
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 1, "coverage_novelty": 2, "L": 0.3, "D": 0.4, "C": 0.85, "T": 0.85},
+        "next_step": "DISPATCH_CANDIDATE"
+      }
+    ],
+    "field_report": [
+      {
+        "evidence_id": "e-r22-field-1",
+        "source_ref": "field://responder-3/route-r22",
+        "observed_at": "2005-08-29T18:20:00-05:00",
+        "captured_at": "2005-08-29T18:25:00-05:00",
+        "subject": "route:R22",
+        "event_type": "route_status",
+        "location": {"lon": -89.84306, "lat": 30.18722},
+        "text": "Field team confirms the southern reroute is clear.",
+        "reporter": "responder-3",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "pass", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 1, "coverage_novelty": 2, "L": 0.3, "D": 0.4, "C": 0.85, "T": 0.85},
+        "next_step": "DISPATCH_CANDIDATE"
+      }
+    ],
+    "community": [
+      {
+        "evidence_id": "e-r22-com-1",
+        "source_ref": "community://sms/anon-3",
+        "observed_at": "2005-08-29T18:40:00-05:00",
+        "captured_at": "2005-08-29T18:45:00-05:00",
+        "subject": "zone:B",
+        "event_type": "people_stranded",
+        "location": {"lon": -90.013, "lat": 29.974},
+        "text": "Residents still request water and evacuation support.",
+        "reporter": "anon-3",
+        "checks": {"provenance": "pass", "schema": "pass", "time_location": "pass", "consistency": "unknown", "corroboration": "pass"},
+        "scores": {"relevance": 2, "actionability": 2, "freshness": 2, "impact": 2, "coverage_novelty": 1, "L": 0.8, "D": 0.6, "C": 0.65, "T": 0.9},
+        "next_step": "URGENT_HUMAN_REVIEW"
+      }
+    ]
+  }
+}

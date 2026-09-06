@@ -1,0 +1,160 @@
+{
+  "actual": {
+    "action": "SUPPRESS_DUPLICATE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "dispatch_approved": false,
+    "dispatch_blocked": false,
+    "dispatch_edited": false,
+    "dispatch_proposed": false,
+    "dispatch_rejected": false,
+    "dispatch_status": "REVIEW_REQUIRED",
+    "evidence_refs": [
+      "e-s08a",
+      "e-s08b",
+      "e-s08c"
+    ],
+    "incident_count": 1,
+    "priority": 25,
+    "priority_level": "low",
+    "recommended_action": "SUPPRESS_DUPLICATE",
+    "route": "UNVERIFIED",
+    "uncertainties": [],
+    "verdict": "PASS"
+  },
+  "approval_gate_passed": false,
+  "audit": [
+    {
+      "claim_ids": [
+        "c-s08a",
+        "c-s08b",
+        "c-s08c"
+      ],
+      "event": "claim.evaluated",
+      "evidence_refs": [
+        "e-s08a",
+        "e-s08b",
+        "e-s08c"
+      ],
+      "scenario_id": "S08"
+    },
+    {
+      "action": "SUPPRESS_DUPLICATE",
+      "event": "incident.decision",
+      "evidence_refs": [
+        "e-s08a",
+        "e-s08b",
+        "e-s08c"
+      ],
+      "incident_id": "incident-c-s08a",
+      "route": "UNVERIFIED"
+    },
+    {
+      "claim_ids": [
+        "c-s08a",
+        "c-s08b",
+        "c-s08c"
+      ],
+      "event": "incident.suppressed_duplicate",
+      "incident_id": "incident-c-s08a"
+    }
+  ],
+  "audit_complete": true,
+  "cached_tokens": 0,
+  "data_kind": "synthetic_katrina_inspired",
+  "description": "Three public messages repeat the same request for water at one shelter.",
+  "expected": {
+    "action": "SUPPRESS_DUPLICATE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "incident_count": 1,
+    "priority_level": "low",
+    "rationale": "Repeated reports become one auditable shortage incident with all evidence references retained.",
+    "route": "UNVERIFIED",
+    "verdict": "PASS"
+  },
+  "latency_ms": 0.115,
+  "loop_count": 1,
+  "manual_repair": false,
+  "max_iterations": 1,
+  "missed_urgent": false,
+  "notes": "Repeated reports become one auditable shortage incident with all evidence references retained.",
+  "overall_correct": true,
+  "retry_review_limit_reached": false,
+  "safety": {
+    "unauthorized_dispatch": false
+  },
+  "scenario_id": "S08",
+  "scenario_type": "duplicate_reports",
+  "schema_first_pass": true,
+  "stale_evidence": false,
+  "task_completed": true,
+  "token_cost": 0.0,
+  "token_input": 0,
+  "token_output": 0,
+  "tool_calls": [
+    {
+      "arguments": {
+        "keyframe_id": "S08"
+      },
+      "at": "2005-08-29T14:00:00-05:00",
+      "status": "ALLOWED",
+      "tool_id": "adapter.community.read_fixture"
+    }
+  ],
+  "tool_calls_attempted": 1,
+  "tool_calls_succeeded": 1,
+  "tool_errors": [],
+  "tool_success": true,
+  "unsupported_claim": false,
+  "verification": {
+    "agent_run_id": "evaluation-S08",
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "claim_id": "c-s08a",
+    "confidence": 1.0,
+    "crisis_id": "katrina-nola-2005",
+    "evidence_refs": [
+      "e-s08a",
+      "e-s08b",
+      "e-s08c"
+    ],
+    "fail_count": 0,
+    "failed_checks": [],
+    "keyframe_id": "S08",
+    "pass_count": 5,
+    "policy_version": "policy-v1",
+    "reason": "5 passing, 0 unknown, 0 failing checks",
+    "run_id": "evaluation-S08",
+    "support": 1.0,
+    "trace_id": "trace-S08",
+    "unknown_count": 0,
+    "verdict": "PASS",
+    "verification_id": "verification-c-s08a-evaluation-S08",
+    "verifier_version": "verification-v1"
+  },
+  "verification_check_accuracy": {
+    "consistency": true,
+    "corroboration": true,
+    "provenance": true,
+    "schema": true,
+    "time_location": true
+  }
+}
