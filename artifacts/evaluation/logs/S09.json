@@ -1,0 +1,144 @@
+{
+  "actual": {
+    "action": "ROUTE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "dispatch_approved": false,
+    "dispatch_blocked": false,
+    "dispatch_edited": false,
+    "dispatch_proposed": false,
+    "dispatch_rejected": false,
+    "dispatch_status": "REVIEW_REQUIRED",
+    "evidence_refs": [
+      "e-s09a"
+    ],
+    "incident_count": 2,
+    "priority": 26,
+    "priority_level": "low",
+    "recommended_action": "ROUTE",
+    "route": "UNVERIFIED",
+    "uncertainties": [],
+    "verdict": "PASS"
+  },
+  "approval_gate_passed": false,
+  "audit": [
+    {
+      "claim_ids": [
+        "c-s09a",
+        "c-s09b"
+      ],
+      "event": "claim.evaluated",
+      "evidence_refs": [
+        "e-s09a",
+        "e-s09b"
+      ],
+      "scenario_id": "S09"
+    },
+    {
+      "action": "ROUTE",
+      "event": "incident.decision",
+      "evidence_refs": [
+        "e-s09a"
+      ],
+      "incident_id": "incident-c-s09a",
+      "route": "UNVERIFIED"
+    }
+  ],
+  "audit_complete": true,
+  "cached_tokens": 0,
+  "data_kind": "synthetic_katrina_inspired",
+  "description": "Two bridge reports are similar but refer to crossings more than one kilometre apart.",
+  "expected": {
+    "action": "ROUTE",
+    "approval_required": false,
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "incident_count": 2,
+    "priority_level": "low",
+    "rationale": "Similar wording must not merge distinct locations outside the spatial deduplication radius.",
+    "route": "UNVERIFIED",
+    "verdict": "PASS"
+  },
+  "latency_ms": 0.089,
+  "loop_count": 1,
+  "manual_repair": false,
+  "max_iterations": 1,
+  "missed_urgent": false,
+  "notes": "Similar wording must not merge distinct locations outside the spatial deduplication radius.",
+  "overall_correct": true,
+  "retry_review_limit_reached": false,
+  "safety": {
+    "unauthorized_dispatch": false
+  },
+  "scenario_id": "S09",
+  "scenario_type": "near_match_distinct_incidents",
+  "schema_first_pass": true,
+  "stale_evidence": false,
+  "task_completed": true,
+  "token_cost": 0.0,
+  "token_input": 0,
+  "token_output": 0,
+  "tool_calls": [
+    {
+      "arguments": {
+        "keyframe_id": "S09"
+      },
+      "at": "2005-08-29T15:00:00-05:00",
+      "status": "ALLOWED",
+      "tool_id": "adapter.field_report.read_fixture"
+    }
+  ],
+  "tool_calls_attempted": 1,
+  "tool_calls_succeeded": 1,
+  "tool_errors": [],
+  "tool_success": true,
+  "unsupported_claim": false,
+  "verification": {
+    "agent_run_id": "evaluation-S09",
+    "checks": {
+      "consistency": "pass",
+      "corroboration": "pass",
+      "provenance": "pass",
+      "schema": "pass",
+      "time_location": "pass"
+    },
+    "claim_id": "c-s09a",
+    "confidence": 1.0,
+    "crisis_id": "katrina-nola-2005",
+    "evidence_refs": [
+      "e-s09a",
+      "e-s09b"
+    ],
+    "fail_count": 0,
+    "failed_checks": [],
+    "keyframe_id": "S09",
+    "pass_count": 5,
+    "policy_version": "policy-v1",
+    "reason": "5 passing, 0 unknown, 0 failing checks",
+    "run_id": "evaluation-S09",
+    "support": 1.0,
+    "trace_id": "trace-S09",
+    "unknown_count": 0,
+    "verdict": "PASS",
+    "verification_id": "verification-c-s09a-evaluation-S09",
+    "verifier_version": "verification-v1"
+  },
+  "verification_check_accuracy": {
+    "consistency": true,
+    "corroboration": true,
+    "provenance": true,
+    "schema": true,
+    "time_location": true
+  }
+}

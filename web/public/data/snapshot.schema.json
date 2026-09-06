@@ -38,6 +38,23 @@
     "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
     "forecasts": { "type": "array" },
     "pulse": { "type": "object" },
+    "agentic": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "string" },
+        "source_evidence_summaries": { "type": "array" },
+        "verified_incidents": { "type": "array" },
+        "unverified_incidents": { "type": "array" },
+        "dispatch_suggested_routes": { "type": "array" },
+        "dispatch_priorities": { "type": "array" },
+        "lane_results": { "type": "array" },
+        "feedback_requests": { "type": "array" },
+        "planning_degraded": { "type": "boolean" },
+        "orchestration_degraded": { "type": "boolean" },
+        "summarisation_degraded": { "type": "boolean" },
+        "audit": { "type": "object" }
+      }
+    },
     "viz": { "type": "object" }
   },
   "$defs": {
