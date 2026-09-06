@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from .bridges import load_bridge_spans
 from .catalog import (
     BASE_STATES, ENTITIES_SPEC, RELATIONSHIPS, ROUTE_PATHS, ZONE_RINGS,
 )
@@ -111,15 +112,23 @@ def interpolate_hydrograph(when: datetime) -> tuple[float, float]:
     return vals[-1] * FT_M, 0.0
 
 
+def district_flood_metrics(d: dict) -> tuple[float, float]:
+    """HUD-weighted mean depth (m) and share of housing units that flooded."""
+    n = d["flooded_units"]
+    tot = d.get("total_units") or 0
+    wet_frac = (n / tot) if tot else 0.0
+    if n <= 0:
+        return 0.0, 0.0
+    mids = load_hud_flood()["bin_midpoints_ft"]
+    wft = (d["units_2_4"] * mids[0] + d["units_4_7"] * mids[1] + d["units_gt7"] * mids[2]) / n
+    return wft * FT_M, wet_frac
+
+
 def hud_weighted_depth_m(district_id: str) -> float:
     hud = load_hud_flood()
-    mids = hud["bin_midpoints_ft"]
     d = next(x for x in hud["districts"] if x["id"] == district_id)
-    n = d["flooded_units"]
-    if n <= 0:
-        return 0.0
-    wft = (d["units_2_4"] * mids[0] + d["units_4_7"] * mids[1] + d["units_gt7"] * mids[2]) / n
-    return wft * FT_M
+    depth_m, _ = district_flood_metrics(d)
+    return depth_m
 
 
 def flood_stage(params: dict, keyframe: str) -> tuple[float, float]:
@@ -130,9 +139,55 @@ def flood_stage(params: dict, keyframe: str) -> tuple[float, float]:
     return hud_weighted_depth_m("lower-9th"), 0.0
 
 
+def load_contamination() -> dict:
+    return load_osm_json("katrina_contamination.json") or {}
+
+
+def load_fires() -> dict:
+    return load_osm_json("katrina_fires.json") or {}
+
+
+def contamination_hazard(keyframe: str) -> dict:
+    raw = load_contamination()
+    areas = list(raw.get("areas") or [])
+    return {
+        "active": bool(areas),
+        "areas": areas,
+        "source_key": raw.get("source_key"),
+        "vintage": raw.get("vintage"),
+        "note": raw.get("note") or "",
+    }
+
+
+def fire_hazard(keyframe: str) -> dict:
+    raw = load_fires()
+    sites = list(raw.get("sites") or [])
+    return {
+        "synthetic": False,
+        "active": bool(sites),
+        "sites": sites,
+        "perimeter": [],
+        "spread_rate": 0.35 if sites else 0.0,
+        "wind": {"u": 0.12, "v": 0.06},
+        "source_key": raw.get("source_key"),
+        "vintage": raw.get("vintage"),
+        "note": raw.get("note") or "No Katrina fire binding retrieved — hazard off.",
+    }
+
+
 def entity_ll(eid: str) -> dict:
     spec = next(e for e in ENTITIES_SPEC if e["entity_id"] == eid)
     return {"lon": spec["lon"], "lat": spec["lat"]}
+
+
+_BRIDGE_SPANS: dict | None = None
+
+
+def _bridge_span_cache() -> dict:
+    global _BRIDGE_SPANS
+    if _BRIDGE_SPANS is None:
+        _BRIDGE_SPANS = load_bridge_spans()
+    return _BRIDGE_SPANS
 
 
 def load_osm_json(name: str) -> dict:
@@ -279,6 +334,42 @@ def mark_orphan_cells(cells: list[dict], buildings: list[dict]) -> None:
         c["orphan"] = bd >= max_d2
 
 
+def mark_building_flood_damage(buildings: list[dict], keyframe: str) -> None:
+    """HUD wet_frac / depth → intact | damaged | destroyed. Height follows damage."""
+    hud = load_hud_flood()
+    districts = []
+    for d in hud["districts"]:
+        if keyframe == "b7" and not d.get("early_29aug"):
+            continue
+        if d.get("flooded_units", 0) <= 0:
+            continue
+        depth_m, wet_frac = district_flood_metrics(d)
+        districts.append({
+            "id": d["id"], "ring": d["ring"],
+            "depth_m": depth_m, "wet_frac": wet_frac,
+        })
+    for b in buildings:
+        cx, cy = _bldg_xy(b)
+        hit = next((d for d in districts if _pip(cx, cy, d["ring"])), None)
+        h0 = float(b.get("height_m") or 8)
+        if hit is None:
+            b["damage"] = "intact"
+            b["wet_frac"] = 0.0
+            b["depth_m"] = 0.0
+            continue
+        b["wet_frac"] = round(hit["wet_frac"], 3)
+        b["depth_m"] = round(hit["depth_m"], 3)
+        b["flood_district"] = hit["id"]
+        if hit["wet_frac"] >= 0.55 or hit["depth_m"] >= 1.8:
+            b["damage"] = "destroyed"
+            b["height_m"] = round(max(1.2, h0 * 0.18), 2)
+        elif hit["wet_frac"] >= 0.12:
+            b["damage"] = "damaged"
+            b["height_m"] = round(max(2.4, h0 * 0.55), 2)
+        else:
+            b["damage"] = "intact"
+
+
 def geography_bundle(keyframe: str, cells: list | None = None) -> dict:
     roads_raw = load_osm_json("osm_roads.json")
     canals_raw = load_osm_json("osm_canals.json")
@@ -309,6 +400,7 @@ def geography_bundle(keyframe: str, cells: list | None = None) -> dict:
         buildings = drape_population(buildings, cells)
     else:
         buildings = [b for b in buildings if not in_open_water(*_bldg_xy(b))]
+    mark_building_flood_damage(buildings, keyframe)
     return {
         "vintage": roads_raw.get("vintage") or "current OSM — Twin Span is the 2011 rebuild",
         "source_key": "osm-extract-nola",
@@ -436,7 +528,7 @@ def wet_mask(keyframe: str) -> dict:
         note = (
             "Rings follow east-bank land bowls on the basemap (lake seawall, 17th St, IHNC, "
             "river levee). LOW subset is Lower 9th + Lakeview at ~06:00 CDT 29 Aug. "
-            "Not a 06:00 observed water polygon and not FEMA MOTF GIS."
+            "Extrusion is each district's HUD-weighted depth, not a 06:00 observed water polygon."
         )
     else:
         districts = [d for d in hud["districts"] if d["flooded_units"] > 0]
@@ -444,12 +536,21 @@ def wet_mask(keyframe: str) -> dict:
         note = (
             "HUD overlay of NOAA 31 Aug 2005 flood depths on Orleans planning districts. "
             "Algiers, French Quarter, and New Aurora/English Turn omitted (0 flooded units). "
-            "Fill rings follow the flooded land outline on the basemap (seawall, canals, river levee), "
-            "not MOTF shapefiles and not open water."
+            "Each ring's height is that district's HUD-weighted mean depth; opacity is flooded-unit share. "
+            "Not MOTF shapefiles and not open water."
         )
+    features = []
+    for d in districts:
+        depth_m, wet_frac = district_flood_metrics(d)
+        features.append({
+            "id": d["id"], "name": d["name"], "ring": d["ring"],
+            "depth_m": round(depth_m, 3), "wet_frac": round(wet_frac, 4),
+            "flooded_units": d["flooded_units"], "total_units": d["total_units"],
+        })
     return {
         "type": "MultiPolygon",
         "coordinates": [[d["ring"]] for d in districts],
+        "features": features,
         "source_key": hud["source_key"],
         "vintage": vintage,
         "flooded_units": sum(d["flooded_units"] for d in districts),
@@ -503,6 +604,14 @@ def _entity_record(spec: dict, state: str, params: dict, vstatus: str, source: s
         attrs = {"stage_m": 0.0, "d_stage_dt": 0.0}
     if extra:
         attrs.update(extra)
+    if spec.get("type") == "bridge":
+        span = _bridge_span_cache().get(eid)
+        if span:
+            attrs.update(span)
+        elif spec.get("heading_deg") is not None:
+            attrs["heading_deg"] = spec["heading_deg"]
+    elif spec.get("heading_deg") is not None:
+        attrs["heading_deg"] = spec["heading_deg"]
     return {
         "entity_id": eid, "type": spec["type"], "name": spec["name"],
         "geometry": {"lon": spec["lon"], "lat": spec["lat"]},
@@ -634,9 +743,8 @@ def build_snapshot(params: dict, keyframe: str) -> dict:
             "cyclone": {"track": load_best_track(), "cone_nm": 0,
                         "rainfall_mm_h": 0,
                         "ghosted": True, "source": "noaa-tcr-al122005"},
-            "fire": {"synthetic": False, "active": False, "perimeter": [],
-                     "spread_rate": 0.0, "wind": {"u": 0.0, "v": 0.0},
-                     "note": "No Katrina fire binding retrieved — hazard off."},
+            "fire": fire_hazard(keyframe),
+            "contamination": contamination_hazard(keyframe),
             "landslide": {"synthetic": False, "active": False, "path": [],
                           "note": "No Katrina landslide binding — hazard off."},
         },

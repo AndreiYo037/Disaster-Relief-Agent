@@ -10,14 +10,11 @@ export interface LayerFlags {
   opRealloc: boolean;
   opEvacuate: boolean;
   popTotal: boolean;
-  cyclone: boolean;
-  fire: boolean;
-  landslide: boolean;
   fallback2d: boolean;
 }
 
-const OP_REALLOC = new Set(["warehouse", "vehicle", "food", "fuel", "medicine", "water", "port"]);
-const OP_EVACUATE = new Set(["shelter", "camp", "zone", "personnel", "hospital", "clinic", "school"]);
+const OP_REALLOC = new Set(["warehouse", "vehicle", "food", "fuel", "medicine", "water", "personnel"]);
+const OP_EVACUATE = new Set(["shelter", "camp", "zone", "hospital", "clinic", "school"]);
 
 function opOf(ent: Entity): "realloc" | "evacuate" | "access" {
   if (OP_REALLOC.has(ent.type)) return "realloc";
@@ -40,6 +37,16 @@ function eventOn(ev: { subject_entity?: string }, snap: WorldSnapshot, flags: La
 
 function rgb(state: string): [number, number, number] {
   return STATE_COLOR[state] ?? [130, 149, 184];
+}
+
+function statePlate(state: string): [number, number, number, number] {
+  const c = rgb(state);
+  return [
+    Math.round(c[0] * 0.42 + 6),
+    Math.round(c[1] * 0.34 + 6),
+    Math.round(c[2] * 0.34 + 6),
+    240,
+  ];
 }
 
 function densityColor(d: number, edges: number[], alpha: number): [number, number, number, number] {
@@ -65,54 +72,23 @@ function farSymbol(type: string): string {
   return map[type] ?? "•";
 }
 
+function mToLonLat(lon: number, lat: number, x: number, z: number): [number, number] {
+  const mLat = 1 / 110570;
+  const mLon = 1 / (111320 * Math.max(0.2, Math.cos(lat * Math.PI / 180)));
+  return [lon + x * mLon, lat + z * mLat];
+}
+
 export function buildLayers(
   snap: WorldSnapshot,
   registry: SymbolRegistry,
   flags: LayerFlags,
   altitudeM: number,
   onClick: (e: Entity | { kind: string; id: string; payload: unknown }) => void,
+  fireT = 0,
 ): Layer[] {
   const layers: Layer[] = [];
   const near = !flags.fallback2d && altitudeM < snap.viz.lod_switch_altitude_m;
   const entities = snap.entities.filter((e) => registry.types[e.type] && opOn(e, flags));
-
-  const w = snap.viz.hero_region_bounds;
-  const heroRing = [
-    [w[0], w[1]], [w[2], w[1]], [w[2], w[3]], [w[0], w[3]], [w[0], w[1]],
-  ];
-  layers.push(new PolygonLayer({
-    id: "hero-mask",
-    data: [{ polygon: heroRing }],
-    getPolygon: (d: { polygon: number[][] }) => d.polygon,
-    stroked: true,
-    filled: false,
-    getLineColor: [124, 156, 255, 90],
-    lineWidthMinPixels: 1,
-  }));
-
-  if (flags.opEvacuate) {
-    const zonePolys = Object.entries(snap.zone_rings).map(([id, ring]) => {
-      const ent = entities.find((e) => e.entity_id === id);
-      const dens = snap.population.cells
-        .filter((c) => Math.abs(c.lon - (ent?.geometry.lon ?? 0)) < 0.03)
-        .reduce((a, c) => a + c.density, 0) / Math.max(1, snap.population.cells.length);
-      return { id, ring, entity: ent, dens };
-    });
-    layers.push(new PolygonLayer({
-      id: "zones",
-      data: zonePolys,
-      getPolygon: (d: { ring: number[][] }) => d.ring,
-      stroked: true,
-      filled: true,
-      getFillColor: (d: { dens: number }) => densityColor(d.dens, snap.population.bin_edges_per_km2, 22),
-      getLineColor: [232, 238, 252, 180],
-      lineWidthMinPixels: 2,
-      pickable: true,
-      onClick: (info: { object?: { entity?: Entity } }) => {
-        if (info.object?.entity) onClick(info.object.entity);
-      },
-    }));
-  }
 
   if (flags.popTotal) {
     const heat = snap.population.heat ?? [];
@@ -152,7 +128,7 @@ export function buildLayers(
       data: snap.population.cells.filter((c) => c.displaced > 0),
       getPosition: (c: { lon: number; lat: number }) => [c.lon, c.lat],
       getRadius: 80,
-      getFillColor: [176, 107, 255, 90],
+      getFillColor: [255, 140, 50, 55],
       radiusUnits: "meters",
     }));
   }
@@ -162,26 +138,41 @@ export function buildLayers(
       data: snap.population.movement,
       getSourcePosition: (m: { from: number[] }) => m.from,
       getTargetPosition: (m: { to: number[] }) => m.to,
-      getSourceColor: [180, 180, 200, 40],
-      getTargetColor: [176, 107, 255, 200],
-      getWidth: (m: { magnitude: number }) => 2 + m.magnitude * 6,
+      getSourceColor: [255, 168, 72, 120],
+      getTargetColor: [255, 96, 28, 220],
+      getWidth: (m: { magnitude: number }) => 2.2 + m.magnitude * 5,
+      getHeight: 0.58,
       greatCircle: false,
+      widthMinPixels: 2,
     }));
   }
 
   const flood = snap.hazards.flood;
-  const floodPolys = (flood.wet_mask.coordinates || []).map((poly) => ({
-    polygon: poly[0],
-    elevation: 8 + flood.stage_m * 12,
-  }));
-  const floodAlpha = Math.min(200, 70 + flood.d_stage_dt * 400);
+  const mask = flood.wet_mask as {
+    coordinates?: number[][][][];
+    features?: { ring: number[][]; depth_m: number; wet_frac: number }[];
+  };
+  const floodFeats = mask.features?.length
+    ? mask.features
+    : (mask.coordinates || []).map((poly) => ({
+      ring: poly[0], depth_m: flood.stage_m, wet_frac: 1,
+    }));
+  const floodPolys = floodFeats.map((d) => {
+    const depth = d.depth_m || 0;
+    const frac = d.wet_frac == null ? 1 : d.wet_frac;
+    return {
+      polygon: d.ring,
+      elevation: flags.fallback2d ? 0 : Math.max(0.3, depth * (0.25 + 0.75 * frac) * 2.5),
+      alpha: Math.round(28 + frac * 155 + Math.min(25, depth * 10)),
+    };
+  });
   layers.push(new SolidPolygonLayer({
     id: "flood",
     data: floodPolys,
     getPolygon: (d: { polygon: number[][] }) => d.polygon,
     extruded: !flags.fallback2d,
     getElevation: (d: { elevation: number }) => (flags.fallback2d ? 0 : d.elevation),
-    getFillColor: [30, 90, 180, floodAlpha],
+    getFillColor: (d: { alpha: number }) => [30, 90, 180, d.alpha],
     wireframe: false,
   }));
 
@@ -199,7 +190,11 @@ export function buildLayers(
         if (s.route_id === ghostRoute && s.route_id !== solidRoute) return [180, 180, 200, 90];
         return SEG_COLOR[s.state] ?? [180, 180, 200, 200];
       },
-      getWidth: 8,
+      getWidth: (s: { state: string }) => {
+        if (s.state === "blocked" || s.state === "degraded") return 16;
+        if (s.state === "submerged") return 6;
+        return 8;
+      },
       widthMinPixels: 3,
     }));
 
@@ -215,7 +210,7 @@ export function buildLayers(
     }
   }
 
-  if (flags.cyclone) {
+  if (snap.hazards.cyclone?.track) {
     const track = snap.hazards.cyclone.track.map((p) => [p.lon, p.lat]);
     layers.push(new PathLayer({
       id: "cyclone-track",
@@ -224,6 +219,7 @@ export function buildLayers(
       getColor: [176, 107, 255, 140],
       getWidth: 4,
       widthMinPixels: 2,
+      pickable: false,
     }));
     const cone = snap.hazards.cyclone.cone_nm * 0.012;
     const mid = snap.hazards.cyclone.track[Math.floor(snap.hazards.cyclone.track.length / 2)];
@@ -237,13 +233,14 @@ export function buildLayers(
       stroked: true,
       filled: true,
       radiusUnits: "meters",
+      pickable: false,
     }));
     const rainN = Math.min(snap.viz.max_particle_count / 4, Math.round(snap.hazards.cyclone.rainfall_mm_h * 80));
-    const rain = Array.from({ length: rainN }, (_, i) => ({
-      lon: -90.3 + (i % 40) * 0.018,
-      lat: 29.85 + Math.floor(i / 40) * 0.018,
-    }));
     if (snap.hazards.cyclone.rainfall_mm_h > 0) {
+      const rain = Array.from({ length: rainN }, (_, i) => ({
+        lon: -90.3 + (i % 40) * 0.018,
+        lat: 29.85 + Math.floor(i / 40) * 0.018,
+      }));
       layers.push(new ScatterplotLayer({
         id: "rain",
         data: rain,
@@ -251,44 +248,81 @@ export function buildLayers(
         getRadius: 40,
         getFillColor: [140, 180, 255, 40],
         radiusUnits: "meters",
+        pickable: false,
       }));
     }
   }
 
-  if (flags.fire && snap.hazards.fire.active) {
+  const contam = snap.hazards.contamination?.areas ?? [];
+  if (contam.length) {
     layers.push(new PolygonLayer({
-      id: "fire",
-      data: [{ polygon: snap.hazards.fire.perimeter }],
-      getPolygon: (d: { polygon: number[][] }) => d.polygon,
-      getFillColor: [255, 80, 20, 160],
-      getLineColor: [255, 160, 40, 220],
-      extruded: false,
-    }));
-    const { u, v } = snap.hazards.fire.wind;
-    const smokeN = Math.min(400, Math.round(snap.hazards.fire.spread_rate * 400));
-    const origin = snap.hazards.fire.perimeter[0];
-    const smoke = Array.from({ length: smokeN }, (_, i) => ({
-      lon: origin[0] + u * 0.002 * (i / smokeN),
-      lat: origin[1] + v * 0.002 * (i / smokeN),
-    }));
-    layers.push(new ScatterplotLayer({
-      id: "smoke",
-      data: smoke,
-      getPosition: (p: { lon: number; lat: number }) => [p.lon, p.lat],
-      getRadius: 90,
-      getFillColor: [80, 80, 80, 50],
-      radiusUnits: "meters",
+      id: "contamination",
+      data: contam,
+      getPolygon: (d: { ring: number[][] }) => d.ring,
+      stroked: true,
+      filled: true,
+      getFillColor: [28, 210, 68, 140],
+      getLineColor: [70, 255, 120, 230],
+      lineWidthMinPixels: 2,
+      pickable: false,
     }));
   }
 
-  if (flags.landslide && snap.hazards.landslide.active) {
-    layers.push(new PathLayer({
-      id: "landslide",
-      data: [{ path: snap.hazards.landslide.path }],
-      getPath: (d: { path: number[][] }) => d.path,
-      getColor: [120, 80, 40, 220],
-      getWidth: 14,
-      widthMinPixels: 4,
+  const fire = snap.hazards.fire;
+  if (fire?.active && (fire.sites || []).length) {
+    const wind = fire.wind || { u: 0.12, v: 0.06 };
+    const particles: { lon: number; lat: number; z: number; radius: number; color: [number, number, number, number] }[] = [];
+    for (const s of fire.sites!) {
+      const r0 = s.radius_m || 70;
+      for (let i = 0; i < 96; i++) {
+        const h = Math.sin(i * 12.9898 + s.lon * 78.233) * 43758.5453;
+        const rnd = h - Math.floor(h);
+        const u = (rnd + fireT) % 1;
+        const ang = i * 2.399 + fireT * 1.7;
+        const spread = r0 * (0.12 + (1 - u) * 0.55);
+        const east = Math.cos(ang) * spread + wind.u * u * 180;
+        const north = Math.sin(ang) * spread * 0.45 + wind.v * u * 180;
+        const ll = mToLonLat(s.lon, s.lat, east, north);
+        const smoke = u > 0.42;
+        particles.push({
+          lon: ll[0], lat: ll[1], z: u * (55 + r0 * 0.9),
+          radius: smoke ? 18 + u * 42 : 8 + (1 - u) * 16,
+          color: smoke
+            ? [48, 44, 40, Math.round(90 - u * 55)]
+            : u < 0.18
+              ? [255, 252, 160, 240]
+              : [255, 90 + Math.round(u * 40), 12, 220],
+        });
+      }
+    }
+    layers.push(new ScatterplotLayer({
+      id: "fire-core",
+      data: fire.sites,
+      getPosition: (s: { lon: number; lat: number }) => [s.lon, s.lat, 4],
+      getRadius: (s: { radius_m?: number }) => (s.radius_m || 70) * 0.7,
+      getFillColor: [255, 58, 8, 210],
+      radiusUnits: "meters",
+      pickable: false,
+    }));
+    layers.push(new ScatterplotLayer({
+      id: "fire-ember",
+      data: particles.filter((p) => p.color[0] > 80),
+      getPosition: (p: { lon: number; lat: number; z: number }) => [p.lon, p.lat, p.z],
+      getRadius: (p: { radius: number }) => p.radius,
+      getFillColor: (p: { color: [number, number, number, number] }) => p.color,
+      radiusUnits: "meters",
+      pickable: false,
+      updateTriggers: { getPosition: fireT },
+    }));
+    layers.push(new ScatterplotLayer({
+      id: "fire-smoke",
+      data: particles.filter((p) => p.color[0] <= 80),
+      getPosition: (p: { lon: number; lat: number; z: number }) => [p.lon, p.lat, p.z],
+      getRadius: (p: { radius: number }) => p.radius,
+      getFillColor: (p: { color: [number, number, number, number] }) => p.color,
+      radiusUnits: "meters",
+      pickable: false,
+      updateTriggers: { getPosition: fireT },
     }));
   }
 
@@ -350,9 +384,12 @@ export function buildLayers(
       getColor: [232, 238, 252, 240],
       billboard: true,
       background: true,
-      getBackgroundColor: [8, 14, 28, 220],
+      getBackgroundColor: (e: Entity) => statePlate(e.state),
       backgroundPadding: [8, 4, 8, 4],
-      getBorderColor: [200, 214, 240, 40],
+      getBorderColor: (e: Entity) => {
+        const c = rgb(e.state);
+        return [c[0], c[1], c[2], 230];
+      },
       getBorderWidth: 1,
     }));
   }

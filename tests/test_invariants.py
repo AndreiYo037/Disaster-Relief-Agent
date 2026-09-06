@@ -127,19 +127,38 @@ def test_sourced_flood_and_population():
     assert abs(b7["hazards"]["flood"]["stage_m"] - 11.3 * 0.3048) < 0.001
     assert t0["hazards"]["flood"]["wet_mask"]["flooded_units"] == 103165
     assert t0["population"]["dataset_id"] == "census-2000-sf1"
-    assert t0["hazards"]["fire"]["active"] is False
+    assert t0["hazards"]["fire"]["active"] is True
+    assert t0["hazards"]["fire"]["synthetic"] is False
+    assert len(t0["hazards"]["fire"]["sites"]) >= 3
+    assert t0["hazards"]["contamination"]["active"] is True
+    assert any(a["id"] == "murphy-oil" and a["ring"] for a in t0["hazards"]["contamination"]["areas"])
     assert t0["hazards"]["landslide"]["active"] is False
+    charity = next(e for e in t0["entities"] if e["entity_id"] == "hospital:charity")
+    assert charity["state"] == "inaccessible"
+    touro = next(e for e in t0["entities"] if e["entity_id"] == "hospital:touro")
+    assert touro["state"] == "damaged"
+    b7t0 = next(e for e in t0["entities"] if e["entity_id"] == "bridge:B7")
+    assert b7t0["state"] == "uncertain"
+    b7b = next(e for e in b7["entities"] if e["entity_id"] == "bridge:B7")
+    assert b7b["state"] == "inaccessible"
     names = {e["name"] for e in t0["entities"]}
     assert "I-10 Twin Span Bridge" in names
     assert "Ernest N. Morial Convention Center" in names
     b7e = next(e for e in t0["entities"] if e["entity_id"] == "bridge:B7")
     assert abs(b7e["geometry"]["lon"] + 89.82486) < 1e-4
     assert abs(b7e["geometry"]["lat"] - 30.18264) < 1e-4
+    assert b7e["attributes"]["span_paths"]
+    assert b7e["attributes"]["span_length_m"] > 7000
     geo = t0["geography"]
     assert len(geo["roads"]) > 100
     assert len(geo["buildings"]) > 100
     assert len(geo["canals"]) > 10
     assert "2011" in geo["vintage"]
+    dmg = {b.get("damage") for b in geo["buildings"]}
+    assert "destroyed" in dmg and "intact" in dmg
+    wrecked = [b for b in geo["buildings"] if b.get("damage") == "destroyed"]
+    assert len(wrecked) > 20
+    assert all((b.get("height_m") or 9) < 6 for b in wrecked[:40])
 
     hoods2 = json.loads((ROOT / "data" / "katrina" / "sourced" / "neighborhoods_census2000.json").read_text(encoding="utf-8"))
     wet = [n["id"] for n in hoods2["neighborhoods"] if in_open_water(n["lon"], n["lat"])]
@@ -171,6 +190,40 @@ def test_sourced_flood_and_population():
             assert not (lon < -89.85 and lat > 30.062), (lon, lat)
     b7_rings = b7["hazards"]["flood"]["wet_mask"]["coordinates"]
     assert len(b7_rings) == 2
+    feats = {f["id"]: f for f in t0["hazards"]["flood"]["wet_mask"]["features"]}
+    assert feats["warehouse-cbd"]["depth_m"] < feats["lower-9th"]["depth_m"]
+    assert feats["warehouse-cbd"]["wet_frac"] < 0.15
+    assert feats["lower-9th"]["wet_frac"] > 0.7
+    assert feats["lakeview"]["depth_m"] > feats["garden"]["depth_m"]
+    assert len(t0["hazards"]["flood"]["wet_mask"]["features"]) == len(
+        t0["hazards"]["flood"]["wet_mask"]["coordinates"]
+    )
+
+
+def test_bridge_spans_follow_osm():
+    from crisis_os.bridges import dist_m, load_bridge_spans, path_length_m
+    from crisis_os.catalog import ENTITIES_SPEC
+
+    spans = load_bridge_spans()
+    pins = {e["entity_id"]: (e["lon"], e["lat"]) for e in ENTITIES_SPEC if e["type"] == "bridge"}
+    assert set(spans) == set(pins)
+    for eid, rec in spans.items():
+        assert rec["span_paths"], eid
+        pin = pins[eid]
+        nearest = min(dist_m(list(pin), pt) for path in rec["span_paths"] for pt in path)
+        assert nearest < 700, (eid, nearest)
+        assert rec["span_length_m"] > 400, (eid, rec["span_length_m"])
+        for path in rec["span_paths"]:
+            assert path_length_m(path) > 300, (eid, path_length_m(path))
+    assert spans["bridge:B7"]["span_length_m"] > 7000
+    assert len(spans["bridge:B7"]["span_paths"]) == 2
+    assert spans["bridge:us11"]["span_length_m"] > 4000
+    assert spans["bridge:danziger"]["span_length_m"] > 800
+    ccc = spans["bridge:ccc"]["span_paths"][0]
+    assert abs(ccc[0][0] - ccc[-1][0]) > abs(ccc[0][1] - ccc[-1][1])
+    # Causeway is clipped to the south landing, not the full lake crossing.
+    assert 2500 < spans["bridge:causeway"]["span_length_m"] < 6000
+    assert len(spans["bridge:causeway"]["span_paths"]) == 2
 
 
 def test_equity_and_spine():
@@ -196,5 +249,6 @@ if __name__ == "__main__":
     test_distinctive_type_solids()
     test_no_synthetic_katrina_entities()
     test_sourced_flood_and_population()
+    test_bridge_spans_follow_osm()
     test_equity_and_spine()
     print("ok")

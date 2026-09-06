@@ -1,0 +1,31 @@
+{
+  "dataset_id": "katrina-contamination-sites",
+  "source_key": "epa-murphy-oil-katrina",
+  "retrieved": "2026-09-06",
+  "vintage": "2005-08-30",
+  "note": "Murphy Oil Meraux tank 250-2 released ~25,110 barrels of mixed crude on/after 30 Aug 2005. EPA: ~1,700 homes, about 1 sq mi, oil flowed east to west into Chalmette. Ring is the court class-area sketch (Paris Rd–St. Bernard Hwy–Judge Perez–Mary Ann Dr–40 Arpent Canal) plus the refinery tank farm, not an EPA GIS shapefile.",
+  "urls": [
+    "https://en.wikipedia.org/wiki/Murphy_Oil_USA_refinery_spill",
+    "https://archive.epa.gov/katrina/web/html/index-6.html"
+  ],
+  "areas": [
+    {
+      "id": "murphy-oil",
+      "name": "Murphy Oil Meraux spill",
+      "kind": "oil",
+      "valid_from": "2005-08-30",
+      "lon": -89.95979,
+      "lat": 29.93092,
+      "ring": [
+        [-89.9770, 29.9540],
+        [-89.9770, 29.9375],
+        [-89.9660, 29.9365],
+        [-89.9600, 29.9285],
+        [-89.9485, 29.9320],
+        [-89.9485, 29.9425],
+        [-89.9500, 29.9540],
+        [-89.9770, 29.9540]
+      ]
+    }
+  ]
+}

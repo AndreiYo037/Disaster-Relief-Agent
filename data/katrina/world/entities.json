@@ -6,6 +6,7 @@
       "name": "I-10 Twin Span Bridge",
       "lon": -89.82486,
       "lat": 30.18264,
+      "heading_deg": 78,
       "aliases": [
         "Twin Span",
         "the north bridge",
@@ -89,6 +90,7 @@
       "name": "Maestri Bridge (US-11)",
       "lon": -89.84306,
       "lat": 30.18722,
+      "heading_deg": 72,
       "aliases": [
         "US-11"
       ]
@@ -99,6 +101,7 @@
       "name": "Crescent City Connection (US-90)",
       "lon": -90.0575,
       "lat": 29.93861,
+      "heading_deg": 12,
       "aliases": [
         "CCC",
         "GNO bridge"
@@ -110,6 +113,7 @@
       "name": "Danziger Bridge",
       "lon": -90.0267,
       "lat": 30.0094,
+      "heading_deg": 100,
       "aliases": [
         "Danziger"
       ]
@@ -120,6 +124,7 @@
       "name": "Lake Pontchartrain Causeway (south landing)",
       "lon": -90.1539,
       "lat": 30.0266,
+      "heading_deg": 2,
       "aliases": [
         "Causeway"
       ]
