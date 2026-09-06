@@ -19,7 +19,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); c
 #app {
   display: grid; height: 100%;
   grid-template-columns: 238px 1fr 320px;
-  grid-template-rows: 46px 1fr 92px;
+  grid-template-rows: 46px 1fr 196px;
   grid-template-areas: "nav nav nav" "pulse map inspector" "timeline timeline timeline";
 }
 .area-nav { grid-area: nav; display: flex; align-items: center; gap: 14px; padding: 0 16px;
@@ -38,7 +38,23 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); c
 .area-inspector { grid-area: inspector; border-left: 1px solid var(--line); }
 .area-map { grid-area: map; position: relative; }
 #map { position: absolute; inset: 0; }
-.area-timeline { grid-area: timeline; background: var(--bg2); border-top: 1px solid var(--line); padding: 10px 16px; }
+.area-timeline { grid-area: timeline; background: var(--bg2); border-top: 1px solid var(--line); padding: 8px 16px 10px; overflow: hidden; }
+.replay-title { font-size: 13px; font-weight: 650; white-space: normal; line-height: 1.3; max-height: 2.7em; overflow: hidden; }
+.replay-meta { font-size: 10px; color: var(--dim); margin-top: 1px; }
+.tl-split { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
+.phase-pills { display: flex; gap: 4px; flex-wrap: wrap; margin: 5px 0 4px; }
+.phase-pills button {
+  background: var(--panel2); color: var(--dim); border: 1px solid var(--line); border-radius: 5px;
+  padding: 2px 7px; cursor: pointer; font-size: 10px;
+}
+.phase-pills button.active { border-color: var(--forecast); color: var(--forecast); }
+.tl-controls { display: flex; align-items: center; gap: 8px; }
+.tl-controls .range { flex: 1; }
+.tbtn.play { min-width: 72px; font-weight: 700; }
+.tbtn.play.on { border-color: var(--forecast); color: var(--forecast); }
+.scan-row { display: flex; flex-wrap: wrap; gap: 5px 10px; font-size: 10px; margin: 4px 0 8px; }
+.scan-row .bound { color: var(--ok); }
+.scan-row .gap { color: var(--dim2); }
 h3.sec { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim2); margin: 14px 0 8px; font-weight: 700; }
 h3.sec:first-child { margin-top: 0; }
 .metric { border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; margin-bottom: 7px; background: var(--panel2); }
@@ -48,6 +64,7 @@ h3.sec:first-child { margin-top: 0; }
 .metric.warnv .val { color: var(--warn); }
 .map-legend { position: absolute; left: 12px; bottom: 12px; z-index: 3; background: rgba(9,14,26,.85);
   border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 10.5px; color: var(--dim); max-width: 420px; }
+.event-now { font-size: 13.5px; font-weight: 700; color: #f4ecff; line-height: 1.3; margin-bottom: 4px; }
 #popctl { position: absolute; right: 12px; top: 12px; z-index: 4; width: 248px; background: rgba(9,14,26,.92);
   border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; font-size: 11px; color: var(--dim); }
 #popctl label { display: flex; align-items: center; gap: 6px; margin: 4px 0; cursor: pointer; color: #aebbd6; }

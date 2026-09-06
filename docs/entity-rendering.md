@@ -6,8 +6,11 @@ How every entity, resource, hazard, event and geography feature is represented i
 the 3D scene. This document is authoritative for **form** — meshes, symbols,
 shaders, particles and level of detail.
 
-**Related documents.** [`3d-diorama.md`](3d-diorama.md) is authoritative for terrain,
-camera, visual language and the master render contract.
+**Related documents.** [`asset-definitions.md`](asset-definitions.md) is the live
+Katrina catalog: 44 instances, registry categories, realloc/evacuate/population
+toggles, always-on hazards (flood, fire, contamination, cyclone), and per-sequence
+binds. [`3d-diorama.md`](3d-diorama.md) is authoritative for terrain, camera, visual
+language and the master render contract.
 [`population-density.md`](population-density.md) is authoritative for everything
 population. This document adds two amendments to the diorama doc, recorded there as
 **A6** (per-type models) and **A7** (the shader-binding rule).
@@ -316,8 +319,12 @@ stage, extent and depth bound; the event grammar for `infrastructure_damage` and
 **Tier 2.** Remaining near meshes; capacity readouts; the LOD switch; cyclone track
 and cone; the remaining event symbols; service-area catchments.
 
-**Tier 3.** Fire and landslide shaders, including the DEM modification; the full
-semantic-zoom ladder; rain and dust particles.
+**Tier 3.** Landslide shaders, including the DEM modification; the full
+semantic-zoom ladder; rain particles bound to a rainfall figure.
+
+Live Katrina already ships flood HUD bowls, fire particles, Murphy Oil
+contamination fill, and the cyclone track (see [`asset-definitions.md`](asset-definitions.md)).
+Landslide stays **off**. Do not treat fire/contamination as unbuilt.
 
 **Constraint that overrides all three tiers:** a far symbol with correct state
 colour beats a beautiful mesh with wrong state. Form is subordinate to the render

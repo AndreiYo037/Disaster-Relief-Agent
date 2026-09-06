@@ -349,6 +349,14 @@
       "status": "unverified",
       "note": "Item 13. Orleans and St. Bernard Parish plus the Lake Pontchartrain crossings, so bridge:B7 (I-10 Twin Span at 30.18264 N, 89.82486 W) and airport:msy both fall inside. Everything outside renders simpler. power:waterford at -90.47 is deliberately outside and contextual."
     },
+    "gulf_camera_zoom": {
+      "value": 5.35,
+      "unit": "MapLibre zoom",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Build phase B. Pull back so Bahamas → Florida → Gulf track is on stage. Not a fact about 2005."
+    },
     "terrain_source_key": {
       "value": "noaa-digitalcoast-lidar",
       "unit": "source_key",
@@ -509,5 +517,211 @@
       "len(visualization.emissive_materials_allowed) == 1, per amendment A7 — a second emissive material means the scene has started glowing everywhere",
       "every Entity.type present in the seed has a row in the symbol registry, or it silently fails to render"
     ]
+  },
+
+  "population_clock": {
+    "orleans_census_2000": {
+      "value": 484674,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "census-2000-sf1",
+      "status": "verified",
+      "note": "Orleans Parish Census 2000 SF1 via The Data Center. Heatmap spatial prior."
+    },
+    "orleans_july_2005": {
+      "value": 494294,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "census-fff-katrina-2015",
+      "status": "verified",
+      "note": "Census Bureau Facts for Features CB15-FF.16: city of New Orleans 494,294 on 1 Jul 2005. Retrieved 2026-09-06 from https://www.census.gov/newsroom/facts-for-features/2015/cb15-ff16.html. Pre-storm estimate; heatmap still drapes Census 2000 NSA geometry."
+    },
+    "orleans_july_2006": {
+      "value": 230172,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "census-fff-katrina-2015",
+      "status": "verified",
+      "note": "Census Bureau Facts for Features CB15-FF.16: city of New Orleans 230,172 on 1 Jul 2006. Retrieved 2026-09-06. Bound to the recovery-end script beat as the long-horizon remaining city, not as October 2005."
+    },
+    "city_remaining_28aug": {
+      "value": 100000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "wiki-katrina-nola-effects",
+      "status": "unverified",
+      "note": "Wikipedia Effects of Hurricane Katrina in New Orleans: 'By the evening of August 28, over 100,000 people remained in the city, with 20,000 taking shelter at the Louisiana Superdome' (fn. 23). Contemporaneous Nagin-era remaining, not a census. White House Lessons Learned ch. 3 only says 'tens of thousands' remained after a 1.2 million / 92% regional evac (fn. 134). Do not narrate 100,000 as verified."
+    },
+    "regional_evac_count": {
+      "value": 1200000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "whitehouse-katrina-lessons-ch3",
+      "status": "verified",
+      "note": "White House Katrina Lessons Learned ch. 3 fn. 134: Governor Blanco estimated 1.2 million people evacuated prior to second landfall. Regional, not Orleans Parish."
+    },
+    "regional_evac_share": {
+      "value": 0.92,
+      "unit": "fraction",
+      "kind": "empirical",
+      "source_key": "whitehouse-katrina-lessons-ch3",
+      "status": "verified",
+      "note": "Same locator: 92 percent of the affected population. Regional share, not the city remaining used on the heatmap."
+    },
+    "city_cleared_early_sep": {
+      "value": 3000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "rand-tr369-repopulation",
+      "status": "unverified",
+      "note": "RAND TR-369 The Repopulation of New Orleans After Hurricane Katrina: the city 'had been reduced to a city of fewer than several thousand people by the end of the first week of September 2005.' 3,000 is a gap-fill midpoint of 'several thousand', not a census. Applied after p5-dome-cc-cleared."
+    },
+    "heatmap_bowl_empty": {
+      "value": 0.75,
+      "unit": "fraction",
+      "kind": "tuned",
+      "source_key": "design:tuned-for-demo",
+      "status": "unverified",
+      "note": "Street-level heatmap join: additional remaining-share cut inside a HUD planning-district bowl as that bowl's flooded-unit share goes to 1. Not a census. Buildings outside bowls use dry remaining."
+    }
+  },
+
+  "unwatering": {
+    "entergy_nola_units_on_8sep": {
+      "value": 9,
+      "unit": "generating units",
+      "kind": "empirical",
+      "source_key": "doe-oe-katrina-sitrep-28",
+      "status": "verified",
+      "note": "DOE OE Hurricane Katrina Situation Report #28, 8 Sep 2005 16:00 EDT: Entergy has 17 gas/oil units in the New Orleans area; nine returned to service, one more expected later that week. Retrieved 2026-09-06 from https://www.osti.gov/servlets/purl/1131848."
+    },
+    "entergy_nola_units_total": {
+      "value": 17,
+      "unit": "generating units",
+      "kind": "empirical",
+      "source_key": "doe-oe-katrina-sitrep-28",
+      "status": "verified",
+      "note": "Same locator as entergy_nola_units_on_8sep."
+    },
+    "entergy_nola_customers_on_frac_8sep": {
+      "value": 0.11,
+      "unit": "fraction",
+      "kind": "empirical",
+      "source_key": "doe-oe-katrina-sitrep-28",
+      "status": "verified",
+      "note": "Same sitrep, Louisiana PSC table 12:00 8 Sep: Entergy New Orleans 182,152 outages, 89% of customers without power. 11% on is 1 − 0.89, not a city-area GIS fraction. Waterford and flooded distribution are still dark."
+    },
+    "pumps_permanent_total": {
+      "value": 148,
+      "unit": "pumps",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Wikipedia Reconstruction of New Orleans, citing USACE public-affairs updates: 148 permanent pumps in the New Orleans area. Archived USACE PDFs were not retrieved as files."
+    },
+    "pumps_permanent_on_7sep": {
+      "value": 23,
+      "unit": "pumps",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Same article: 23 of 148 permanent pumps operating on 7 Sep 2005 (USACE 7 Sep update)."
+    },
+    "pumps_permanent_on_10sep": {
+      "value": 26,
+      "unit": "pumps",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Same article: average 26 permanent pumps on 10 Sep 2005."
+    },
+    "pumps_permanent_cfs_10sep": {
+      "value": 9125,
+      "unit": "cfs",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Same article: 26 permanent pumps at 9,125 cfs on 10 Sep 2005."
+    },
+    "pumps_portable_on_10sep": {
+      "value": 39,
+      "unit": "pumps",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Same article: 39 portable pumps on 10 Sep 2005."
+    },
+    "pumps_portable_cfs_10sep": {
+      "value": 723,
+      "unit": "cfs",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Same article: 39 portable pumps at 723 cfs on 10 Sep 2005."
+    },
+    "inundation_city_frac_6sep": {
+      "value": 0.60,
+      "unit": "fraction",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Wikipedia Reconstruction of New Orleans citing Bloomberg 6 Sep 2005: estimated flooded area reduced to 60%. City-area language, not HUD housing-unit wet_frac. Demo remaining = 0.60 / 0.80 of the 31 Aug HUD ceiling."
+    },
+    "inundation_city_frac_15sep": {
+      "value": 0.40,
+      "unit": "fraction",
+      "kind": "empirical",
+      "source_key": "usgs-circ-1306-ch3h",
+      "status": "verified",
+      "note": "USGS Circ. 1306 ch. 3H cites USACE 15 Sep 2005 news release 'Inundation cut from 80 to 40 percent'. City-area language. Remaining vs HUD ceiling = 0.40 / 0.80. Same chapter's volume table (56e9 gal on 15 Sep vs 131e9 on 2 Sep) is a cross-check, not the GIS."
+    },
+    "unwatered_area_frac_18sep": {
+      "value": 0.80,
+      "unit": "fraction",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Wikipedia Reconstruction of New Orleans citing USACE 18 Sep 2005 news release: New Orleans area more than 80 percent unwatered. Remaining vs HUD ceiling ≈ 0.20 / 0.80."
+    },
+    "gallons_pumped_15sep": {
+      "value": 7500000000,
+      "unit": "gal",
+      "kind": "empirical",
+      "source_key": "wiki-nola-reconstruction",
+      "status": "unverified",
+      "note": "Wikipedia Reconstruction of New Orleans: 7.5 billion gallons pumped on 15 Sep 2005. Chrome count, not a bowl height."
+    },
+    "ng_gulf_2sep": {
+      "value": 22000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "dvidshub-ng-katrina-2005-09-02",
+      "status": "unverified",
+      "note": "DVIDS 2 Sep 2005: 'almost 22,000 National Guardsmen already on the ground' in the Gulf. Regional headcount, not a NOLA mesh."
+    },
+    "ng_nola_2sep": {
+      "value": 6500,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "ng-on-guard-katrina",
+      "status": "verified",
+      "note": "National Guard The On Guard (LTG Blum): 'There were more than 6,500 in New Orleans alone by Sept. 2.' Retrieved 2026-09-06 from https://www.nationalguard.mil/Resources/Archives/The-On-Guard/FileId/62636/."
+    },
+    "title10_troops_announced": {
+      "value": 7000,
+      "unit": "persons",
+      "kind": "empirical",
+      "source_key": "whitehouse-katrina-2005-09-03",
+      "status": "verified",
+      "note": "White House fact sheet 3 Sep 2005: more than 7,000 additional active-duty troops to arrive in 24–72 hours. Script '7,200 Title 10' is the round figure; this parameter keeps the White House locator."
+    },
+    "msy_commercial_reopen": {
+      "value": "2005-09-13T12:00:00-05:00",
+      "unit": "ISO-8601 CDT",
+      "kind": "chronology",
+      "source_key": "latimes-msy-2005-09-14",
+      "status": "verified",
+      "note": "Los Angeles Times 14 Sep 2005: Northwest Flight 947 from Memphis was the first commercial arrival at Louis Armstrong on Tuesday 13 Sep. Retrieved 2026-09-06 from https://www.latimes.com/archives/la-xpm-2005-sep-14-na-flight14-story.html. Limited service, not a full pre-storm schedule."
+    }
   }
 }

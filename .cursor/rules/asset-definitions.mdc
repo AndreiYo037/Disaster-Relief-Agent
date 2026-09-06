@@ -1,0 +1,29 @@
+---
+description: Katrina world-model asset catalog — types, meshes, live draw path
+alwaysApply: true
+---
+
+# Asset definitions
+
+Closed catalog: **44 named entities**, **one symbolic mesh per type**, color = damage (green undamaged → yellow unknown → orange damaged → red destroyed/inaccessible).
+
+Full catalog, toggles, hazards, heatmap, and per-sequence binds: `docs/asset-definitions.md`. Chart: `katrina-asset-definitions` canvas.
+
+## Source of truth
+
+- Instances, coords, `BASE_STATES`: `src/crisis_os/catalog.py`
+- Type grammar (primitive, glTF, far symbol, failure variant): `data/katrina/world/symbol-registry.json`
+- What the live CDN map actually extrudes: `web/public/assets/type-solids.json` via `web/diorama.js`
+- glTF under `web/public/assets/gltf/` exists but is **not** loaded on the live path
+- Event clock (84 bullets): `data/katrina/sourced/katrina_event_script.json` — replay scrubber **is** this sequence (tick i = events[i] sorted by t)
+
+## Render contract
+
+- Type with no registry row does not render. No unique mesh per hospital.
+- Failure geometry only: `bridge.failed` (Twin Span after corroboration, or landfall **ground truth** at 06:00), `breach.open`. Color follows **belief** `state`; failed/open mesh follows `ground_truth_state` when present.
+- Landslide is registered and **off** — not Katrina NOLA. Do not add `fire:synth` / `landslide:synth`.
+- Hazards are **not** catalog meshes. Flood / fire / contamination have **no layer checkboxes** — they follow the **replay clock**. Cyclone pose (eye + track) is always `ev.t`. The translucent R34 wind-field disk is chrome (`cycloneAoe`, default on), not a hazard-field checkbox. `fuel:depot` is the contamination catalog pin.
+- Chrome toggles (default all on): **Resource reallocation** (`warehouse`, `vehicle`, `food`, `fuel`, `medicine`, `water`, `personnel` + convoy routes), **Evacuation** (`shelter`, `camp`, `zone`, `hospital`, `clinic`, `school` + displacement dots/arcs), **Overall population** (Census 2000 heatmap, never people meshes), **R34 wind field** (translucent 34-kt radius; track and eye stay). Access (`bridge`, `route`, `road`, `port`, `airport`, `power`, `pump`, `breach`, `comm`, `gauge`) shows if either operation is on. Orange arcs follow `population_delta.movement` for the current replay tick — not the frozen 31 Aug snapshot, and not gated on flood/landfall. Heatmap remaining is continuous in event `t`; each sample joins this tick's HUD bowl (street-level).
+- Category ≠ toggle: `personnel` is humanitarian + realloc; `water` is utilities + realloc; `medicine` is health + realloc.
+- Three keyframes only: `t0`, `b7`, `reroute`. Canonical IDs: `bridge:B7`, `route:R14`, `route:R22`, `zone:B`, `zone:C`, `warehouse:W1`, `truck:17`, `hospital:NDH`.
+- Couplings: `R14`↔`B7`, `R22`↔`bridge:us11`, `zone:C`↔`shelter:morial`, IHNC breaches↔`zone:B`, 17th/London↔`zone:C`.

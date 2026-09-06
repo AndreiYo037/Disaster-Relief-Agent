@@ -22,7 +22,7 @@ a retrieval date before its parameters can be marked `verified`.**
 | `whitehouse-katrina-lessons-ch3` | White House *The Federal Response to Hurricane Katrina: Lessons Learned*, ch. 3 — “10,000 - 12,000 people at the Superdome by midnight” (Sunday 28 Aug), fn. 139 | https://georgewbush-whitehouse.archives.gov/reports/katrina-lessons-learned/chapter3.html | 2026-09-04 | retrieved |
 | `nyt-superdome-2005-09-01` | NYT, 1 Sep 2005, “Superdome: Haven Quickly Becomes an Ordeal”, dateline 31 Aug — “20,000 or more” | https://www.nytimes.com/2005/09/01/us/nationalspecial/superdome-haven-quicklybecomes-an-ordeal.html | 2026-09-04 | retrieved |
 | `convention-center-headcount` | Superseded by `house-select-katrina` | — | 2026-09-04 | superseded |
-| `noaa-tcr-al122005` | NOAA NHC TCR AL122005 Table 1 best track; Buras landfall 1110 UTC 29 Aug, 110 kt, 29.3N 89.6W | https://www.nhc.noaa.gov/data/tcr/AL122005_Katrina.pdf | 2026-09-04 | retrieved |
+| `hurdat2-al122005` | NHC HURDAT2 Atlantic best track AL122005 Katrina — 6-hourly + landfall fixes, 34-kt quadrant radii (nm). `data/katrina/sourced/hurdat2_al122005.txt` | https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2024-040425.txt | 2026-09-06 | retrieved |
 | `usace-ipet` | IPET Vol. V — 17th St / London Ave / IHNC breach timings; IHNC peak ~14.2 ft NAVD88 ~09:00 29 Aug. IHNC Lock staff hydrograph (05:00 10.3 ft → 09:00 14.3 ft → 10:00 12.3 ft) in `data/katrina/sourced/ihnc_lock_hydrograph.json` | https://biotech.law.lsu.edu/katrina/ipet/gpo/Vol%20V%20The%20Performance%20Levees%20and%20Floodwalls%20-%20maintext.pdf | 2026-09-04 | retrieved |
 | `usgs-katrina-surge` | USGS NWIS — intended IHNC/NOLA stage series. Station 073802332 (IHNC at Seabrook) **has no 2005 data** (period starts 2017). Substituted: IHNC Lock staff hydrograph under `usace-ipet` | https://waterdata.usgs.gov/nwis | 2026-09-04 | not retrieved (no 2005 series) |
 | `usgs-circ-1306-ch3d` | USGS Circ. 1306 ch. 3D — Twin Span rendered unusable; 38 EB + 20 WB spans dislodged | https://pubs.usgs.gov/circ/1306/pdf/c1306_ch3_d.pdf | 2026-09-04 | retrieved |
@@ -31,6 +31,18 @@ a retrieval date before its parameters can be marked `verified`.**
 | `fema-dr1603` | FEMA — Louisiana Hurricane Katrina disaster declaration (DR-1603-LA) | https://www.fema.gov/disaster/1603 | — | not retrieved |
 | `epa-murphy-oil-katrina` | EPA / Wikipedia — Murphy Oil Meraux tank 250-2, ~25,110 barrels mixed crude, ~1,700 homes / ~1 sq mi in Chalmette–Meraux, 30 Aug 2005. Geometry is a class-area sketch, not EPA GIS. `data/katrina/sourced/katrina_contamination.json` | https://archive.epa.gov/katrina/web/html/index-6.html ; https://en.wikipedia.org/wiki/Murphy_Oil_USA_refinery_spill | 2026-09-06 | retrieved |
 | `wikipedia-katrina-nola-fires` | Wikipedia *Effects of Hurricane Katrina in New Orleans* — fire at 329 Tchoupitoulas St photographed 2 Sep 2005; Mandeville Street Wharf and 3200 Chartres St also cited. Point sites. `data/katrina/sourced/katrina_fires.json` | https://en.wikipedia.org/wiki/Effects_of_Hurricane_Katrina_in_New_Orleans | 2026-09-06 | retrieved |
+| `script:katrina-event-synthesis` | Compiled Aug 23–October event script for the 3D sim (`data/katrina/sourced/katrina_event_script.json`). Not a primary source — do not verify parameters from it. | — | 2026-09-06 | compiled script |
+| `census-fff-katrina-2015` | Census Bureau Facts for Features CB15-FF.16 (29 Jul 2015) — New Orleans city 494,294 on 1 Jul 2005 and 230,172 on 1 Jul 2006 | https://www.census.gov/newsroom/facts-for-features/2015/cb15-ff16.html | 2026-09-06 | retrieved |
+| `wiki-katrina-nola-effects` | Wikipedia *Effects of Hurricane Katrina in New Orleans* — “over 100,000 people remained in the city” evening 28 Aug (fn. 23). Secondary; not a census | https://en.wikipedia.org/wiki/Effects_of_Hurricane_Katrina_in_New_Orleans | 2026-09-06 | retrieved (secondary) |
+| `rand-tr369-repopulation` | RAND TR-369 *The Repopulation of New Orleans After Hurricane Katrina* — “fewer than several thousand people by the end of the first week of September 2005” | https://www.rand.org/pubs/technical_reports/TR369.html | 2026-09-06 | retrieved (web summary; PDF not archived here) |
+| `doe-oe-katrina-sitrep-28` | DOE OE Hurricane Katrina Situation Report #28, 8 Sep 2005 16:00 EDT — Entergy 9 of 17 NOLA-area gas/oil units back; Entergy New Orleans 89% of customers without power (LAPSC 12:00 8 Sep) | https://www.osti.gov/servlets/purl/1131848 | 2026-09-06 | retrieved |
+| `doe-oe-katrina-sitrep-31` | DOE OE Situation Report #31, 10 Sep 2005 — Mississippi 11% of customers still without power; Louisiana flooded parishes still high (Orleans 88% out) | https://www.osti.gov/servlets/purl/1131845 | 2026-09-06 | retrieved |
+| `wiki-nola-reconstruction` | Wikipedia *Reconstruction of New Orleans* — USACE unwatering timeline (23 of 148 pumps 7 Sep; 26 permanent / 9,125 cfs + 39 portable / 723 cfs 10 Sep; 60% flooded 6 Sep; 7.5e9 gal 15 Sep; >80% unwatered 18 Sep). Secondary; archived USACE PDFs not retrieved as files | https://en.wikipedia.org/wiki/Reconstruction_of_New_Orleans | 2026-09-06 | retrieved (secondary) |
+| `npr-dome-cc-empty-2005-09-04` | NPR 4 Sep 2005 — Superdome and Convention Center reported empty after the weekend evacuation | https://www.npr.org/2005/09/04/4832016/federal-response-to-katrina-begins-to-take-hold ; https://www.npr.org/2005/09/04/4832022/now-empty-superdome-awaits-cleanup | 2026-09-06 | retrieved |
+| `latimes-msy-2005-09-14` | Los Angeles Times 14 Sep 2005 — Northwest Flight 947 MEM was the first commercial arrival at MSY on Tuesday 13 Sep | https://www.latimes.com/archives/la-xpm-2005-sep-14-na-flight14-story.html | 2026-09-06 | retrieved |
+| `dvidshub-ng-katrina-2005-09-02` | DVIDS 2 Sep 2005 — “almost 22,000 National Guardsmen already on the ground” in the Gulf; 7,000 more active-duty announced | https://www.dvidshub.net/news/537224/more-active-guard-troops-join-katrina-response | 2026-09-06 | retrieved (secondary) |
+| `ng-on-guard-katrina` | National Guard *The On Guard* — LTG Blum: more than 6,500 Guard in New Orleans alone by 2 Sep | https://www.nationalguard.mil/Resources/Archives/The-On-Guard/FileId/62636/ | 2026-09-06 | retrieved |
+| `whitehouse-katrina-2005-09-03` | White House fact sheet 3 Sep 2005 — more than 7,000 additional active-duty troops in 24–72 hours; more than 21,000 National Guard already in affected areas | https://georgewbush-whitehouse.archives.gov/news/releases/2005/09/text/20050903-3.html | 2026-09-06 | retrieved |
 
 ### URL confidence
 
@@ -78,7 +90,7 @@ consumers, the sensor-threshold path in Perception and the diorama's water heigh
 
 ## Non-source keys
 
-These two keys exist so that **every** parameter has a resolvable `source_key` and
+These keys exist so that **every** parameter has a resolvable `source_key` and
 none can hide as an unattributed literal. They are declarations that a number is a
 choice rather than a measurement.
 
@@ -86,6 +98,7 @@ choice rather than a measurement.
 | --- | --- |
 | `design:tuned-for-demo` | A calibration decision made so the demo behaves as designed. Not a claim about the world. If it appears on screen it must be labelled as a modelling assumption. |
 | `design:derived` | Computed from other parameters. Must never be hand-edited; change its inputs instead. |
+| `design:gap-fill` | Demo state painted because this sequence has no sourced locator yet. Never `verified`. Never a `parameters.json` fact. Label on screen if a mesh uses it. |
 
 ## Verification protocol
 

@@ -42,6 +42,7 @@ def viz_block(params: dict) -> dict:
         "saturation_historical", "fog_recency_kernel_radius_m",
         "population_grid_resolution_m", "flood_grid_resolution_m",
         "population_min_aggregation_cell_count", "population_density_bin_method",
+        "gulf_camera_zoom",
     )}
 
 

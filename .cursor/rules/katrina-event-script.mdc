@@ -1,0 +1,23 @@
+---
+description: Katrina event script — replay clock is the 84-event sequence
+alwaysApply: true
+---
+
+# Event script
+
+Full sequence: `data/katrina/sourced/katrina_event_script.json` (84 events, phases 0–6, CDT). Chart: `katrina-event-script` canvas.
+
+This file is a **compiled script**, not evidence. Do not mark `parameters.json` verified from it. Bind a bullet to an entity/hazard only when the same fact has a `source_key` in `data/SOURCES.md`.
+
+## Replay clock = script sequence
+
+The footer scrubber, Play, and phase pills **are** the event script. Tick `i` is `events[i]` after a **stable sort by `t`**. Do not drive replay from the three belief keyframes, from JSON file-order if that disagrees with time, or from an invented interpolant.
+
+- Clock time, title, binds, cyclone pose (`hurdat2-al122005` at `ev.t`), and camera window come from that event. Phase 0 follows the eye (NOLA hidden). From phase 1 the camera is on the NOLA basemap and catalog. Keep the NOLA center; **never zoom in** on a bind. **Zoom out only** if this tick's **catalog bind** is out of frame. Do **not** zoom or pan to fit the cyclone (eye, R34, or track). Empty binds → leave the current view (city overview at rest).
+- Play walks `events[i]` in order with **no skipping**, 1.2 s per tick.
+- Hazard fields have **no checkboxes**. They appear when the sequence first binds them (`hazards.flood`, `hazards.fire`, `hazards.contamination`) and stay until a later sourced decay. Cyclone pose (eye + track) is always this tick. The translucent R34 disk is a chrome overlay (`cycloneAoe`, default on); toggling it must not hide the track or eye.
+- Evacuation chrome on → pulsing orange arcs for **this tick's movement** (phase 1 outbound, into Dome/CC, rooftop rescue, Dome→CC, then off-map via `airport:msy`). Do not hide arcs behind flood or landfall patches. Do not draw Houston geography.
+- Current-event `binds` (plus couplings R14↔B7, R22↔us11, zone:C↔morial) are highlighted on the map.
+- Belief snapshots (`b7` / `t0` / `reroute`) still hold NOLA **entity meshes** until a sprint interpolates them. Phase C patches 29 Aug landfall entities (breaches, flood bowls, B7 ground truth) without rewriting `t0.json`. Phase D patches 30–31 Aug inundation and shelter occupancy (HUD bowls → 31 Aug table, Dome/CC, Murphy Oil) without rewriting `t0.json` and without turning on fire. Phase E patches Sep federal surge / unwatering / power (pump counts, HUD decay, MSY, Dome/CC empty) without rewriting `t0.json` and without Houston geography. Pick the nearest snapshot **by event `t`**, not by a stale `demo_keyframe` tag. Pinning a snapshot must not reorder the clock.
+
+Build order: `docs/katrina-replay-build-phases.md`. Catalog: `docs/asset-definitions.md`.

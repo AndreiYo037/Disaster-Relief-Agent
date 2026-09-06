@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from . import db
 from .models import HumanDecision, Permit
-from .snapshot import build_snapshot, load_parameters, pv, write_world_files
+from .snapshot import SNAP_DIR, build_snapshot, load_parameters, pv, write_world_files
 
 
 def perception(inbox: list[dict]) -> list[dict]:
@@ -189,7 +189,8 @@ def run_demo() -> dict:
          '{"lesson":"candidate","confidence":"low"}'),
     )
     db.get_db().commit()
-    write_world_files()
+    if not (SNAP_DIR / "t0.json").exists():
+        write_world_files()
     return {
         "equity_blocked_efficient": viol[0],
         "fair": fair,

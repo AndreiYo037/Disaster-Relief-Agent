@@ -25,7 +25,9 @@ The Crisis OS isn't showing geography. It's showing **knowledge about geography.
 
 Seven amendments were made to the original spec during review. Each is marked inline
 where it applies. A6 and A7 arrived later, from the entity-rendering pass; their
-full treatment is in [`entity-rendering.md`](entity-rendering.md).
+full treatment is in [`entity-rendering.md`](entity-rendering.md). The live Katrina
+instance list, operation toggles, always-on hazards, and population heatmap are in
+[`asset-definitions.md`](asset-definitions.md).
 
 | # | Item | Amendment |
 | --- | --- | --- |

@@ -226,6 +226,494 @@ def test_bridge_spans_follow_osm():
     assert len(spans["bridge:causeway"]["span_paths"]) == 2
 
 
+def test_replay_clock():
+    from crisis_os.replay import (
+        PUBLIC_SCRIPT_PATH, SCRIPT_PATH, belief_for_event, event_count, index_at_time,
+        load_script, nearest_belief_keyframe, parse_cdt, phase_category_scan, phase_counts,
+        replay_at, script_payload, elapsed_binds, fields_on,
+    )
+
+    raw = json.loads(SCRIPT_PATH.read_text(encoding="utf-8"))
+    public = json.loads(PUBLIC_SCRIPT_PATH.read_text(encoding="utf-8"))
+    assert len(raw["events"]) == 84
+    assert [e["id"] for e in raw["events"]] == [e["id"] for e in public["events"]]
+    assert {p["id"] for p in raw["phases"]} == {0, 1, 2, 3, 4, 5, 6}
+
+    script = load_script()
+    assert event_count(script) == 84
+    counts = phase_counts(script)
+    assert set(counts) == {0, 1, 2, 3, 4, 5, 6}
+    assert sum(counts.values()) == 84
+    assert all(counts[p] > 0 for p in range(7))
+
+    prev = None
+    ids = set()
+    for i, ev in enumerate(script["events"]):
+        assert ev["id"] and ev["title"] and isinstance(ev.get("binds"), list)
+        assert 0 <= ev["phase"] <= 6
+        assert ev["seq"] == i
+        dt = parse_cdt(ev["t"])
+        assert dt.utcoffset() is not None
+        if prev is not None:
+            assert dt >= prev
+        prev = dt
+        ids.add(ev["id"])
+    assert len(ids) == 84
+    assert [e["id"] for e in script["events"]] == [e["id"] for e in raw["events"]]
+    murphy_i = next(i for i, e in enumerate(script["events"]) if e["id"] == "p3-murphy-oil")
+    fires_i = next(i for i, e in enumerate(script["events"]) if e["id"] == "p4-fires")
+    assert murphy_i < fires_i
+
+    assert fields_on(0)["flood"] is False
+    ihnc = script["_id_index"]["p2-ihnc-overtop-west"]
+    assert fields_on(ihnc)["flood"] is True
+    rescues = script["_id_index"]["p3-rescues-thousands"]
+    assert fields_on(rescues)["contamination"] is True
+    assert fields_on(rescues)["fire"] is False
+    assert fields_on(fires_i)["fire"] is True
+    assert "hazards.flood" in elapsed_binds(rescues)
+
+    assert nearest_belief_keyframe("2005-08-23T16:00:00-05:00") == "b7"
+    assert nearest_belief_keyframe("2005-08-31T08:00:00-05:00") == "t0"
+    assert nearest_belief_keyframe("2005-08-31T09:20:00-05:00") == "reroute"
+    assert nearest_belief_keyframe("2005-09-18T12:00:00-05:00") == "reroute"
+
+    landfall = next(e for e in script["events"] if e["id"] == "p2-twin-span")
+    assert belief_for_event(landfall) == "b7"
+    assert index_at_time("2005-08-23T00:00:00-05:00") == 0
+
+    at = replay_at(event_id="p2-twin-span")
+    assert at["build_phase"] == "C"
+    assert at["belief_keyframe"] == "b7"
+    assert "t0 snapshot unchanged" in at["world_note"]
+    assert at["event"]["title"]
+    assert at["world_delta"]["entities"]["bridge:B7"]["state"] == "uncertain"
+
+    payload = script_payload()
+    assert payload["event_count"] == 84
+    assert payload["t_start"] == script["events"][0]["t"]
+    assert payload["t_end"] == script["events"][-1]["t"]
+    assert "script sequence" in payload["clock_rule"] or "sorted by t" in payload["clock_rule"]
+    assert payload["events"][0]["id"] == "p0-td12"
+    assert payload["events"][0]["seq"] == 0
+
+    scan0 = phase_category_scan(0, script)
+    assert scan0["categories"]["transport"]["status"] == "gap"
+    assert scan0["categories"]["cyclone"]["status"] == "gap"
+    scan2 = phase_category_scan(2, script)
+    assert scan2["categories"]["hazard"]["status"] == "bound"
+    assert scan2["categories"]["flood"]["status"] == "bound"
+    assert scan2["categories"]["population"]["status"] == "gap"
+
+
+def test_cyclone_pose():
+    from crisis_os.cyclone import load_track, pose_at
+    from crisis_os.replay import replay_at
+
+    track = load_track()
+    assert track[0]["utc"] == "2005-08-23T18:00:00Z"
+    assert abs(track[0]["lat"] - 23.1) < 1e-6
+    assert abs(track[0]["lon"] + 75.1) < 1e-6
+    fl = pose_at("2005-08-25T17:30:00-05:00")
+    assert abs(fl["lat"] - 26.0) < 0.05
+    assert abs(fl["lon"] + 80.1) < 0.05
+    assert fl["camera"] == "gulf"
+    peak = pose_at("2005-08-28T13:00:00-05:00")
+    assert peak["cat"] == 5
+    assert peak["r34_nm"] > 150
+    early = pose_at("2005-08-23T16:00:00-05:00")
+    assert early["camera"] == "gulf"
+    assert early["r34_nm"] == 0
+    nola = pose_at("2005-08-31T08:00:00-05:00")
+    assert nola["camera"] == "nola"
+    westbound = [p["lon"] for p in track if p["utc"] <= "2005-08-28T18:00:00Z"]
+    assert westbound[0] > westbound[-1]
+    gulf = replay_at(event_id="p0-td12")
+    assert gulf["cyclone"]["camera"] == "gulf"
+    assert "cyclone pose" in gulf["world_note"]
+    early_path = pose_at("2005-08-23T16:00:00-05:00")
+    assert len(early_path["ahead"]) <= 8
+    assert all(lat < 28 for _lon, lat in early_path["ahead"])
+    assert all(lat < 32.5 for _lon, lat in early_path["flown"])
+    landfall_path = pose_at("2005-08-29T10:00:00-05:00")
+    assert all(lat < 32.5 for _lon, lat in landfall_path["ahead"] + landfall_path["flown"])
+    inland = pose_at("2005-08-31T08:00:00-05:00")
+    assert all(lat < 32.5 for _lon, lat in inland["ahead"] + inland["flown"])
+
+
+def test_prelandfall_assets():
+    from crisis_os.landfall import prelandfall_delta
+    from crisis_os.replay import load_script, replay_at
+
+    script = load_script()
+    nagin = replay_at(event_id="p1-nagin-soe")
+    assert nagin["event"]["phase"] == 1
+    delta = nagin["world_delta"]
+    assert delta["prelandfall"] is True
+    assert delta["entities"]["bridge:B7"]["state"] == "operational"
+    assert delta["entities"]["hospital:charity"]["state"] == "operational"
+    assert delta["entities"]["comms:eoc"]["state"] == "operational"
+    assert "NOLA assets on" in nagin["world_note"]
+    opens = prelandfall_delta(script["_id_index"]["p1-dome-opens"], script)
+    assert opens["entities"]["shelter:dome"]["state"] == "operational"
+    assert opens["entities"]["shelter:dome"]["attributes"]["occupancy"] == 0
+    dome = prelandfall_delta(script["_id_index"]["p1-dome-evening"], script)
+    assert dome["entities"]["shelter:dome"]["state"] == "critical"
+    assert dome["entities"]["shelter:dome"]["attributes"]["occupancy"] > 0
+    gulf = replay_at(event_id="p0-td12")
+    assert gulf.get("world_delta") is None
+    t0 = json.loads((ROOT / "data" / "katrina" / "snapshots" / "t0.json").read_text(encoding="utf-8"))
+    b7 = next(e for e in t0["entities"] if e["entity_id"] == "bridge:B7")
+    assert b7["state"] == "uncertain"
+    assert b7["verification_status"] == "unverified"
+
+
+def test_landfall_hour():
+    from crisis_os.landfall import FLIPS, landfall_delta
+    from crisis_os.replay import load_script, replay_at, script_payload
+    from crisis_os.app import snapshot_for
+
+    t0_path = ROOT / "data" / "katrina" / "snapshots" / "t0.json"
+    t0 = json.loads(t0_path.read_text(encoding="utf-8"))
+    b7t0 = next(e for e in t0["entities"] if e["entity_id"] == "bridge:B7")
+    assert b7t0["state"] == "uncertain"
+    assert b7t0["verification_status"] == "unverified"
+    assert b7t0.get("ground_truth_state") in (None, "uncertain")
+
+    live = snapshot_for("t0")
+    live_b7 = next(e for e in live["entities"] if e["entity_id"] == "bridge:B7")
+    assert live_b7["state"] == "uncertain"
+    assert live_b7["verification_status"] == "unverified"
+
+    src = (ROOT / "data" / "SOURCES.md").read_text(encoding="utf-8")
+    script = load_script()
+    ids = {e["id"] for e in script["events"]}
+    for event_id, _eid, _state, source_key in FLIPS:
+        assert event_id in ids, event_id
+        assert f"`{source_key}`" in src, source_key
+
+    west = landfall_delta(script["_id_index"]["p2-ihnc-overtop-west"], script)
+    assert west["entities"]["breach:ihnc-west"]["state"] == "critical"
+    assert west["entities"]["breach:ihnc"]["state"] == "operational"
+    assert west["entities"]["bridge:B7"]["state"] == "uncertain"
+    assert west["entities"]["bridge:B7"]["ground_truth_state"] == "operational"
+    assert west["entities"]["bridge:B7"]["verification_status"] == "unverified"
+
+    twin = landfall_delta(script["_id_index"]["p2-twin-span"], script)
+    assert twin["entities"]["bridge:B7"]["state"] == "uncertain"
+    assert twin["entities"]["bridge:B7"]["ground_truth_state"] == "inaccessible"
+    assert twin["entities"]["bridge:B7"]["verification_status"] == "unverified"
+    assert twin["entities"]["route:R14"]["state"] == "inaccessible"
+
+    dome = landfall_delta(script["_id_index"]["p2-dome-power"], script)
+    assert dome["entities"]["shelter:dome"]["gap_fill"] is True
+    assert dome["entities"]["shelter:dome"]["verification_status"] == "unverified"
+
+    opened = landfall_delta(script["_id_index"]["p2-17th-open"], script)
+    for bid in ("breach:ihnc-west", "breach:ihnc", "breach:london", "breach:london-n", "breach:17th"):
+        assert opened["entities"][bid]["state"] in ("damaged", "critical", "inaccessible"), bid
+    west_wet = sum(f["wet_frac"] for f in west["flood"]["wet_mask"]["features"])
+    open_wet = sum(f["wet_frac"] for f in opened["flood"]["wet_mask"]["features"])
+    assert open_wet > west_wet
+    open_depth = sum(f["depth_m"] for f in opened["flood"]["wet_mask"]["features"])
+    later = landfall_delta(script["_id_index"]["p2-catastrophic-flood"], script)
+    later_depth = sum(f["depth_m"] for f in later["flood"]["wet_mask"]["features"])
+    assert later_depth >= open_depth
+
+    at = replay_at(event_id="p2-twin-span")
+    assert at["build_phase"] == "C"
+    assert at["world_delta"]["entities"]["bridge:B7"]["state"] == "uncertain"
+    assert at["belief_keyframe"] == "b7"
+
+    gulf = replay_at(event_id="p0-td12")
+    assert gulf.get("world_delta") is None
+    later_clock = replay_at(event_id="p3-murphy-oil")
+    assert later_clock["build_phase"] == "D"
+    assert later_clock.get("world_delta")
+    assert later_clock["world_delta"]["build_phase"] == "D"
+
+    payload = script_payload()
+    assert payload["build_phase"] == "E"
+    assert payload["events"][script["_id_index"]["p2-17th-open"]].get("world_delta")
+
+    frozen = json.loads(t0_path.read_text(encoding="utf-8"))
+    frozen_b7 = next(e for e in frozen["entities"] if e["entity_id"] == "bridge:B7")
+    assert frozen_b7["state"] == "uncertain"
+    assert frozen_b7["verification_status"] == "unverified"
+
+
+def test_population_clock():
+    from crisis_os.population_clock import population_delta
+    from crisis_os.replay import load_script, replay_at, script_payload
+    from crisis_os.snapshot import pv, load_parameters
+
+    script = load_script()
+    p = load_parameters()
+    census = pv(p, "population_clock", "orleans_census_2000")
+    remain = pv(p, "population_clock", "city_remaining_28aug")
+    cleared = pv(p, "population_clock", "city_cleared_early_sep")
+
+    p0 = replay_at(event_id="p0-td12")
+    assert p0["population_delta"]["city_in"] == census
+    assert p0["population_delta"]["wet_frac"] == 1
+    assert p0["event"]["population_delta"]["hotspots"] == []
+    assert p0["population_delta"]["movement"] == []
+
+    nagin = replay_at(event_id="p1-nagin-soe")
+    assert nagin["population_delta"]["city_in"] < census
+    assert nagin["population_delta"]["city_in"] > remain
+    assert nagin["population_delta"]["continuous"] is True
+    nagin_kinds = {m["kind"] for m in nagin["population_delta"]["movement"]}
+    assert "outbound" in nagin_kinds
+    assert nagin["population_delta"]["movement"]
+
+    prep = replay_at(event_id="p1-eoc-contraflow-prep")
+    man = replay_at(event_id="p1-mandatory-nola")
+    assert nagin["population_delta"]["wet_frac"] > prep["population_delta"]["wet_frac"] > man["population_delta"]["wet_frac"]
+
+    rta = replay_at(event_id="p1-rta-buses")
+    assert any(m["kind"] == "to_shelter" for m in rta["population_delta"]["movement"])
+    assert any(m["to_id"] == "shelter:dome" for m in rta["population_delta"]["movement"])
+
+    roof = replay_at(event_id="p2-rooftop-start")
+    assert any(m["kind"] == "rescue" for m in roof["population_delta"]["movement"])
+    assert any(m["to_id"] == "shelter:dome" for m in roof["population_delta"]["movement"])
+
+    xfer = replay_at(event_id="p3-dome-to-cc")
+    assert any(m["kind"] == "dome_to_cc" for m in xfer["population_delta"]["movement"])
+
+    hou = replay_at(event_id="p4-evac-houston")
+    assert all(m["to_id"] == "airport:msy" for m in hou["population_delta"]["movement"])
+    assert any(m["from_id"] == "shelter:dome" for m in hou["population_delta"]["movement"])
+    blob = json.dumps(hou["population_delta"]["movement"]).lower()
+    assert "houston" not in blob
+
+    stay = replay_at(event_id="p1-remain")
+    assert stay["population_delta"]["city_in"] == remain
+    dome = next(h for h in stay["population_delta"]["hotspots"] if h["entity_id"] == "shelter:dome")
+    assert dome["people"] == 11000
+
+    cc = replay_at(event_id="p3-cc-crisis")
+    assert cc["population_delta"]["classes"]["shelter:morial"] == 19000
+    assert cc["population_delta"]["classes"]["shelter:dome"] == 16000
+    assert cc["population_delta"]["wet_frac"] < stay["population_delta"]["wet_frac"]
+
+    empty = replay_at(event_id="p5-dome-cc-cleared")
+    assert empty["population_delta"]["city_in"] == cleared
+    assert empty["population_delta"]["classes"]["shelter:dome"] == 0
+    assert empty["population_delta"]["classes"]["shelter:morial"] == 0
+    assert any(m["kind"] == "off_map" for m in empty["population_delta"]["movement"])
+
+    rebound = replay_at(event_id="p6-rebuild")
+    assert rebound["population_delta"]["city_in"] > empty["population_delta"]["city_in"]
+    assert rebound["population_delta"]["movement"] == []
+    july = pv(p, "population_clock", "orleans_july_2006")
+    assert abs(rebound["population_delta"]["city_in"] - july) < 5
+
+    payload = script_payload()
+    assert all("population_delta" in e for e in payload["events"])
+    city = [e["population_delta"]["city_in"] for e in payload["events"]]
+    assert city[0] == census
+    assert min(city) < remain
+    t0 = json.loads((ROOT / "data" / "katrina" / "snapshots" / "t0.json").read_text(encoding="utf-8"))
+    assert t0["population"]["classes"]["total"]["orleans_parish_2000"] == census
+
+
+def test_inundation_shelters():
+    from crisis_os.inundation import FLIPS, hud_ceiling_features, inundation_delta
+    from crisis_os.landfall import landfall_delta
+    from crisis_os.replay import load_script, replay_at, script_payload
+    from crisis_os.snapshot import district_flood_metrics, load_hud_flood
+
+    t0_path = ROOT / "data" / "katrina" / "snapshots" / "t0.json"
+    frozen = json.loads(t0_path.read_text(encoding="utf-8"))
+    frozen_b7 = next(e for e in frozen["entities"] if e["entity_id"] == "bridge:B7")
+    assert frozen_b7["state"] == "uncertain"
+    assert frozen_b7["verification_status"] == "unverified"
+
+    src = (ROOT / "data" / "SOURCES.md").read_text(encoding="utf-8")
+    script = load_script()
+    ids = {e["id"] for e in script["events"]}
+    for event_id, _eid, _state, source_key in FLIPS:
+        assert event_id in ids, event_id
+        assert f"`{source_key}`" in src, source_key
+
+    last_p2 = max(i for i, e in enumerate(script["events"]) if e["phase"] == 2)
+    c_end = landfall_delta(last_p2, script)
+    c_wet = sum(f["wet_frac"] for f in c_end["flood"]["wet_mask"]["features"])
+    c_depth = sum(f["depth_m"] for f in c_end["flood"]["wet_mask"]["features"])
+
+    eighty = inundation_delta(script["_id_index"]["p3-80pct"], script)
+    assert eighty["build_phase"] == "D"
+    assert eighty["entities"]["bridge:B7"]["state"] == "uncertain"
+    assert eighty["entities"]["bridge:B7"]["ground_truth_state"] == "inaccessible"
+    assert eighty["entities"]["bridge:B7"]["verification_status"] == "unverified"
+    assert eighty["pulse"]["truck_status"] == "N/A"
+    eighty_wet = sum(f["wet_frac"] for f in eighty["flood"]["wet_mask"]["features"])
+    assert eighty_wet > c_wet
+    assert "MOTF" in eighty["flood"]["wet_mask"]["note"]
+    assert "hud-noaa-flood-2005-08-31" in eighty["flood"]["wet_mask"]["source_key"]
+
+    at80 = replay_at(event_id="p3-80pct")
+    assert at80["build_phase"] == "D"
+    assert at80["world_delta"]["entities"]["bridge:B7"]["state"] == "uncertain"
+    assert at80["fields_on"]["fire"] is False
+
+    ceiling = {f["id"]: f for f in hud_ceiling_features()}
+    peak = inundation_delta(script["_id_index"]["p3-max-inundation"], script)
+    peak_depth = sum(f["depth_m"] for f in peak["flood"]["wet_mask"]["features"])
+    assert peak_depth >= sum(f["depth_m"] for f in eighty["flood"]["wet_mask"]["features"])
+    assert peak_depth >= c_depth
+    for f in peak["flood"]["wet_mask"]["features"]:
+        want = ceiling[f["id"]]
+        assert abs(f["wet_frac"] - want["wet_frac"]) < 1e-6, f["id"]
+        assert abs(f["depth_m"] - want["depth_m"]) < 1e-6, f["id"]
+    hud = load_hud_flood()
+    for d in hud["districts"]:
+        if d["flooded_units"] <= 0:
+            continue
+        depth_m, wet_frac = district_flood_metrics(d)
+        got = next(x for x in peak["flood"]["wet_mask"]["features"] if x["id"] == d["id"])
+        assert abs(got["wet_frac"] - round(wet_frac, 4)) < 1e-6
+        assert abs(got["depth_m"] - round(depth_m, 3)) < 1e-6
+
+    cc = replay_at(event_id="p3-cc-crisis")
+    assert cc["build_phase"] == "D"
+    assert cc["population_delta"]["classes"]["shelter:morial"] == 19000
+    assert cc["population_delta"]["classes"]["shelter:dome"] == 16000
+    assert cc["world_delta"]["entities"]["shelter:morial"]["attributes"]["occupancy"] == 19000
+    assert cc["world_delta"]["entities"]["shelter:dome"]["attributes"]["occupancy"] == 16000
+    assert cc["world_delta"]["entities"]["shelter:morial"]["state"] == "critical"
+    assert cc["fields_on"]["fire"] is False
+
+    murphy = replay_at(event_id="p3-murphy-oil")
+    assert murphy["fields_on"]["contamination"] is True
+    assert murphy["fields_on"]["fire"] is False
+    assert murphy["world_delta"]["entities"]["fuel:depot"]["state"] == "critical"
+    assert murphy["world_delta"]["pulse"]["truck_status"] == "N/A"
+
+    fires = replay_at(event_id="p4-fires")
+    assert fires["fields_on"]["fire"] is True
+    assert fires["build_phase"] == "E"
+    assert fires.get("world_delta")
+
+    td = replay_at(event_id="p3-td")
+    assert td["build_phase"] == "D"
+    assert "bridge:B7" not in td["world_delta"]["entities"]
+    assert td["world_delta"]["pulse"].get("truck_status") != "N/A"
+    assert td["belief_keyframe"] == "reroute"
+
+    payload = script_payload()
+    assert payload["build_phase"] == "E"
+    assert payload["events"][script["_id_index"]["p3-max-inundation"]].get("world_delta")
+    frozen2 = json.loads(t0_path.read_text(encoding="utf-8"))
+    frozen2_b7 = next(e for e in frozen2["entities"] if e["entity_id"] == "bridge:B7")
+    assert frozen2_b7["state"] == "uncertain"
+    assert frozen2_b7["verification_status"] == "unverified"
+
+
+def test_unwatering():
+    from crisis_os.inundation import hud_ceiling_features, inundation_delta
+    from crisis_os.replay import load_script, replay_at, script_payload
+    from crisis_os.snapshot import pv, load_parameters
+    from crisis_os.unwatering import FLIPS, unwatering_delta
+
+    t0_path = ROOT / "data" / "katrina" / "snapshots" / "t0.json"
+    frozen = json.loads(t0_path.read_text(encoding="utf-8"))
+    frozen_b7 = next(e for e in frozen["entities"] if e["entity_id"] == "bridge:B7")
+    assert frozen_b7["state"] == "uncertain"
+    assert frozen_b7["verification_status"] == "unverified"
+
+    src = (ROOT / "data" / "SOURCES.md").read_text(encoding="utf-8")
+    script = load_script()
+    ids = {e["id"] for e in script["events"]}
+    for event_id, _eid, _state, source_key in FLIPS:
+        assert event_id in ids, event_id
+        assert f"`{source_key}`" in src, source_key
+
+    last_p3 = max(i for i, e in enumerate(script["events"]) if e["phase"] == 3)
+    d_end = inundation_delta(last_p3, script)
+    d_wet = sum(f["wet_frac"] for f in d_end["flood"]["wet_mask"]["features"])
+
+    fires = replay_at(event_id="p4-fires")
+    assert fires["build_phase"] == "E"
+    assert fires["fields_on"]["fire"] is True
+    assert fires["fields_on"]["contamination"] is True
+    fire_wet = sum(f["wet_frac"] for f in fires["world_delta"]["flood"]["wet_mask"]["features"])
+    assert abs(fire_wet - d_wet) < 0.05
+    assert "astrodome" not in json.dumps(fires["world_delta"]).lower()
+    assert "houston" not in (fires["world_delta"].get("entities") or {})
+
+    pumps = replay_at(event_id="p5-portable-pumps")
+    pump_wet = sum(f["wet_frac"] for f in pumps["world_delta"]["flood"]["wet_mask"]["features"])
+    assert pump_wet < fire_wet
+    assert pumps["world_delta"]["entities"]["infra:pump6"]["state"] == "damaged"
+    assert pumps["world_delta"]["pulse"]["remain"] == 0.75
+
+    n23 = replay_at(event_id="p5-pumps-23")
+    p = load_parameters()
+    assert n23["world_delta"]["entities"]["infra:pump6"]["attributes"]["pumps_on"] == pv(p, "unwatering", "pumps_permanent_on_7sep")
+    assert n23["world_delta"]["pulse"]["pumps_on"] == 23
+
+    n26 = replay_at(event_id="p5-pumps-26")
+    assert n26["world_delta"]["pulse"]["pumps_on"] == pv(p, "unwatering", "pumps_permanent_on_10sep")
+    assert n26["world_delta"]["entities"]["infra:pump6"]["state"] == "operational"
+    assert n26["world_delta"]["pulse"]["cfs"] == (
+        pv(p, "unwatering", "pumps_permanent_cfs_10sep") + pv(p, "unwatering", "pumps_portable_cfs_10sep")
+    )
+
+    entergy = replay_at(event_id="p5-entergy-9of17")
+    assert entergy["world_delta"]["entities"]["power:waterford"]["state"] != "operational"
+    assert entergy["world_delta"]["entities"]["power:michoud"]["state"] == "inaccessible"
+    assert entergy["world_delta"]["entities"]["infra:power"]["state"] == "damaged"
+
+    forty = replay_at(event_id="p6-40pct")
+    ceiling = hud_ceiling_features()
+    by_id = {f["id"]: f for f in forty["world_delta"]["flood"]["wet_mask"]["features"]}
+    for f in ceiling:
+        got = by_id[f["id"]]
+        assert abs(got["wet_frac"] - round(f["wet_frac"] * 0.50, 4)) < 1e-6, f["id"]
+    forty_wet = sum(x["wet_frac"] for x in by_id.values())
+    assert forty_wet < pump_wet
+
+    dryish = replay_at(event_id="p6-80pct-unwatered")
+    dry_wet = sum(f["wet_frac"] for f in dryish["world_delta"]["flood"]["wet_mask"]["features"])
+    assert dry_wet < forty_wet
+    assert dryish["world_delta"]["pulse"]["remain"] == 0.25
+
+    octo = replay_at(event_id="p6-october-dry")
+    assert octo["world_delta"]["pulse"]["remain"] < 0.12
+    assert octo["world_delta"]["roads_wet"] is False
+
+    cleared = replay_at(event_id="p5-dome-cc-cleared")
+    assert cleared["population_delta"]["classes"]["shelter:dome"] == 0
+    assert cleared["population_delta"]["classes"]["shelter:morial"] == 0
+    assert cleared["world_delta"]["entities"]["shelter:dome"]["attributes"]["occupancy"] == 0
+    assert cleared["world_delta"]["entities"]["shelter:morial"]["attributes"]["occupancy"] == 0
+
+    msy = replay_at(event_id="p6-msy-commercial")
+    assert msy["world_delta"]["entities"]["airport:msy"]["state"] == "operational"
+    mil = replay_at(event_id="p4-msy-military")
+    assert mil["world_delta"]["entities"]["airport:msy"]["state"] == "damaged"
+
+    houston = replay_at(event_id="p4-evac-houston")
+    assert "Houston" in houston["world_delta"]["pulse"]["off_map"]
+    assert all("houston" not in eid and "astrodome" not in eid for eid in houston["world_delta"]["entities"])
+
+    b7 = replay_at(event_id="p6-rebuild")
+    assert b7["world_delta"]["entities"]["bridge:B7"]["state"] == "inaccessible"
+    assert b7["world_delta"]["entities"]["bridge:B7"]["verification_status"] == "verified"
+
+    payload = script_payload()
+    assert payload["build_phase"] == "E"
+    assert payload["events"][script["_id_index"]["p6-october-dry"]].get("world_delta")
+    frozen2 = json.loads(t0_path.read_text(encoding="utf-8"))
+    frozen2_b7 = next(e for e in frozen2["entities"] if e["entity_id"] == "bridge:B7")
+    assert frozen2_b7["state"] == "uncertain"
+    assert frozen2_b7["verification_status"] == "unverified"
+    assert unwatering_delta(script["_id_index"]["p3-cc-crisis"], script) is None
+
+
 def test_equity_and_spine():
     p = load_parameters()
     sphere = pv(p, "humanitarian_standards", "water_l_per_person_day")
@@ -250,5 +738,12 @@ if __name__ == "__main__":
     test_no_synthetic_katrina_entities()
     test_sourced_flood_and_population()
     test_bridge_spans_follow_osm()
+    test_replay_clock()
+    test_cyclone_pose()
+    test_prelandfall_assets()
+    test_landfall_hour()
+    test_population_clock()
+    test_inundation_shelters()
+    test_unwatering()
     test_equity_and_spine()
     print("ok")

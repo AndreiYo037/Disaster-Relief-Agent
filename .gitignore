@@ -4,4 +4,6 @@ __pycache__/
 web/node_modules/
 web/dist/
 data/crisis_os.db
+data/crisis_os.db-shm
+data/crisis_os.db-wal
 .env

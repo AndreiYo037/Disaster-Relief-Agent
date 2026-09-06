@@ -520,6 +520,18 @@ flood intensity.**
 
 ## 27. UI layer control
 
+**Live chrome (authoritative for the CDN map):** three checkboxes, all on by
+default — Resource reallocation, Evacuation, Overall population. There are no
+hazard toggles. See [`asset-definitions.md`](asset-definitions.md).
+
+- **Overall population** = this density heatmap (`snap.population.heat`). Buildings
+  and flood flatten while it is on. Forecast is disabled.
+- **Evacuation** also shows displaced-cell dots and occupancy-delta arcs. Those are
+  not the heatmap.
+- **Resource reallocation** does not change this surface.
+
+Design target (not yet the live panel):
+
 ```
 POPULATION
 ☑ Overall population
@@ -530,7 +542,7 @@ POPULATION
 ☐ Forecast
 ```
 
-Default: `Overall population = ON`, everything else off.
+Default in that target: `Overall population = ON`, everything else off.
 
 ## 28. Population legend interaction
 

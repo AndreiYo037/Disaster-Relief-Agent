@@ -42,8 +42,10 @@ def snapshot_for(keyframe: str | None = None, ts: str | None = None) -> dict:
         from .agentic import replay_projection
         from .graph import run_replay
         projected = replay_projection(run_replay(kf))
-        projected.update({key: value for key, value in base.items() if key not in projected})
-        return projected
+        agentic = projected.get("agentic")
+        if agentic:
+            base = {**base, "agentic": agentic}
+        return base
     except Exception as exc:
         print(f"[agentic] projection unavailable: {exc}")
         return base
@@ -103,6 +105,18 @@ class Handler(BaseHTTPRequestHandler):
             kf = (q.get("keyframe") or [None])[0]
             snap = snapshot_for(kf, ts)
             self._json(snap["population"] if u.path.endswith("population") else snap)
+            return
+        if u.path == "/api/replay":
+            from .replay import script_payload
+            self._json(script_payload())
+            return
+        if u.path == "/api/replay/at":
+            from .replay import replay_at
+            t = (q.get("t") or q.get("ts") or [None])[0]
+            eid = (q.get("event") or q.get("id") or [None])[0]
+            raw_idx = (q.get("index") or [None])[0]
+            idx = int(raw_idx) if raw_idx is not None and str(raw_idx).lstrip("-").isdigit() else None
+            self._json(replay_at(t=t, event_id=eid, index=idx))
             return
         if u.path == "/api/health":
             self._json({"ok": True})

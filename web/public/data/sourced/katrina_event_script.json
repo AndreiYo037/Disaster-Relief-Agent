@@ -1,0 +1,1398 @@
+{
+  "dataset_id": "katrina-event-script",
+  "source_key": "script:katrina-event-synthesis",
+  "timezone": "America/Chicago",
+  "time_label": "CDT unless noted",
+  "retrieved": "2026-09-06",
+  "status": "compiled-script",
+  "note": "Event-by-event script for the 3D sim, Aug 23–early October 2005. events[] is the replay clock: one tick per event, sorted by t (stable). This is a compiled synthesis, not a primary source. Do not mark parameters verified from this file. Bind a bullet to an entity/hazard only when the value also has a source_key in data/SOURCES.md. Belief snapshots remain three keyframes only: b7 2005-08-29T06:00-05:00, t0 2005-08-31T08:00-05:00, reroute 2005-08-31T09:20-05:00.",
+  "demo_keyframes": {
+    "b7": "2005-08-29T06:00:00-05:00",
+    "t0": "2005-08-31T08:00:00-05:00",
+    "reroute": "2005-08-31T09:20:00-05:00"
+  },
+  "phases": [
+    {
+      "id": 0,
+      "name": "Formation and first U.S. landfall",
+      "span": "2005-08-23/2005-08-25"
+    },
+    {
+      "id": 1,
+      "name": "Gulf intensification and evacuations",
+      "span": "2005-08-26/2005-08-28"
+    },
+    {
+      "id": 2,
+      "name": "Landfall, surge, and initial failures",
+      "span": "2005-08-29"
+    },
+    {
+      "id": 3,
+      "name": "Citywide inundation and shelter crisis",
+      "span": "2005-08-30/2005-08-31"
+    },
+    {
+      "id": 4,
+      "name": "Federal surge and logistics breakdown",
+      "span": "2005-09-01/2005-09-03"
+    },
+    {
+      "id": 5,
+      "name": "Unwatering begins, power restoration starts",
+      "span": "2005-09-04/2005-09-10"
+    },
+    {
+      "id": 6,
+      "name": "Flood recession, early recovery, long rebuild",
+      "span": "2005-09-11/2005-10"
+    }
+  ],
+  "events": [
+    {
+      "id": "p0-td12",
+      "seq": 0,
+      "phase": 0,
+      "t": "2005-08-23T16:00:00-05:00",
+      "t_label": "Tue 23 Aug ~16:00",
+      "title": "Tropical Depression Twelve forms ~200 mi SE of Nassau",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p0-nhc-advisories",
+      "seq": 1,
+      "phase": 0,
+      "t": "2005-08-23T16:00:00-05:00",
+      "t_label": "Tue 23 Aug",
+      "title": "NHC begins advisories; models show a westward track toward Florida and the Gulf",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p0-ts-katrina",
+      "seq": 2,
+      "phase": 0,
+      "t": "2005-08-24T12:00:00-05:00",
+      "t_label": "Wed–Thu 24–25 Aug",
+      "title": "Depression organizes into Tropical Storm Katrina; track shifts WNW toward south Florida",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p0-fl-prep",
+      "seq": 3,
+      "phase": 0,
+      "t": "2005-08-24T18:00:00-05:00",
+      "t_label": "Wed–Thu 24–25 Aug",
+      "title": "Florida Keys and SE Florida begin tropical-storm preparations",
+      "layers": [
+        "response"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p0-fl-landfall",
+      "seq": 4,
+      "phase": 0,
+      "t": "2005-08-25T16:00:00-05:00",
+      "t_label": "Fri 25 Aug ~16:00 CDT (17:00 EDT)",
+      "title": "First U.S. landfall near Hallandale Beach / Aventura, FL as Category 1",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p0-enter-gulf",
+      "seq": 5,
+      "phase": 0,
+      "t": "2005-08-25T21:00:00-05:00",
+      "t_label": "Fri 25 Aug evening–night",
+      "title": "Katrina crosses the Florida peninsula into the Gulf over warm water",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-gulf-intensify",
+      "seq": 6,
+      "phase": 1,
+      "t": "2005-08-26T08:00:00-05:00",
+      "t_label": "Sat 26 Aug morning",
+      "title": "Katrina re-emerges over the Gulf and begins to intensify",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-nhc-nola-track",
+      "seq": 7,
+      "phase": 1,
+      "t": "2005-08-26T15:00:00-05:00",
+      "t_label": "Sat 26 Aug afternoon",
+      "title": "NHC track: eye likely just east of New Orleans on 29 Aug; Cat 4–5 MS–LA coast",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [
+        "hazards.cyclone"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-parish-evac",
+      "seq": 8,
+      "phase": 1,
+      "t": "2005-08-26T16:00:00-05:00",
+      "t_label": "Sat 26 Aug",
+      "title": "St. Charles, St. Tammany, Plaquemines mandatory; Jefferson and St. Bernard voluntary then mandatory",
+      "layers": [
+        "response",
+        "evacuation"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-nagin-soe",
+      "seq": 9,
+      "phase": 1,
+      "t": "2005-08-26T17:00:00-05:00",
+      "t_label": "Sat 26 Aug ~17:00",
+      "title": "Mayor Nagin declares a state of emergency and calls for voluntary evacuation of low-lying areas",
+      "layers": [
+        "response",
+        "evacuation"
+      ],
+      "binds": [
+        "comms:eoc"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-eoc-contraflow-prep",
+      "seq": 10,
+      "phase": 1,
+      "t": "2005-08-26T18:00:00-05:00",
+      "t_label": "Sat 26 Aug",
+      "title": "EOCs activate; contraflow plans prepared",
+      "layers": [
+        "response"
+      ],
+      "binds": [
+        "comms:eoc",
+        "road:i10"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-cat45",
+      "seq": 11,
+      "phase": 1,
+      "t": "2005-08-27T08:00:00-05:00",
+      "t_label": "Sun 27 Aug morning",
+      "title": "Katrina strengthens to Category 4, then Category 5 over the central Gulf",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [
+        "hazards.cyclone"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-rta-buses",
+      "seq": 12,
+      "phase": 1,
+      "t": "2005-08-27T09:30:00-05:00",
+      "t_label": "Sun 27 Aug ~09:30",
+      "title": "RTA buses pick up residents for refuges of last resort, including the Superdome",
+      "layers": [
+        "evacuation",
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-mandatory-nola",
+      "seq": 13,
+      "phase": 1,
+      "t": "2005-08-27T11:00:00-05:00",
+      "t_label": "Sun 27 Aug ~11:00",
+      "title": "First citywide mandatory evacuation of New Orleans (Nagin / Blanco)",
+      "layers": [
+        "response",
+        "evacuation"
+      ],
+      "binds": [
+        "zone:B",
+        "zone:C"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-contraflow",
+      "seq": 14,
+      "phase": 1,
+      "t": "2005-08-27T15:00:00-05:00",
+      "t_label": "Sun 27 Aug afternoon–evening",
+      "title": "Contraflow on I-10, I-12, I-55; hundreds of thousands leave the metro",
+      "layers": [
+        "evacuation",
+        "transport"
+      ],
+      "binds": [
+        "route:R14",
+        "route:R22",
+        "road:i10"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-hospitals-sip",
+      "seq": 15,
+      "phase": 1,
+      "t": "2005-08-27T18:00:00-05:00",
+      "t_label": "Sun 27 Aug",
+      "title": "Many hospitals and nursing homes shelter-in-place; some patient transfers begin",
+      "layers": [
+        "health"
+      ],
+      "binds": [
+        "hospital:NDH",
+        "hospital:charity",
+        "hospital:university",
+        "hospital:touro"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-dome-opens",
+      "seq": 16,
+      "phase": 1,
+      "t": "2005-08-28T06:00:00-05:00",
+      "t_label": "Mon 28 Aug ~06:00",
+      "title": "Nagin announces Superdome as public shelter of last resort",
+      "layers": [
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-peak-intensity",
+      "seq": 17,
+      "phase": 1,
+      "t": "2005-08-28T08:00:00-05:00",
+      "t_label": "Mon 28 Aug morning",
+      "title": "Peak intensity: ~175 mph, ~902 mb, eye ~25 nm; NHC warns area uninhabitable for weeks",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [
+        "hazards.cyclone"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-entergy-prestage",
+      "seq": 18,
+      "phase": 1,
+      "t": "2005-08-28T12:00:00-05:00",
+      "t_label": "Mon 28 Aug",
+      "title": "Entergy / Mississippi Power pre-stage crews; expect catastrophic damage",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:power",
+        "power:michoud",
+        "power:waterford",
+        "power:ninemile"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-pumps-prep",
+      "seq": 19,
+      "phase": 1,
+      "t": "2005-08-28T12:00:00-05:00",
+      "t_label": "Mon 28 Aug",
+      "title": "Pump stations prepare; some generators fueled, many still on grid power",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:pump6",
+        "infra:pumpInd"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-dome-evening",
+      "seq": 20,
+      "phase": 1,
+      "t": "2005-08-28T20:00:00-05:00",
+      "t_label": "Mon 28 Aug evening",
+      "title": "~10,000+ residents and ~150 National Guard inside the Dome",
+      "layers": [
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome",
+        "personnel:ng"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p1-remain",
+      "seq": 21,
+      "phase": 1,
+      "t": "2005-08-28T21:00:00-05:00",
+      "t_label": "Mon 28 Aug evening",
+      "title": "Those remaining: low-mobility, no transport, or chose to stay",
+      "layers": [
+        "population"
+      ],
+      "binds": [
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-ihnc-overtop-west",
+      "seq": 22,
+      "phase": 2,
+      "t": "2005-08-29T04:45:00-05:00",
+      "t_label": "Tue 29 Aug ~04:30–05:00",
+      "title": "Localized flooding west side of northern Industrial Canal near CSX as surge overtops",
+      "layers": [
+        "flood",
+        "breach"
+      ],
+      "binds": [
+        "breach:ihnc-west",
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-ihnc-east-monolith",
+      "seq": 23,
+      "phase": 2,
+      "t": "2005-08-29T05:00:00-05:00",
+      "t_label": "Tue 29 Aug ~05:00",
+      "title": "~20–30 ft IHNC east floodwall monolith breaches into the Lower 9th Ward",
+      "layers": [
+        "breach",
+        "flood"
+      ],
+      "binds": [
+        "breach:ihnc",
+        "zone:B",
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-twin-span",
+      "seq": 24,
+      "phase": 2,
+      "t": "2005-08-29T06:00:00-05:00",
+      "t_label": "Tue 29 Aug ~06:00 (landfall-morning bound)",
+      "title": "I-10 Twin Span rendered unusable by surge (demo bridge:B7 valid_from)",
+      "layers": [
+        "transport"
+      ],
+      "binds": [
+        "bridge:B7",
+        "route:R14"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-buras-landfall",
+      "seq": 25,
+      "phase": 2,
+      "t": "2005-08-29T06:10:00-05:00",
+      "t_label": "Tue 29 Aug ~06:10",
+      "title": "Landfall near Buras–Triumph, LA as Category 3 (~125 mph); surge into Borgne, MR-GO, IHNC",
+      "layers": [
+        "meteorology",
+        "flood"
+      ],
+      "binds": [
+        "hazards.cyclone",
+        "hazards.flood",
+        "gauge:ihnc"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-overtop-ihnc-mrgo",
+      "seq": 26,
+      "phase": 2,
+      "t": "2005-08-29T06:10:00-05:00",
+      "t_label": "Tue 29 Aug ~06:00–06:20",
+      "title": "Surge overtops Industrial Canal (East, Lower 9) and MR-GO / adjacent canals",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "breach:ihnc",
+        "breach:ihnc-west",
+        "zone:B"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-dome-power",
+      "seq": 27,
+      "phase": 2,
+      "t": "2005-08-29T06:20:00-05:00",
+      "t_label": "Tue 29 Aug ~06:20",
+      "title": "Power fails at the Superdome; generators keep lights, no AC or refrigeration",
+      "layers": [
+        "utilities",
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome",
+        "infra:power"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-pump2",
+      "seq": 28,
+      "phase": 2,
+      "t": "2005-08-29T06:30:00-05:00",
+      "t_label": "Tue 29 Aug ~06:30",
+      "title": "Pump Station 2 shuts down; other pumps lose power or are shut as surge enters canals",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:pumpInd",
+        "infra:pump6"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-london-south",
+      "seq": 29,
+      "phase": 2,
+      "t": "2005-08-29T06:30:00-05:00",
+      "t_label": "Tue 29 Aug ~06:00–07:00",
+      "title": "London Avenue Canal east/south breach north of Mirabeau (~60 ft; I-wall ~210 ft); >10 ft in Fillmore Gardens",
+      "layers": [
+        "breach",
+        "flood"
+      ],
+      "binds": [
+        "breach:london",
+        "hazards.flood"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-17th-begins",
+      "seq": 30,
+      "phase": 2,
+      "t": "2005-08-29T06:30:00-05:00",
+      "t_label": "Tue 29 Aug ~06:00–07:00",
+      "title": "17th Street Canal east I-wall begins to fail south of Old Hammond (~400 ft; canal ~El 7 NAVD88)",
+      "layers": [
+        "breach",
+        "flood"
+      ],
+      "binds": [
+        "breach:17th",
+        "hazards.flood"
+      ],
+      "demo_keyframe": "b7"
+    },
+    {
+      "id": "p2-ihnc-second-hole",
+      "seq": 31,
+      "phase": 2,
+      "t": "2005-08-29T07:45:00-05:00",
+      "t_label": "Tue 29 Aug ~07:30–07:45",
+      "title": "IHNC overtopping both sides; larger second hole south of first; failures Florida–Claiborne into Lower 9",
+      "layers": [
+        "breach",
+        "flood"
+      ],
+      "binds": [
+        "breach:ihnc",
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-london-north",
+      "seq": 32,
+      "phase": 2,
+      "t": "2005-08-29T08:00:00-05:00",
+      "t_label": "Tue 29 Aug ~07:30–09:00",
+      "title": "London Avenue Canal west/north breach south of Robert E. Lee Ave",
+      "layers": [
+        "breach",
+        "flood"
+      ],
+      "binds": [
+        "breach:london-n"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-nws-tennessee",
+      "seq": 33,
+      "phase": 2,
+      "t": "2005-08-29T08:12:00-05:00",
+      "t_label": "Tue 29 Aug 08:12 CDT (09:12 EDT)",
+      "title": "NWS flash-flood warning: Industrial Canal breach at Tennessee Street",
+      "layers": [
+        "flood",
+        "response"
+      ],
+      "binds": [
+        "breach:ihnc",
+        "gauge:ihnc"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-17th-open",
+      "seq": 34,
+      "phase": 2,
+      "t": "2005-08-29T09:00:00-05:00",
+      "t_label": "Tue 29 Aug ~09:00",
+      "title": "17th Street Canal breach fully open into the western New Orleans bowl / Lakeview",
+      "layers": [
+        "breach",
+        "flood"
+      ],
+      "binds": [
+        "breach:17th"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-l9-stbernard-depth",
+      "seq": 35,
+      "phase": 2,
+      "t": "2005-08-29T09:00:00-05:00",
+      "t_label": "Tue 29 Aug ~09:00",
+      "title": "Lower 9th under 6–8 ft in many areas; St. Bernard Parish under ~10 ft",
+      "layers": [
+        "flood",
+        "population"
+      ],
+      "binds": [
+        "zone:B",
+        "hospital:chalmette",
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-entergy-peak",
+      "seq": 36,
+      "phase": 2,
+      "t": "2005-08-29T09:00:00-05:00",
+      "t_label": "Tue 29 Aug morning",
+      "title": "Widespread outages; Entergy later ~990,000 customers, 522 lines, 715 substations out",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:power",
+        "power:michoud",
+        "power:ninemile",
+        "power:waterford"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-second-landfall",
+      "seq": 37,
+      "phase": 2,
+      "t": "2005-08-29T10:00:00-05:00",
+      "t_label": "Tue 29 Aug ~10:00",
+      "title": "Second landfall near the Louisiana–Mississippi border, continuing north",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [
+        "hazards.cyclone"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-usace-dhs",
+      "seq": 38,
+      "phase": 2,
+      "t": "2005-08-29T14:00:00-05:00",
+      "t_label": "Tue 29 Aug early–mid afternoon",
+      "title": "USACE notifies DHS: St. Bernard overtopping, West Bank breach report, small Orleans breach from firefighters",
+      "layers": [
+        "response",
+        "breach"
+      ],
+      "binds": [
+        "breach:ihnc",
+        "comms:eoc"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-rooftop-start",
+      "seq": 39,
+      "phase": 2,
+      "t": "2005-08-29T15:00:00-05:00",
+      "t_label": "Tue 29 Aug mid-morning to afternoon",
+      "title": "Coast Guard and local boats begin rooftop rescues (~9 hours after landfall): Plaquemines, Lower 9, Lakeview, Gentilly",
+      "layers": [
+        "response",
+        "evacuation"
+      ],
+      "binds": [
+        "zone:B",
+        "personnel:ng"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-catastrophic-flood",
+      "seq": 40,
+      "phase": 2,
+      "t": "2005-08-29T16:00:00-05:00",
+      "t_label": "Tue 29 Aug mid-afternoon",
+      "title": "Large portions of New Orleans under water; described as catastrophic flooding",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-dome-conditions",
+      "seq": 41,
+      "phase": 2,
+      "t": "2005-08-29T16:00:00-05:00",
+      "t_label": "Tue 29 Aug afternoon",
+      "title": "Superdome: no AC, sanitation failing, food and water insufficient",
+      "layers": [
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p2-disaster-declarations",
+      "seq": 42,
+      "phase": 2,
+      "t": "2005-08-29T18:00:00-05:00",
+      "t_label": "Tue 29 Aug",
+      "title": "Major disaster declarations for AL, LA, MS; FEMA activates federal support",
+      "layers": [
+        "response"
+      ],
+      "binds": [
+        "comms:eoc"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p3-80pct",
+      "seq": 43,
+      "phase": 3,
+      "t": "2005-08-30T08:00:00-05:00",
+      "t_label": "Wed 30 Aug early morning–end of day",
+      "title": "Two more major breaches reported; ~80% of New Orleans under water, some 10–20 ft",
+      "layers": [
+        "flood",
+        "breach"
+      ],
+      "binds": [
+        "hazards.flood",
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p3-nws-9th-arabi",
+      "seq": 44,
+      "phase": 3,
+      "t": "2005-08-30T09:00:00-05:00",
+      "t_label": "Wed 30 Aug morning",
+      "title": "NWS flash-flood warnings: IHNC breach, 3–8 ft expected in 9th Ward and Arabi",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "breach:ihnc",
+        "zone:B",
+        "hospital:chalmette"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p3-bowl-rising",
+      "seq": 45,
+      "phase": 3,
+      "t": "2005-08-30T12:00:00-05:00",
+      "t_label": "Wed 30 Aug daytime",
+      "title": "Floodwaters still rising in the bowl; rooftops and attics; Lakeview, Gentilly, New Orleans East, Lower 9",
+      "layers": [
+        "flood",
+        "population"
+      ],
+      "binds": [
+        "hazards.flood",
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p3-jtf-katrina",
+      "seq": 46,
+      "phase": 3,
+      "t": "2005-08-30T12:00:00-05:00",
+      "t_label": "Wed 30 Aug",
+      "title": "JTF Katrina established; LTG Honoré from Camp Shelby, MS",
+      "layers": [
+        "response"
+      ],
+      "binds": [
+        "personnel:ng"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p3-murphy-oil",
+      "seq": 47,
+      "phase": 3,
+      "t": "2005-08-30T12:00:00-05:00",
+      "t_label": "Tue 30 Aug (spill on/after 30 Aug)",
+      "title": "Murphy Oil Meraux tank 250-2 releases ~25,110 bbl; ~1 sq mi Chalmette–Meraux",
+      "layers": [
+        "contamination"
+      ],
+      "binds": [
+        "hazards.contamination",
+        "fuel:depot"
+      ],
+      "demo_keyframe": "t0"
+    },
+    {
+      "id": "p3-rescues-thousands",
+      "seq": 48,
+      "phase": 3,
+      "t": "2005-08-30T18:00:00-05:00",
+      "t_label": "Wed 30 Aug",
+      "title": "Hundreds of rooftop rescues; thousands pulled from rooftops and streets by end of day",
+      "layers": [
+        "response",
+        "evacuation"
+      ],
+      "binds": [
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p3-td",
+      "seq": 49,
+      "phase": 3,
+      "t": "2005-08-31T11:00:00-05:00",
+      "t_label": "Thu 31 Aug ~11:00",
+      "title": "Katrina downgraded to a tropical depression",
+      "layers": [
+        "meteorology"
+      ],
+      "binds": [
+        "hazards.cyclone"
+      ],
+      "demo_keyframe": "t0"
+    },
+    {
+      "id": "p3-guard-ramp",
+      "seq": 50,
+      "phase": 3,
+      "t": "2005-08-31T12:00:00-05:00",
+      "t_label": "27 Aug ~2,633 Guard; 31 Aug ~11,000; +19,000 next four days; ~50,000 by 7 Sep",
+      "title": "National Guard deployments accelerate on the Gulf Coast",
+      "layers": [
+        "response"
+      ],
+      "binds": [
+        "personnel:ng"
+      ],
+      "demo_keyframe": "t0"
+    },
+    {
+      "id": "p3-max-inundation",
+      "seq": 51,
+      "phase": 3,
+      "t": "2005-08-31T14:00:00-05:00",
+      "t_label": "Thu 31 Aug late morning–afternoon",
+      "title": "Water stops rising; max inundation ~80% of city; average home ~9 ft",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "hazards.flood"
+      ],
+      "demo_keyframe": "t0"
+    },
+    {
+      "id": "p3-dome-uninhabitable",
+      "seq": 52,
+      "phase": 3,
+      "t": "2005-08-31T15:00:00-05:00",
+      "t_label": "Thu 31 Aug afternoon",
+      "title": "Governor Blanco orders Superdome evacuation; assessed uninhabitable",
+      "layers": [
+        "shelter",
+        "evacuation"
+      ],
+      "binds": [
+        "shelter:dome"
+      ],
+      "demo_keyframe": "t0"
+    },
+    {
+      "id": "p3-dome-to-cc",
+      "seq": 53,
+      "phase": 3,
+      "t": "2005-08-31T19:00:00-05:00",
+      "t_label": "Thu 31 Aug evening",
+      "title": "Dome evacuees bused out; many sent to Convention Center, not stocked as a shelter",
+      "layers": [
+        "shelter",
+        "evacuation"
+      ],
+      "binds": [
+        "shelter:dome",
+        "shelter:morial",
+        "zone:C"
+      ],
+      "demo_keyframe": "reroute"
+    },
+    {
+      "id": "p3-cc-crisis",
+      "seq": 54,
+      "phase": 3,
+      "t": "2005-08-31T20:00:00-05:00",
+      "t_label": "Thu 31 Aug evening",
+      "title": "Convention Center overcrowded: little food, water, medical care; heat and sanitation failure",
+      "layers": [
+        "shelter"
+      ],
+      "binds": [
+        "shelter:morial",
+        "zone:C",
+        "food:pod",
+        "medicine:cache"
+      ],
+      "demo_keyframe": "reroute"
+    },
+    {
+      "id": "p4-cg-4468",
+      "seq": 55,
+      "phase": 4,
+      "t": "2005-09-01T12:00:00-05:00",
+      "t_label": "Fri 1 Sep morning–afternoon",
+      "title": "Coast Guard ~4,468 rooftop rescues cumulative (response total later >33,500)",
+      "layers": [
+        "response",
+        "evacuation"
+      ],
+      "binds": [
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-media-cc",
+      "seq": 56,
+      "phase": 4,
+      "t": "2005-09-01T14:00:00-05:00",
+      "t_label": "Fri 1 Sep",
+      "title": "Dome and Convention Center conditions worsen; plaza crowds; violence reports later overstated",
+      "layers": [
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome",
+        "shelter:morial"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-logistics-confusion",
+      "seq": 57,
+      "phase": 4,
+      "t": "2005-09-01T16:00:00-05:00",
+      "t_label": "Fri 1 Sep",
+      "title": "Federal assets arrive but command/logistics confusion slows food, water, medical aid",
+      "layers": [
+        "response",
+        "supply"
+      ],
+      "binds": [
+        "warehouse:W1",
+        "truck:17",
+        "food:pod"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-bush-tour",
+      "seq": 58,
+      "phase": 4,
+      "t": "2005-09-01T18:00:00-05:00",
+      "t_label": "Fri 1 Sep",
+      "title": "President Bush tours the Gulf by air then ground; pressure over slow federal response",
+      "layers": [
+        "response"
+      ],
+      "binds": [],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-dome-15000",
+      "seq": 59,
+      "phase": 4,
+      "t": "2005-09-02T08:00:00-05:00",
+      "t_label": "Sat 2 Sep morning",
+      "title": "~15,000 evacuated from Superdome, ~5,500 remain; Convention Center general evac waits until 3 Sep",
+      "layers": [
+        "shelter",
+        "evacuation"
+      ],
+      "binds": [
+        "shelter:dome",
+        "shelter:morial"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-fires",
+      "seq": 60,
+      "phase": 4,
+      "t": "2005-09-02T08:00:00-05:00",
+      "t_label": "Sat 2 Sep (photographs; shown on 31 Aug keyframes as the fire cluster)",
+      "title": "Documented riverfront fires: 329 Tchoupitoulas, Mandeville Street Wharf, 3200 Chartres",
+      "layers": [
+        "fire"
+      ],
+      "binds": [
+        "hazards.fire"
+      ],
+      "demo_keyframe": "t0"
+    },
+    {
+      "id": "p4-guard-22000",
+      "seq": 61,
+      "phase": 4,
+      "t": "2005-09-02T12:00:00-05:00",
+      "t_label": "Sat 2 Sep",
+      "title": "~22,000 National Guard in region including ~6,500 in New Orleans; 7,200 Title 10 troops announced",
+      "layers": [
+        "response"
+      ],
+      "binds": [
+        "personnel:ng"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-fema-dod-logistics",
+      "seq": 62,
+      "phase": 4,
+      "t": "2005-09-02T12:00:00-05:00",
+      "t_label": "Sat 2 Sep",
+      "title": "FEMA asks DOD to take full logistics support for the affected area",
+      "layers": [
+        "response",
+        "supply"
+      ],
+      "binds": [
+        "warehouse:W1",
+        "truck:17"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-evac-houston",
+      "seq": 63,
+      "phase": 4,
+      "t": "2005-09-02T12:00:00-05:00",
+      "t_label": "Sat–Sun 2–3 Sep",
+      "title": "Large-scale evac to Houston Astrodome, San Antonio, Dallas, and other cities",
+      "layers": [
+        "evacuation"
+      ],
+      "binds": [
+        "shelter:dome",
+        "shelter:morial",
+        "airport:msy"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-msy-military",
+      "seq": 64,
+      "phase": 4,
+      "t": "2005-09-02T12:00:00-05:00",
+      "t_label": "Sat–Sun 2–3 Sep",
+      "title": "MSY closed to commercial traffic; military and relief flights. Gulfport–Biloxi handles relief",
+      "layers": [
+        "transport"
+      ],
+      "binds": [
+        "airport:msy",
+        "airport:lakefront"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p4-sar-transition",
+      "seq": 65,
+      "phase": 4,
+      "t": "2005-09-03T12:00:00-05:00",
+      "t_label": "Sun 3 Sep",
+      "title": "Search and rescue shifts from rooftop extraction to neighborhood sweeps and recovery",
+      "layers": [
+        "response"
+      ],
+      "binds": [
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-dome-cc-cleared",
+      "seq": 66,
+      "phase": 5,
+      "t": "2005-09-04T12:00:00-05:00",
+      "t_label": "Sun 4 Sep",
+      "title": "DHS: Superdome and Convention Center evacuated; >35,000 out of New Orleans including Dome ill/injured",
+      "layers": [
+        "shelter",
+        "evacuation"
+      ],
+      "binds": [
+        "shelter:dome",
+        "shelter:morial"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-power-cbd",
+      "seq": 67,
+      "phase": 5,
+      "t": "2005-09-05T12:00:00-05:00",
+      "t_label": "Mon 5 Sep",
+      "title": "Priority power restore to CBD critical facilities (hospitals, EOC, some government)",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:power",
+        "comms:eoc",
+        "hospital:NDH"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-portable-pumps",
+      "seq": 68,
+      "phase": 5,
+      "t": "2005-09-06T12:00:00-05:00",
+      "t_label": "Wed 6 Sep",
+      "title": "Large-scale unwatering begins; pumps into Pontchartrain and outfall canals; many stations still dead",
+      "layers": [
+        "utilities",
+        "flood"
+      ],
+      "binds": [
+        "infra:pump6",
+        "infra:pumpInd",
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-pumps-23",
+      "seq": 69,
+      "phase": 5,
+      "t": "2005-09-07T12:00:00-05:00",
+      "t_label": "Thu 7 Sep",
+      "title": "23 of 148 permanent pumps operating; portable pumps added; Orleans drain estimate early October",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:pump6",
+        "infra:pumpInd"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-entergy-9of17",
+      "seq": 70,
+      "phase": 5,
+      "t": "2005-09-08T12:00:00-05:00",
+      "t_label": "Thu 8 Sep",
+      "title": "Entergy: 9 of 17 New Orleans-area generating units in service; Waterford and Watson still offline; ~11% of NOLA customers",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:power",
+        "power:waterford",
+        "power:michoud",
+        "power:ninemile"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-ms-75pct",
+      "seq": 71,
+      "phase": 5,
+      "t": "2005-09-09T12:00:00-05:00",
+      "t_label": "early Sep (~10–11 days)",
+      "title": "Mississippi ~75% of affected customers restored; Louisiana flooded parishes much slower",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:power"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p5-pumps-26",
+      "seq": 72,
+      "phase": 5,
+      "t": "2005-09-10T12:00:00-05:00",
+      "t_label": "Sat 10 Sep",
+      "title": "~26 permanent pumps (9,125 cfs) + 39 portable (723 cfs); ~one Olympic pool every two seconds",
+      "layers": [
+        "utilities",
+        "flood"
+      ],
+      "binds": [
+        "infra:pump6",
+        "infra:pumpInd"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-unwater-billions",
+      "seq": 73,
+      "phase": 6,
+      "t": "2005-09-11T12:00:00-05:00",
+      "t_label": "Sun 11 Sep",
+      "title": "Massive unwatering continues; billions of gallons pumped",
+      "layers": [
+        "flood",
+        "utilities"
+      ],
+      "binds": [
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-l9-dry-enough",
+      "seq": 74,
+      "phase": 6,
+      "t": "2005-09-13T12:00:00-05:00",
+      "t_label": "Tue 13 Sep",
+      "title": "Lower 9th and southern Orleans dry enough for recovery ops; north still flooded",
+      "layers": [
+        "flood",
+        "response"
+      ],
+      "binds": [
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-msy-commercial",
+      "seq": 75,
+      "phase": 6,
+      "t": "2005-09-13T12:00:00-05:00",
+      "t_label": "Tue 13 Sep",
+      "title": "MSY reopens limited commercial flights (Delta ATL, Northwest MEM)",
+      "layers": [
+        "transport"
+      ],
+      "binds": [
+        "airport:msy"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-40pct",
+      "seq": 76,
+      "phase": 6,
+      "t": "2005-09-15T12:00:00-05:00",
+      "t_label": "Thu 15 Sep",
+      "title": "Inundation ~80% → ~40%; 7.5 billion gallons pumped that day",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-shelter-transition",
+      "seq": 77,
+      "phase": 6,
+      "t": "2005-09-15T12:00:00-05:00",
+      "t_label": "mid-Sep",
+      "title": "Out-of-region shelters shift from emergency beds to housing and case management",
+      "layers": [
+        "shelter"
+      ],
+      "binds": [
+        "shelter:dome",
+        "shelter:morial"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-80pct-unwatered",
+      "seq": 78,
+      "phase": 6,
+      "t": "2005-09-18T12:00:00-05:00",
+      "t_label": "Sun 18 Sep",
+      "title": "USACE: >80% of New Orleans area unwatered; complete early October barring major rain",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "hazards.flood"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-breach-closures",
+      "seq": 79,
+      "phase": 6,
+      "t": "2005-09-20T12:00:00-05:00",
+      "t_label": "late September",
+      "title": "Emergency closures of 17th St, London Ave, IHNC with sheet pile, rock, sandbags",
+      "layers": [
+        "breach"
+      ],
+      "binds": [
+        "breach:17th",
+        "breach:london",
+        "breach:london-n",
+        "breach:ihnc"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-hazmat",
+      "seq": 80,
+      "phase": 6,
+      "t": "2005-09-20T12:00:00-05:00",
+      "t_label": "late September",
+      "title": "Debris, environmental sampling, and hazardous-material cleanup become major operations",
+      "layers": [
+        "contamination",
+        "response"
+      ],
+      "binds": [
+        "hazards.contamination",
+        "fuel:depot"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-power-late-sep",
+      "seq": 81,
+      "phase": 6,
+      "t": "2005-09-25T12:00:00-05:00",
+      "t_label": "late September",
+      "title": "Most Entergy fossil units back; flooded neighborhoods still dark pending dewatering and inspections",
+      "layers": [
+        "utilities"
+      ],
+      "binds": [
+        "infra:power",
+        "power:waterford"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-october-dry",
+      "seq": 82,
+      "phase": 6,
+      "t": "2005-10-05T12:00:00-05:00",
+      "t_label": "early October",
+      "title": "Most of Orleans Parish dewatered; many structures still uninhabitable",
+      "layers": [
+        "flood"
+      ],
+      "binds": [
+        "hazards.flood",
+        "zone:B"
+      ],
+      "demo_keyframe": null
+    },
+    {
+      "id": "p6-rebuild",
+      "seq": 83,
+      "phase": 6,
+      "t": "2005-10-15T12:00:00-05:00",
+      "t_label": "October and beyond",
+      "title": "IPET levee redesign, housing and economic recovery over years; population drops then slowly rebounds",
+      "layers": [
+        "response",
+        "population"
+      ],
+      "binds": [
+        "zone:B",
+        "zone:C"
+      ],
+      "demo_keyframe": null
+    }
+  ]
+}
